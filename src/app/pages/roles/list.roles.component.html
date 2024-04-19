@@ -1,0 +1,52 @@
+<div class="grid">
+	<div class="col-12 xl:col-12">
+		<div class="card">
+			<ng-template [ngIf]="loading" [ngIfElse]="showTable">
+				<skeleton-table-component [title]="title"></skeleton-table-component>
+			</ng-template>
+
+			<ng-template #showTable>
+					<p-table #dt [value]="roles" [paginator]="true"  [rows]="5"
+					responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['userId','name', 'userName', 'email']">
+						<ng-template pTemplate="header">
+							<tr>
+								<th pSortableColumn="roleId">Id <p-sortIcon field="roleId"></p-sortIcon> <p-columnFilter type="text" field="roleId" display="menu" class="ml-auto" ></p-columnFilter></th>
+								<th pSortableColumn="description">Descripción <p-sortIcon field="description"></p-sortIcon> <p-columnFilter type="text" field="description" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="active">Estado <p-sortIcon field="active"></p-sortIcon></th>
+								<th>Acción</th>
+							</tr>
+						</ng-template>
+							<ng-template pTemplate="caption">
+                                <h4 class="mt-2">{{title}}</h4>
+								<div class="flex">
+									<button pButton class="ml-2" pRipple type="button" (click)="addRole()" pTooltip="Agregar nuevo rol" tooltipPosition="bottom" label="Agregar" ></button>
+									<span class="p-input-icon-left ml-auto">
+										<i class="pi pi-search"></i>
+										<input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+									</span>
+								</div>
+							</ng-template>
+						<ng-template pTemplate="body" let-role>
+							<tr>
+								<td style="width: 10%; min-width: 2rem;">{{role.roleId }}</td>
+								<td style="width: 35%; min-width: 7rem;">{{role.description}}</td>
+								<td style="width: 15%; min-width: 4rem;">
+									<ng-template [ngIf]="role.active" [ngIfElse]="inactive">
+										<p-chip label="Activo" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+									</ng-template>
+									<ng-template #inactive>
+										<p-chip label="Inactivo" icon="pi pi-check"></p-chip>
+									</ng-template>
+								</td>
+								<td style="width: 20%;">
+									<button (click)="editRole(role)" pButton pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
+								</td>
+							</tr>
+						</ng-template>
+					</p-table>
+
+			</ng-template>
+		</div>
+	</div>
+	<role-dialog-component (roleModify)="roleModify($event)" ></role-dialog-component>
+</div>

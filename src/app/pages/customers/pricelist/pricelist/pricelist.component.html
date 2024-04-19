@@ -1,0 +1,59 @@
+<div class="grid">
+	<div class="col-12 xl:col-12">
+		<div class="card">
+			<ng-template [ngIf]="loading" [ngIfElse]="showTable">
+				<skeleton-table-component [title]="title"></skeleton-table-component>
+			</ng-template>
+
+			<ng-template #showTable>
+					<p-table #dt [value]="priceListList" [paginator]="true"  [rows]="5"
+					responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['listPriceId','listPriceName','porcentGain', 'createByName', 'email']">
+						<ng-template pTemplate="header">
+							<tr>
+								<th pSortableColumn="listPriceId">Id <p-sortIcon field="listPriceId"></p-sortIcon> <p-columnFilter type="text" field="listPriceId" display="menu" class="ml-auto" ></p-columnFilter></th>
+								<th pSortableColumn="listPriceName">Nombre lista <p-sortIcon field="listPriceName"></p-sortIcon> <p-columnFilter type="text" field="listPriceName" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th pSortableColumn="porcentGain">Ganancia<p-sortIcon field="porcentGain"></p-sortIcon> <p-columnFilter type="text" field="porcentGain" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="createByName">Creado por <p-sortIcon field="createByName"></p-sortIcon><p-columnFilter type="text" field="createByName" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="active">Estado <p-sortIcon field="active"></p-sortIcon></th>
+								<th>Acción</th>
+							</tr>
+						</ng-template>
+							<ng-template pTemplate="caption">
+                                <h4 class="mt-2">{{title}}</h4>
+								<div class="flex">
+									<button pButton  class="ml-2" pRipple type="button" (click)="addPriceList()" pTooltip="Agregar nueva lista" tooltipPosition="bottom" label="Agregar nueva lista" ></button>
+									<span class="p-input-icon-left ml-auto">
+										<i class="pi pi-search"></i>
+										<input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+									</span>
+								</div>
+							</ng-template>
+						<ng-template pTemplate="body" let-priceList>
+							<tr>
+								<td style="width: 10%; min-width: 2rem;">{{priceList.listPriceId }}</td>
+								<td style="width: 25%; min-width: 7rem;">{{priceList.listPriceName}}</td>
+                                <td style="width: 15%; min-width: 7rem;">{{priceList.porcentGain}}%</td>
+								<td style="width: 25%; min-width: 4rem;">{{priceList.createByName}}</td>
+								<td style="width: 1%; min-width: 4rem;">
+									<ng-template [ngIf]="priceList.active" [ngIfElse]="inactive">
+										<p-chip label="Activo" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+									</ng-template>
+									<ng-template #inactive>
+										<p-chip label="Inactivo" icon="pi pi-check"></p-chip>
+									</ng-template>
+								</td>
+								<td style="width: 20%;">
+                                    <button pTooltip="Asignar precios" (click)="addPrice(priceList.listPriceId)"  pButton pRipple type="button" icon="pi pi-money-bill" class="p-button p-component p-button-text p-button-icon-only"></button>
+									<button (click)="editPriceList(priceList)" pButton pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
+								</td>
+							</tr>
+						</ng-template>
+					</p-table>
+
+			</ng-template>
+		</div>
+	</div>
+<app-pricelist-dialog (PriceListModify)="priceListModify($event)"></app-pricelist-dialog>
+<app-pricelist-detail></app-pricelist-detail>
+</div>
+

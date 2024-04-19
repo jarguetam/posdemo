@@ -1,0 +1,45 @@
+<div class="grid">
+	<div class="col-12 xl:col-12">
+		<div class="card">
+			<ng-template [ngIf]="loading" [ngIfElse]="showTable">
+				<skeleton-table-component [title]="title"></skeleton-table-component>
+			</ng-template>
+
+			<ng-template #showTable>
+					<p-table #dt [value]="companyInfo" [paginator]="true"  [rows]="5"
+					responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['id','name', 'companyName', 'rtn']">
+						<ng-template pTemplate="header">
+							<tr>
+								<th pSortableColumn="id">Id <p-sortIcon field="id"></p-sortIcon> <p-columnFilter type="text" field="id" display="menu" class="ml-auto" ></p-columnFilter></th>
+								<th pSortableColumn="companyName">Empresa <p-sortIcon field="companyName"></p-sortIcon> <p-columnFilter type="text" field="companyName" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="rtn">Rtn <p-sortIcon field="rtn"></p-sortIcon></th>
+								<th>Acción</th>
+							</tr>
+						</ng-template>
+                        <ng-template pTemplate="caption">
+                            <h4 class="mt-2"> {{title}} </h4>
+                            <div class="flex">
+                                <span class="p-input-icon-left ml-auto">
+                                    <i class="pi pi-search"></i>
+                                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+                                </span>
+                            </div>
+                        </ng-template>
+
+						<ng-template pTemplate="body" let-mode>
+							<tr>
+								<td style="width: 10%; min-width: 2rem;">{{mode.id }}</td>
+								<td style="width: 35%; min-width: 7rem;">{{mode.companyName}}</td>
+								<td style="width: 15%; min-width: 4rem;">{{mode.rtn}}</td>
+								<td style="width: 20%;">
+									<button (click)="editMode(mode)" pButton pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
+								</td>
+							</tr>
+						</ng-template>
+					</p-table>
+					<company-info-dialog (companyModify)="modeModify($event)"></company-info-dialog>
+			</ng-template>
+		</div>
+	</div>
+</div>
+

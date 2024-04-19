@@ -1,0 +1,166 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} gasto" [(visible)]="display" modal="true" blockScroll="true"
+    [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '80%'}">
+    <ng-container>
+        <ng-template [ngIf]="loading" [ngIfElse]="data">
+            <skeleton-table-component [title]="title"></skeleton-table-component>
+        </ng-template>
+        <ng-template #data readonly="disable">
+            <form [formGroup]="formExpense" *ngIf="formExpense" class="mb-5">
+                <div class="grid p-fluid">
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-calendar"></i>
+                            <input id="expenseDate" type="date" pInputText formControlName="expenseDate">
+                            <label for="expenseDate">Fecha Gasto</label>
+                        </span>
+                        <div
+                            *ngIf="formExpense.controls['expenseDate'].invalid && formExpense.controls['expenseDate'].dirty">
+                            <small *ngIf="formExpense.controls['expenseDate'].errors.required" id="expenseDate"
+                                class="p-error block">Fecha Gasto es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <p-dropdown [disabled]="disabled" [options]="sellerList" formControlName="sellerId"
+                                optionValue="sellerId" optionLabel="sellerName"></p-dropdown>
+                            <label for="sellerId">Vendedor</label>
+                        </span>
+                        <div *ngIf="formExpense.controls['sellerId'].invalid && formExpense.controls['sellerId'].dirty">
+                            <small *ngIf="formExpense.controls['sellerId'].errors.required" id="sellerId"
+                                class="p-error block">Vendedor es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-comments"></i>
+                            <input id="comment" [disabled]="disabled" type="text" pInputText formControlName="comment"
+                                [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <label for="comment">Comentario</label>
+                        </span>
+                        <div *ngIf="formExpense.controls['comment'].invalid && formExpense.controls['comment'].dirty">
+                            <small *ngIf="formExpense.controls['comment'].errors.required" id="comment"
+                                class="p-error block">Comentario es requerido</small>
+                        </div>
+                    </div>
+
+                    <div class="col-12 md:col-12">
+                        <p-table #dt [value]="expense.detail" responsiveLayout="stack"
+                            styleClass="p-datatable-sm p-datatable-striped"
+                            [globalFilterFields]="['expenseDetailId','itemName', 'lineTotal', 'itemName']">
+                            <ng-template pTemplate="header">
+                                <tr [pSelectableRow]="rowData">
+                                    <th>#</th>
+                                    <th>Descripcion </th>
+                                    <th>Referencia</th>
+                                    <th>Total</th>
+                                    <th>Accion</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="caption">
+                                <div class="p-inputgroup">
+                                    <p-dropdown #barcode id="barcode" autoWidth="false" [style]="{'width':'100%'}"
+                                        [showClear]="true"
+                                        [options]="expenseTypeList"
+                                        optionLabel="expenseName"></p-dropdown>
+                                    <input #barcode2 id="barcode2" [disabled]="disabled" type="text" pInputText
+                                        (keydown.enter)="addLine(barcode.value, barcode2.value, barcode3.value); barcode2.value=''; barcode3.value=''"
+                                        placeholder="Referencia"
+                                        [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                                    <input #barcode3 id="barcode3" [disabled]="disabled" type="text" pInputText
+                                        (keydown.enter)="addLine(barcode.value, barcode2.value, barcode3.value); barcode2.value=''; barcode3.value=''"
+                                        placeholder="Valor" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                                    <button [disabled]="disabled" type="button" pButton pRipple icon="pi pi-plus"
+                                        pTooltip="Agregar" tooltipPosition="bottom"
+                                        (click)="addLine(barcode.value, barcode2.value, barcode3.value); barcode2.value=''; barcode3.value=''"></button>
+                                </div>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-detail let-rowIndex="rowIndex">
+                                <tr>
+                                    <td pEditableColumn>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <div class="p-inputgroup">
+                                                    <input [disabled]="disabled" id="expenseDetailId" type="text"
+                                                        pInputText [(ngModel)]="detail.expenseDetailId"
+                                                        [ngModelOptions]="{standalone: true}" disabled="true">
+                                                </div>
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.expenseDetailId}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="output">
+                                                {{detail.expenseTypeName}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="text"
+                                                    [(ngModel)]="detail.reference"
+                                                    [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.reference}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="text"
+                                                    [(ngModel)]="detail.lineTotal"
+                                                    [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.lineTotal | currency: 'L. '}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td style="width: 12%;"><span class="p-column-title">Acción</span>
+                                        <button [disabled]="disabled" (click)="deleteLine(detail.expenseDetailId)"
+                                            pButton pRipple type="button" icon="pi pi-trash"
+                                            class="p-button p-component p-button-text p-button-icon-only"></button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="footer">
+                                <tr>
+                                    <td>Total</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>{{doctotal | currency: 'L. '}}</td>
+                                    <td></td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </div>
+            </form>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+                <button pButton type="button" [disabled]="formExpense.invalid || loading" (click)="add()"
+                    label="Agregar"></button>
+            </ng-template>
+            <ng-template #addButton>
+                <button pButton type="button" [disabled]="formExpense.invalid || loading" (click)="edit()"
+                    label="Editar"></button>
+                <button pButton type="button" (click)="cancel()" class="p-button-danger" label="Anular"></button>
+            </ng-template>
+        </ng-template>
+        <br><br><br><br><br>
+    </ng-container>
+</p-dialog>

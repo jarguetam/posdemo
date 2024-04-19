@@ -1,0 +1,39 @@
+<div class="layout-topbar">
+    <a class="layout-topbar-logo" routerLink="">
+        <!-- <img src="assets/layout/images/{{appMain.config.dark ? 'logo-white' : 'logo-dark'}}.svg" alt="logo"> -->
+        <img src="assets/img/pos-terminal.png" alt="logo">
+        <span>POS</span>
+    </a>
+
+    <a class="p-link layout-menu-button layout-topbar-button" href="#" (click)="appMain.toggleMenu($event)">
+        <i class="pi pi-bars"></i>
+    </a>
+
+    <a class="p-link layout-topbar-menu-button layout-topbar-button" href="#" (click)="appMain.toggleTopMenu($event)">
+        <i class="pi pi-ellipsis-v"></i>
+    </a>
+    <div class="layout-topbar-status">
+        <i [ngClass]="getStyle()"></i>
+        <span>{{ status ? 'Conectado' : 'Desconectado' }}</span>
+    </div>
+    <div class="app-bar">
+        <p-chip styleClass="seller-chip" label="{{ this.auth.UserValue.sellerName }}"></p-chip>
+      </div>
+
+    <div class="layout-topbar-menu" [ngClass]="{'layout-topbar-menu-mobile-active': appMain.topMenuActive}">
+        <div class="p-hidden-md-up">
+
+
+            <p-slideMenu #menuProfile [model]="items" [popup]="true"></p-slideMenu>
+            <button *ngIf="!isMobile" #btn type="button" pButton class="p-button-outlined" (click)="menuProfile.toggle($event)">
+                <i class="pi pi-user"></i>
+                <span class="ml-2"> Bienvenido, {{ this.auth.UserValue.name }}</span>
+            </button>
+            <button *ngIf="isMobile" type="button" pButton class="p-button-outlined" (click)="logout()">
+                <i class="pi pi-sign-out"></i>
+                <span class="ml-2"> Cerrar Sesión</span>
+            </button>
+        </div>
+    </div>
+</div>
+<app-inactivity-modal></app-inactivity-modal>

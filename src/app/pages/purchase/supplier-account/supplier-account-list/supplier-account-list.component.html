@@ -1,0 +1,106 @@
+<div class="grid">
+    <div class="col-12 xl:col-12">
+        <div class="card">
+            <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+                <skeleton-table-component [title]="title"></skeleton-table-component>
+            </ng-template>
+
+            <ng-template #showTable>
+                <p-table #dt [value]="accountList" [paginator]="true" [rows]="10" responsiveLayout="scroll"
+                    styleClass="p-datatable-sm p-datatable-gridlines"
+                    [globalFilterFields]="['supplierId','supplierCode','supplierName','invoiceNumber','payConditionName','daysExpired']">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th pSortableColumn="supplierCode">Proveedor <p-sortIcon field="supplierCode"></p-sortIcon>
+                                <p-columnFilter type="text" field="supplierCode" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="supplierName">Nombre<p-sortIcon field="supplierName"></p-sortIcon>
+                                <p-columnFilter type="text" field="supplierName" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="payConditionName">Condicion<p-sortIcon
+                                    field="payConditionName"></p-sortIcon> <p-columnFilter type="text"
+                                    field="payConditionName" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="invoiceNumber">N° Fact. <p-sortIcon field="invoiceNumber"></p-sortIcon>
+                                <p-columnFilter type="text" field="invoiceNumber" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="dueDate">Fecha de vencimiento<p-sortIcon field="dueDate"></p-sortIcon>
+                                <p-columnFilter type="text" field="dueDate" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="unexpiredBalance">Sin Vencer<p-sortIcon
+                                    field="unexpiredBalance"></p-sortIcon> <p-columnFilter type="text"
+                                    field="unexpiredBalance" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="balanceDue">Saldo Vencido<p-sortIcon field="balanceDue"></p-sortIcon>
+                                <p-columnFilter type="text" field="balanceDue" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="balanceAt30Days">0-30 dias<p-sortIcon
+                                    field="balanceAt30Days"></p-sortIcon> <p-columnFilter type="text"
+                                    field="balanceAt30Days" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="balanceFrom31To60Days">31-60 dias<p-sortIcon
+                                    field="balanceFrom31To60Days"></p-sortIcon> <p-columnFilter type="text"
+                                    field="balanceFrom31To60Days" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="balanceFrom61To90Days">61-90 dias<p-sortIcon
+                                    field="balanceFrom61To90Days"></p-sortIcon> <p-columnFilter type="text"
+                                    field="balanceFrom61To90Days" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="balanceFrom91To120Days">91-120 dias<p-sortIcon
+                                    field="balanceFrom91To120Days"></p-sortIcon> <p-columnFilter type="text"
+                                    field="balanceFrom91To120Days" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="balanceMoreThan120Days">+121 dias<p-sortIcon
+                                    field="balanceMoreThan120Days"></p-sortIcon> <p-columnFilter type="text"
+                                    field="balanceMoreThan120Days" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="daysExpired">Dias vencidos<p-sortIcon field="daysExpired"></p-sortIcon>
+                                <p-columnFilter type="text" field="daysExpired" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="caption">
+                        <div class="header-container">
+                            <h4>{{title}}</h4>
+                            <div class="button-container">
+                                <button pButton pRipple label="Excel" pTooltip="Excel" icon="pi pi-file-excel"
+                                    class="p-button-success mr-2" (click)="exportToExcel()"></button>
+                                <button pButton pRipple label="PDF" icon="pi pi-file-pdf" (click)="exportToPDF()"
+                                    class="p-button-warning"></button>
+                            </div>
+                            <div class="search-container">
+                                <span class="p-input-icon-left">
+                                    <i class="pi pi-search"></i>
+                                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')"
+                                        placeholder="Buscar una palabra" />
+                                </span>
+                            </div>
+                        </div>
+                    </ng-template>
+
+                    <ng-template pTemplate="body" let-order>
+                        <tr>
+                            <td style="width: 15%; min-width: 5rem;">{{order.supplierCode}}</td>
+                            <td style="width: 25%; min-width: 4rem;">{{order.supplierName}}</td>
+                            <td style="width: 10%; min-width: 2rem;">{{order.payConditionName}}</td>
+                            <td style="width: 10%; min-width: 2rem;">{{order.invoiceNumber}}</td>
+                            <td style="width: 15%; min-width: 4rem;">{{order.dueDate |date:'dd/MM/yyyy'}}</td>
+                            <td style="width: 10%; min-width: 5rem;">{{order.unexpiredBalance | currency:'L. '}}</td>
+                            <td [ngStyle]="getBalanceStyle(order.balanceDue)" style="width: 10%; min-width: 5rem;">{{order.balanceDue | currency:'L. '}}</td>
+                            <td [ngStyle]="getBalanceStyle(order.balanceAt30Days)" style="width: 10%; min-width: 5rem;">
+                                {{order.balanceAt30Days | currency:'L. '}}
+                            </td>
+                            <td [ngStyle]="getBalanceStyle(order.balanceFrom31To60Days)" style="width: 10%; min-width: 5rem;">
+                                {{order.balanceFrom31To60Days | currency:'L. '}}
+                            </td>
+                            <td [ngStyle]="getBalanceStyle(order.balanceFrom61To90Days)" style="width: 10%; min-width: 5rem;">
+                                {{order.balanceFrom61To90Days | currency:'L. '}}
+                            </td>
+                            <td [ngStyle]="getBalanceStyle(order.balanceFrom91To120Days)" style="width: 10%; min-width: 5rem;">
+                                {{order.balanceFrom91To120Days | currency:'L. '}}
+                            </td>
+                            <td [ngStyle]="getBalanceStyle(order.balanceMoreThan120Days)" style="width: 10%; min-width: 5rem;">
+                                {{order.balanceMoreThan120Days | currency:'L. '}}
+                            </td>
+                            <td [ngStyle]="getBalanceStyle(order.daysExpired)"  style="width: 10%; min-width: 5rem;">{{order.daysExpired}}</td>
+
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </ng-template>
+        </div>
+    </div>
+</div>

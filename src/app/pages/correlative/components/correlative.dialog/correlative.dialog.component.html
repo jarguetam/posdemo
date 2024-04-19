@@ -1,0 +1,119 @@
+<p-dialog  header="{{isAdd ? 'Agregar': 'Editar'}} Numeracion" [(visible)]="display"
+modal="true" blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '90%'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        Cargando...
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formMode" *ngIf="formMode" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="cai" type="text" pInputText  formControlName="description" [ngClass]="{ 'is-invalid': submitted && f.description.errors }">
+                        <label for="description">Descripción</label>
+                    </span>
+                    <div *ngIf="formMode.controls['description'].invalid && formMode.controls['description'].dirty" >
+                        <small  *ngIf="formMode.controls['description'].errors.required" id="description" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="cai" type="text" pInputText  formControlName="cai" [ngClass]="{ 'is-invalid': submitted && f.cai.errors }">
+                        <label for="cai">CAI</label>
+                    </span>
+                    <div *ngIf="formMode.controls['cai'].invalid && formMode.controls['cai'].dirty" >
+                        <small  *ngIf="formMode.controls['cai'].errors.required" id="cai" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="dateLimit" type="date" pInputText  formControlName="dateLimit" [ngClass]="{ 'is-invalid': submitted && f.dateLimit.errors }">
+                        <label for="dateLimit">Limite de emision</label>
+                    </span>
+                    <div *ngIf="formMode.controls['dateLimit'].invalid && formMode.controls['dateLimit'].dirty" >
+                        <small  *ngIf="formMode.controls['dateLimit'].errors.required" id="dateLimit" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="authorizeRangeFrom" type="text" pInputText  formControlName="authorizeRangeFrom" [ngClass]="{ 'is-invalid': submitted && f.authorizeRangeFrom.errors }">
+                        <label for="authorizeRangeFrom">Rango desde</label>
+                    </span>
+                    <div *ngIf="formMode.controls['authorizeRangeFrom'].invalid && formMode.controls['authorizeRangeFrom'].dirty" >
+                        <small  *ngIf="formMode.controls['authorizeRangeFrom'].errors.required" id="authorizeRangeFrom" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="authorizeRangeTo" type="text" pInputText  formControlName="authorizeRangeTo" [ngClass]="{ 'is-invalid': submitted && f.authorizeRangeTo.errors }">
+                        <label for="authorizeRangeTo">Rango hasta</label>
+                    </span>
+                    <div *ngIf="formMode.controls['authorizeRangeTo'].invalid && formMode.controls['authorizeRangeTo'].dirty" >
+                        <small  *ngIf="formMode.controls['authorizeRangeTo'].errors.required" id="authorizeRangeTo" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="currentCorrelative" type="text" pInputText  formControlName="currentCorrelative" [ngClass]="{ 'is-invalid': submitted && f.currentCorrelative.errors }">
+                        <label for="currentCorrelative">Numero Actual</label>
+                    </span>
+                    <div *ngIf="formMode.controls['currentCorrelative'].invalid && formMode.controls['currentCorrelative'].dirty" >
+                        <small  *ngIf="formMode.controls['currentCorrelative'].errors.required" id="currentCorrelative" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown id="branchId" [options]="branchList"
+                            formControlName="branchId" optionValue="branchId" optionLabel="name">
+                        </p-dropdown>
+                        <label for="branchId">Sucursal</label>
+                    </span>
+                    <div *ngIf="formMode.controls['branchId'].invalid && formMode.controls['branchId'].dirty" >
+                        <small  *ngIf="formMode.controls['branchId'].errors.required" id="branchId" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown id="typeDocument" [options]="pointSaleList"
+                            formControlName="pointSaleId" optionValue="pointSaleId" optionLabel="name">
+                        </p-dropdown>
+                        <label for="pointSaleId">Punto de venta</label>
+                    </span>
+                    <div *ngIf="formMode.controls['pointSaleId'].invalid && formMode.controls['pointSaleId'].dirty" >
+                        <small  *ngIf="formMode.controls['pointSaleId'].errors.required" id="pointSaleId" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown id="typeDocument" [options]="typeList"
+                            formControlName="typeDocument" optionValue="typeDocument" optionLabel="name">
+                        </p-dropdown>
+                        <label for="typeDocument">Tipo Documento</label>
+                    </span>
+                    <div *ngIf="formMode.controls['typeDocument'].invalid && formMode.controls['typeDocument'].dirty" >
+                        <small  *ngIf="formMode.controls['typeDocument'].errors.required" id="typeDocument" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+            </div>
+            <br><br><br><br><br> <br><br>   <br><br> <br><br> <br><br>
+        </form>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formMode.invalid || loading" (click)="add()" label="Agregar" ></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formMode.invalid || loading" (click)="edit()" label="Editar" ></button>
+        </ng-template>
+    </ng-template>
+</p-dialog>

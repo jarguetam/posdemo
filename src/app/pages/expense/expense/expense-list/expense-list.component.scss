@@ -1,0 +1,9 @@
+:host ::ng-deep .p-chip.custom-chip {
+    background: #498b49!important;
+    color: var(--primary-color-text) !important;
+}
+
+:host ::ng-deep .p-chip.custom-chip-canceled {
+    background: #a74e4e!important;
+    color: var(--primary-color-text) !important;
+}

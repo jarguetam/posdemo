@@ -1,0 +1,48 @@
+<div class="grid">
+    <div class="col-12 xl:col-12">
+        <div class="card">
+            <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+                <skeleton-table-component [title]="title"></skeleton-table-component>
+            </ng-template>
+            <ng-template #showTable>
+                <div class="card">
+                    <h4 class="my-2">{{title}}</h4>
+                </div>
+                <!-- <br> -->
+                <div class="card">
+                    <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+                        <div class="grid p-fluid">
+                            <div class="col-12 md:col-4">
+                                <span class="mt-4 p-float-label p-input-icon-left">
+                                    <i class="pi pi-calendar"></i>
+                                    <input id="from" type="date" pInputText formControlName="from">
+                                    <label for="from">Desde</label>
+                                </span>
+                                <div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty">
+                                    <small *ngIf="formFilter.controls['from'].errors.required" id="from"
+                                        class="p-error block">Desde es requerido</small>
+                                </div>
+                            </div>
+                            <div class="col-12 md:col-4">
+                                <span class="mt-4 p-float-label p-input-icon-left">
+                                    <i class="pi pi-calendar"></i>
+                                    <input id="to" type="date" pInputText formControlName="to">
+                                    <label for="to">Hasta</label>
+                                </span>
+                                <div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty">
+                                    <small *ngIf="formFilter.controls['to'].errors.required" id="to"
+                                        class="p-error block">Hasta es requerido</small>
+                                </div>
+                            </div>
+                            <div class="col-12 md:col-4">
+                                <button class="mt-4" pButton type="button" [disabled]="formFilter.invalid || loading"
+                                    (click)="getReport()" label="Generar reporte"></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,63 @@
+<div class="grid">
+    <div class="col-12 xl:col-12">
+        <div class="card">
+            <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+                <skeleton-table-component [title]="title"></skeleton-table-component>
+            </ng-template>
+            <ng-template #showTable>
+                <p-table #dt [value]="stockList" [paginator]="true" [rows]="10" responsiveLayout="scroll"
+                    styleClass="p-datatable-sm p-datatable-gridlines"
+                    [globalFilterFields]="['itemCode','itemName','itemName','avgPrice','quantity','costTotal']">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th pSortableColumn="itemCode">Codigo <p-sortIcon field="itemCode"></p-sortIcon>
+                                <p-columnFilter type="text" field="itemCode" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="itemName">Descripcion<p-sortIcon field="itemName"></p-sortIcon>
+                                <p-columnFilter type="text" field="itemName" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="quantity">Cantidad<p-sortIcon
+                                    field="quantity"></p-sortIcon> <p-columnFilter type="text"
+                                    field="quantity" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="avgPrice">Costo <p-sortIcon field="avgPrice"></p-sortIcon>
+                                <p-columnFilter type="text" field="avgPrice" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="costTotal">Costo Total<p-sortIcon field="costTotal"></p-sortIcon>
+                                <p-columnFilter type="text" field="costTotal" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="caption">
+                        <div class="header-container">
+                            <h4>{{title}}</h4>
+                            <div class="button-container">
+                                <button pButton pRipple label="Excel" pTooltip="Excel" icon="pi pi-file-excel"
+                                    class="p-button-success mr-2" (click)="exportToExcel()"></button>
+                                <button pButton pRipple label="PDF" icon="pi pi-file-pdf" (click)="exportToPDF()"
+                                    class="p-button-warning"></button>
+                            </div>
+                            <div class="search-container">
+                                <span class="p-input-icon-left">
+                                    <i class="pi pi-search"></i>
+                                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')"
+                                        placeholder="Buscar una palabra" />
+                                </span>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-order>
+                        <tr>
+                            <td style="width: 15%; min-width: 5rem;">{{order.itemCode}}</td>
+                            <td style="width: 25%; min-width: 4rem;">{{order.itemName}}</td>
+                            <td style="width: 10%; min-width: 2rem;">{{order.quantity}}</td>
+                            <td style="width: 10%; min-width: 2rem;">{{order.avgPrice}}</td>
+                            <td style="width: 15%; min-width: 4rem;">{{order.costTotal| currency:'L. '}}</td>
+
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </ng-template>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,111 @@
+<div class="grid">
+    <div class="col-12 xl:col-12">
+        <div class="card">
+            <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+                <skeleton-table-component [title]="title"></skeleton-table-component>
+            </ng-template>
+            <ng-template #showTable>
+                <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+                    <div class="grid p-fluid">
+                        <div class="col-12 md:col-4">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <i class="pi pi-calendar"></i>
+                                <input id="from" type="date" pInputText formControlName="from">
+                                <label for="from">Desde</label>
+                            </span>
+                            <div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty">
+                                <small *ngIf="formFilter.controls['from'].errors.required" id="from"
+                                    class="p-error block">Desde es requerido</small>
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <i class="pi pi-calendar"></i>
+                                <input id="to" type="date" pInputText formControlName="to">
+                                <label for="to">Hasta</label>
+                            </span>
+                            <div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty">
+                                <small *ngIf="formFilter.controls['to'].errors.required" id="to"
+                                    class="p-error block">Hasta es requerido</small>
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-2">
+                            <button class="mt-4" pButton type="button" [disabled]="formFilter.invalid || loading"
+                                (click)="search()" label="Buscar"></button>
+                        </div>
+                    </div>
+                </form>
+                <p-table #dt [value]="liquidationList" [paginator]="true" [rows]="7" responsiveLayout="scroll"
+                    styleClass="p-datatable-sm p-datatable-gridlines"
+                    [globalFilterFields]="['idLiquidation','total','liquidation','sellerName','createdByName']">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th pSortableColumn="idLiquidation">Id <p-sortIcon field="idLiquidation"></p-sortIcon> <p-columnFilter
+                                    type="text" field="idLiquidation" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="createdByName">Usuario <p-sortIcon field="createdByName"></p-sortIcon>
+                                <p-columnFilter type="text" field="createdByName" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="sellerName">Vendedor<p-sortIcon field="sellerName"></p-sortIcon>
+                                <p-columnFilter type="text" field="sellerName" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="total">Total Deposito<p-sortIcon field="total"></p-sortIcon>
+                                <p-columnFilter type="text" field="total" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="liquidationDate">Desde<p-sortIcon field="liquidationDate"></p-sortIcon>
+                                <p-columnFilter type="text" field="liquidationDate" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="createdByName">Hasta<p-sortIcon field="createdByName"></p-sortIcon>
+                                <p-columnFilter type="text" field="createdByName" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="active">Estatus<p-sortIcon field="active"></p-sortIcon>
+                                <p-columnFilter type="text" field="liquidation" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th>Acción</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="caption">
+                        <h4 class="mt-2">{{title}}</h4>
+                        <div class="flex">
+                            <button pButton class="ml-2" pRipple type="button" (click)="addLiquidation()"
+                                pTooltip="Agregar nueva liquidacion" tooltipPosition="bottom"
+                                label="Agregar"></button>
+                            <span class="p-input-icon-left ml-auto">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')"
+                                    placeholder="Buscar una palabra" />
+                            </span>
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-liquidation>
+                        <tr>
+                            <td style="width: 10%; min-width: 2rem;">{{liquidation.idLiquidation}}</td>
+                            <td style="width: 15%; min-width: 5rem;">{{liquidation.createdByName}}</td>
+                            <td style="width: 15%; min-width: 4rem;">{{liquidation.sellerName}}</td>
+                            <td style="width: 10%; min-width: 5rem;">{{liquidation.total | currency:'L. '}}</td>
+                            <td style="width: 15%; min-width: 4rem;">{{liquidation.from |date:'dd/MM/yyyy'}}</td>
+                            <td style="width: 10%; min-width: 4rem;">{{liquidation.to |date:'dd/MM/yyyy'}}</td>
+                            <td style="width: 15%; min-width: 4rem;">
+                                <ng-template [ngIf]="liquidation.active" [ngIfElse]="inactive">
+                                    <p-chip label="Valido" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+                                </ng-template>
+                                <ng-template #inactive>
+                                    <p-chip label="Anulado" icon="pi pi-check"></p-chip>
+                                </ng-template>
+                            </td>
+                            <td style="width: 20%;">
+                                <button [disabled]="!liquidation.active" (click)="editLiquidation(liquidation)" pButton
+                                    pTooltip="Editar" pRipple type="button" icon="pi pi-pencil"
+                                    class="p-button p-component p-button-text p-button-icon-only"></button>
+                                <!-- <button (click)="print(liquidation)" pButton pRipple pTooltip="Imprimir" type="button"
+                                    icon="pi pi-print"
+                                    class="p-button-help p-component p-button-text p-button-icon-only"></button> -->
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </ng-template>
+        </div>
+    </div>
+    <app-liquidation-dialog (LiquidationModify)="liquidationModify($event)"></app-liquidation-dialog>
+</div>
+

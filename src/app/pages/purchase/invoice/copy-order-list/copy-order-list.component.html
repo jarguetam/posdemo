@@ -1,0 +1,55 @@
+<p-dialog header="{{title}}" [(visible)]="display" modal="true" blockScroll="true"
+    [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '850px', height: '800px'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+        <skeleton-table-component [title]="title"></skeleton-table-component>
+    </ng-template>
+
+    <ng-template #showTable>
+        <p-table #dt [value]="orderList" [rowHover]="true" [paginator]="true"  [rows]="7"
+        responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['docId','docTotal','order','supplierName','supplierCode']">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="docId">Id <p-sortIcon field="docId"></p-sortIcon> <p-columnFilter type="text" field="docId" display="menu" class="ml-auto" ></p-columnFilter></th>
+                    <th pSortableColumn="supplierCode">Proveedor <p-sortIcon field="supplierCode"></p-sortIcon> <p-columnFilter type="text" field="supplierCode" display="menu" class="ml-auto"></p-columnFilter></th>
+                    <th pSortableColumn="supplierName">Nombre<p-sortIcon field="supplierName"></p-sortIcon> <p-columnFilter type="text" field="supplierName" display="menu" class="ml-auto"></p-columnFilter></th>
+                    <th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon> <p-columnFilter type="text" field="docTotal" display="menu" class="ml-auto"></p-columnFilter></th>
+                    <th pSortableColumn="order">Fecha de creacion<p-sortIcon field="order"></p-sortIcon> <p-columnFilter type="text" field="order" display="menu" class="ml-auto"></p-columnFilter></th>
+                    <th pSortableColumn="order">Creado por<p-sortIcon field="order"></p-sortIcon> <p-columnFilter type="text" field="order" display="menu" class="ml-auto"></p-columnFilter></th>
+                    <th pSortableColumn="complete">Estatus<p-sortIcon field="complete"></p-sortIcon> <p-columnFilter type="text" field="order" display="menu" class="ml-auto"></p-columnFilter></th>
+                    <th>Acción</th>
+                </tr>
+            </ng-template>
+                <ng-template pTemplate="caption">
+                    <div class="flex">
+                        <span class="p-input-icon-left ml-auto">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+                        </span>
+                    </div>
+                </ng-template>
+            <ng-template pTemplate="body" let-order>
+                <tr (click)="selectOrder(order)" [pSelectableRow]="rowData">
+                    <td style="width: 10%; min-width: 2rem;">{{order.docId}}</td>
+                    <td style="width: 15%; min-width: 5rem;">{{order.supplierCode}}</td>
+                    <td style="width: 15%; min-width: 4rem;">{{order.supplierName}}</td>
+                    <td style="width: 10%; min-width: 5rem;">{{order.docTotal | currency:'L. '}}</td>
+                    <td style="width: 15%; min-width: 4rem;">{{order.docDate |date:'dd/MM/yyyy H:mm a'}}</td>
+                    <td style="width: 10%; min-width: 4rem;">{{order.createByName}}</td>
+                    <td style="width: 15%; min-width: 4rem;">
+                        <ng-template [ngIf]="order.complete" [ngIfElse]="inactive">
+                            <p-chip label="Completado" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+                        </ng-template>
+                        <ng-template #inactive>
+                            <p-chip label="Pendiente" icon="pi pi-check"></p-chip>
+                        </ng-template>
+                    </td>
+
+                    <td style="width: 20%;">
+                        <button [disabled]="order.complete" (click)="editOrder(order)" pButton pTooltip="Editar" pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </ng-template>
+</p-dialog>
+

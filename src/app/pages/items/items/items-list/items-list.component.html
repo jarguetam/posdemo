@@ -1,0 +1,60 @@
+<div class="grid">
+	<div class="col-12 xl:col-12">
+		<div class="card">
+			<ng-template [ngIf]="loading" [ngIfElse]="showTable">
+				<skeleton-table-component [title]="title"></skeleton-table-component>
+			</ng-template>
+			<ng-template #showTable>
+					<p-table #dt [value]="itemsList" [paginator]="true"  [rows]="10"
+					responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['itemId','itemName', 'itemCategoryName','stock', 'unitOfMeasureName']">
+						<ng-template pTemplate="header">
+							<tr>
+								<th pSortableColumn="itemCode">Articulo <p-sortIcon field="itemCode"></p-sortIcon> <p-columnFilter type="text" field="itemId" display="menu" class="ml-auto" ></p-columnFilter></th>
+								<th pSortableColumn="itemName">Nombre <p-sortIcon field="itemName"></p-sortIcon> <p-columnFilter type="text" field="itemName" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="itemCategoryName">Categoria <p-sortIcon field="itemCategoryName"></p-sortIcon><p-columnFilter type="text" field="itemCategoryName" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th pSortableColumn="stock">Stock <p-sortIcon field="stock"></p-sortIcon><p-columnFilter type="text" field="stock" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th pSortableColumn="unitOfMeasureName">Medida <p-sortIcon field="unitOfMeasureName"></p-sortIcon><p-columnFilter type="text" field="unitOfMeasureName" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th pSortableColumn="active">Estado <p-sortIcon field="active"></p-sortIcon></th>
+								<th>Acción</th>
+							</tr>
+						</ng-template>
+							<ng-template pTemplate="caption">
+                                <h4 class="mt-2">{{title}}</h4>
+								<div class="flex">
+									<button pButton  class="ml-2" pRipple type="button" (click)="addItems()" pTooltip="Agregar nuevo articulo" tooltipPosition="bottom" label="Agregar" ></button>
+									<span class="p-input-icon-left ml-auto">
+										<i class="pi pi-search"></i>
+										<input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+									</span>
+								</div>
+							</ng-template>
+						<ng-template pTemplate="body" let-item>
+							<tr>
+								<td style="width: 15%; min-width: 2rem;">{{item.itemCode }}</td>
+								<td style="width: 25%; min-width: 7rem;">{{item.itemName}}</td>
+								<td style="width: 10%; min-width: 4rem;">{{item.itemCategoryName}}</td>
+                                <td style="width: 5%; min-width: 4rem;">{{item.stock}}</td>
+                                <td style="width: 5%; min-width: 4rem;">{{item.unitOfMeasureName}}</td>
+								<td style="width: 15%; min-width: 4rem;">
+									<ng-template [ngIf]="item.active" [ngIfElse]="inactive">
+										<p-chip label="Activo" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+									</ng-template>
+									<ng-template #inactive>
+										<p-chip label="Inactivo" icon="pi pi-check"></p-chip>
+									</ng-template>
+								</td>
+								<td style="width: 20%;">
+                                    <button pButton pRipple icon="pi pi-pencil" pTooltip="Editar producto" class="p-button-rounded p-button-help" (click)="editItems(item)"></button>
+									<!-- <button (click)="editItems(item)" pButton pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button> -->
+									&nbsp;
+                                    <button [disabled]="disabled" type="button" pButton pRipple pTooltip="Generar Codigos de barra" class="p-button-rounded p-button-secundary mr-2"
+                                tooltipPosition="bottom" icon="pi pi-bars" (click)="printBarcodes(item)"></button>
+							</tr>
+						</ng-template>
+					</p-table>
+
+			</ng-template>
+		</div>
+	</div>
+	<app-items-dialog (ItemModify)="ItemsModify($event)"></app-items-dialog>
+</div>

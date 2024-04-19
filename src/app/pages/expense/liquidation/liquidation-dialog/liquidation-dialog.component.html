@@ -1,0 +1,182 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} liquidacion" [(visible)]="display" modal="true" blockScroll="true"
+    [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '90%'}">
+    <ng-container>
+        <ng-template [ngIf]="loading" [ngIfElse]="data">
+            <skeleton-table-component [title]="title"></skeleton-table-component>
+        </ng-template>
+        <ng-template #data readonly="disable">
+            <form [formGroup]="formLiquidation" *ngIf="formLiquidation" class="mb-5">
+                <div class="grid p-fluid">
+                    <div class="col-12 md:col-3">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-calendar"></i>
+                            <input id="from" type="date" pInputText formControlName="from">
+                            <label for="from">Desde</label>
+                        </span>
+                        <div *ngIf="formLiquidation.controls['from'].invalid && formLiquidation.controls['from'].dirty">
+                            <small *ngIf="formLiquidation.controls['from'].errors.required" id="from"
+                                class="p-error block">Desde es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-calendar"></i>
+                            <input id="to" type="date" pInputText formControlName="to">
+                            <label for="to">Hasta</label>
+                        </span>
+                        <div *ngIf="formLiquidation.controls['to'].invalid && formLiquidation.controls['to'].dirty">
+                            <small *ngIf="formLiquidation.controls['to'].errors.required" id="to"
+                                class="p-error block">Hasta es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <p-dropdown #seller [disabled]="disabled" [options]="sellerList" formControlName="sellerId"
+                                optionValue="sellerId" optionLabel="sellerName" (ngModelChange)="search()"></p-dropdown>
+                            <label for="sellerId">Ruta</label>
+                        </span>
+                        <div
+                            *ngIf="formLiquidation.controls['sellerId'].invalid && formLiquidation.controls['sellerId'].dirty">
+                            <small *ngIf="formLiquidation.controls['sellerId'].errors.required" id="sellerId"
+                                class="p-error block">Ruta es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <button class="mt-4" pButton type="button" [disabled]="formLiquidation.invalid || loading"
+                            (click)="search()" label="Buscar"></button>
+                    </div>
+                    <div class="col-12 md:col-3">
+                        <div class="col-12 md:col-12">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <p-inputNumber mode="currency" currency="HNL" locale="es-HN" id="saleCredit"
+                                    formControlName="saleCredit" [readonly]="true" class="total"></p-inputNumber>
+                                <label for="saleCredit">Ventas Crédito</label>
+                            </span>
+                        </div>
+                        <div class="col-12 md:col-12">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <p-inputNumber mode="currency" currency="HNL" locale="es-HN" id="saleCash"
+                                    formControlName="saleCash" [readonly]="true" class="total"></p-inputNumber>
+                                <label for="saleCash">Ventas Contado</label>
+                            </span>
+                        </div>
+                        <div class="col-12 md:col-12">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <p-inputNumber mode="currency" currency="HNL" locale="es-HN" id="saleTotal"
+                                    formControlName="saleTotal" [readonly]="true" class="total"></p-inputNumber>
+                                <label for="saleTotal">Ventas Totales</label>
+                            </span>
+                        </div>
+                        <div class="col-12 md:col-12">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <p-inputNumber mode="currency" currency="HNL" locale="es-HN" id="paidTotal"
+                                    formControlName="paidTotal" [readonly]="true" class="total"></p-inputNumber>
+                                <label for="paidTotal">Cobros</label>
+                            </span>
+                        </div>
+                        <div class="col-12 md:col-12">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <p-inputNumber mode="currency" currency="HNL" locale="es-HN" id="expenseTotal"
+                                    formControlName="expenseTotal" [readonly]="true" class="expense"></p-inputNumber>
+                                <label for="expenseTotal">Total Gastos</label>
+                            </span>
+                        </div>
+                        <div class="col-12 md:col-12">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <p-inputNumber mode="currency" currency="HNL" locale="es-HN" id="total"
+                                    formControlName="total" [readonly]="true" class="total"></p-inputNumber>
+                                <label for="total">Total Ingresos</label>
+                            </span>
+                        </div>
+                        <div class="col-12 md:col-12">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <p-inputNumber mode="currency" currency="HNL" locale="es-HN" id="deposit"
+                                    formControlName="deposit" #deposit autofocus></p-inputNumber>
+                                <label for="deposit">Total Depósito</label>
+                            </span>
+                        </div>
+                        <div class="col-12 md:col-12">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <p-inputNumber mode="currency" currency="HNL" locale="es-HN" id="totalDifference"
+                                    formControlName="totalDifference" [readonly]="true" class="total"></p-inputNumber>
+                                <label for="totalDifference">Diferencia</label>
+                            </span>
+                        </div>
+
+                    </div>
+                    <div class="col-12 md:col-9">
+                        <p-table #dt [value]="detailView" responsiveLayout="stack"
+                            styleClass="p-datatable-sm p-datatable-striped" [paginator]="true" [rows]="10"
+                            responsiveLayout="scroll"
+                            [globalFilterFields]="['liquidationDetailId','itemName', 'lineTotal', 'itemName']">
+                            <ng-template pTemplate="header">
+                                <tr [pSelectableRow]="rowData">
+                                    <th>#</th>
+                                    <th>N° Documento</th>
+                                    <th>Tipo</th>
+                                    <th>Referencia</th>
+                                    <th>Fecha</th>
+                                    <th>Codigo</th>
+                                    <th>Nombre</th>
+                                    <th>Total</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="caption">
+                            </ng-template>
+                            <ng-template pTemplate="body" let-liquidation let-rowIndex="rowIndex">
+                                <tr>
+                                    <td style="width: 10%; min-width: 2rem;">{{rowIndex+1}}</td>
+                                    <td style="width: 15%; min-width: 5rem; vertical-align: middle;">
+                                        <button (click)="viewInvoice(liquidation.docNum, liquidation.docType)" pButton pTooltip="Ver" pRipple type="button" icon="pi pi-arrow-circle-right"
+                                            class="mt-2 p-button p-component p-button-text p-button-icon-only" style="vertical-align: middle;"></button>
+                                        <span style="margin-top: 5px; vertical-align: middle;">{{liquidation.docNum}}</span>
+                                    </td>
+                                    <td style="width: 15%; min-width: 4rem;">
+                                        <i class="pi" [ngClass]="{
+                                            'pi-credit-card': liquidation.docType === 'Factura Contado',
+                                            'pi-arrow-down-left': liquidation.docType === 'Gasto',
+                                            'pi-money-bill': liquidation.docType === 'Pago Recibido',
+                                            'pi-wallet': liquidation.docType === 'Factura Credito',
+                                            'green-icon': liquidation.docType === 'Factura Contado' || liquidation.docType === 'Pago Recibido',
+                                            'red-icon': liquidation.docType === 'Gasto',
+                                            'blue-icon': liquidation.docType === 'Factura Credito'
+                                        }"></i>
+                                        {{liquidation.docType}}
+                                    </td>
+                                    <td style="width: 10%; min-width: 5rem;"> {{liquidation.reference}}</td>
+                                    <td style="width: 15%; min-width: 4rem;">{{liquidation.docDate | date:'dd/MM/yyyy'}}
+                                    </td>
+                                    <td style="width: 10%; min-width: 4rem;">{{liquidation.customerCode}}</td>
+                                    <td style="width: 10%; min-width: 4rem;">{{liquidation.customerName}}</td>
+                                    <td style="width: 10%; min-width: 4rem;">{{liquidation.docTotal | currency:'L. '}}
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </div>
+            </form>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+                <button pButton type="button" [disabled]="formLiquidation.invalid || loading" (click)="add()"
+                    label="Agregar"></button>
+            </ng-template>
+            <ng-template #addButton>
+                <button pButton type="button" [disabled]="formLiquidation.invalid || loading" (click)="edit()"
+                    label="Editar"></button>
+                <button pButton type="button" (click)="cancel()" class="p-button-danger" label="Anular"></button>
+            </ng-template>
+        </ng-template>
+        <br><br><br><br><br>
+    </ng-container>
+    <app-invoice-sale-dialog></app-invoice-sale-dialog>
+</p-dialog>

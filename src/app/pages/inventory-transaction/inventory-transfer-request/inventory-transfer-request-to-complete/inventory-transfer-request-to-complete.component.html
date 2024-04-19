@@ -1,0 +1,60 @@
+<p-dialog header="Listado de solicitudes de transferencia de mercaderia" [(visible)]="display" modal="true"
+    blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '950px', height: '800px'}">
+    <ng-container>
+        <ng-template [ngIf]="loading" [ngIfElse]="data">
+            <skeleton-table-component [title]="title"></skeleton-table-component>
+        </ng-template>
+        <ng-template #data readonly="disable">
+            <p-table #dt [value]="transferList" [paginator]="true"  [rows]="7"
+            [rowHover]="true"
+            responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['transferRequestId','docTotal','transfer','comment','fromWhsName','toWhsName']">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="transferRequestId">Id <p-sortIcon field="transferRequestId"></p-sortIcon> <p-columnFilter type="text" field="transferRequestId" display="menu" class="ml-auto" ></p-columnFilter></th>
+                        <th pSortableColumn="fromWhsName">Almacen origen <p-sortIcon field="fromWhsName"></p-sortIcon> <p-columnFilter type="text" field="whsName" display="menu" class="ml-auto"></p-columnFilter></th>
+                        <th pSortableColumn="toWhsName">Almacen destino <p-sortIcon field="toWhsName"></p-sortIcon> <p-columnFilter type="text" field="whsName" display="menu" class="ml-auto"></p-columnFilter></th>
+                        <th pSortableColumn="comment">Comentario<p-sortIcon field="comment"></p-sortIcon> <p-columnFilter type="text" field="comment" display="menu" class="ml-auto"></p-columnFilter></th>
+                        <th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon> <p-columnFilter type="text" field="docTotal" display="menu" class="ml-auto"></p-columnFilter></th>
+                        <th pSortableColumn="transferRequestDate">Fecha de creacion<p-sortIcon field="transferRequestDate"></p-sortIcon> <p-columnFilter type="text" field="transferRequestDate" display="menu" class="ml-auto"></p-columnFilter></th>
+                        <th pSortableColumn="transfer">Creado por<p-sortIcon field="transfer"></p-sortIcon> <p-columnFilter type="text" field="transfer" display="menu" class="ml-auto"></p-columnFilter></th>
+                        <th pSortableColumn="complete">Estatus<p-sortIcon field="complete"></p-sortIcon> <p-columnFilter type="text" field="order" display="menu" class="ml-auto"></p-columnFilter></th>
+                    </tr>
+                </ng-template>
+                    <ng-template pTemplate="caption">
+                        <!-- <h4 class="mt-2">{{title}}</h4> -->
+                        <div class="flex">
+                            <!-- <button pButton class="ml-2" pRipple type="button" (click)="addTransfer()" pTooltip="Agregar nueva entrada de mercaderia" tooltipPosition="bottom" label="Agregar" ></button> -->
+                            <span class="p-input-icon-left ml-auto">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+                            </span>
+                        </div>
+                    </ng-template>
+                <ng-template pTemplate="body" let-transfer>
+                    <tr (click)="selectOrder(transfer)" [pSelectableRow]="rowData">
+                        <td style="width: 10%; min-width: 2rem;">{{transfer.transferRequestId}}</td>
+                        <td style="width: 15%; min-width: 5rem;">{{transfer.fromWhsName}}</td>
+                        <td style="width: 15%; min-width: 5rem;">{{transfer.toWhsName}}</td>
+                        <td style="width: 15%; min-width: 4rem;">{{transfer.comment}}</td>
+                        <td style="width: 10%; min-width: 5rem;">{{transfer.docTotal | currency:'L. '}}</td>
+                        <td style="width: 15%; min-width: 4rem;">{{transfer.transferRequestDate |date:'dd/MM/yyyy H:mm a'}}</td>
+                        <td style="width: 10%; min-width: 4rem;">{{transfer.createByName}}</td>
+                        <td style="width: 15%; min-width: 4rem;">
+                            <ng-template [ngIf]="transfer.complete" [ngIfElse]="inactive">
+                                <p-chip label="Completado" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+                            </ng-template>
+                            <ng-template #inactive>
+                                <p-chip label="Pendiente" icon="pi pi-check"></p-chip>
+                            </ng-template>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+
+        </ng-template>
+        <br><br><br><br><br>
+    </ng-container>
+</p-dialog>

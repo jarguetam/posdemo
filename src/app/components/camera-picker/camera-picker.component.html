@@ -1,0 +1,23 @@
+<div class="col-12 md:col-12">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        <loading-component></loading-component>
+    </ng-template>
+    <ng-template #data>
+        <p-dialog header="Tomar fotografia" [(visible)]="displayCam" (onHide)="hide()">
+            <div style="text-align:center">
+                <div>
+                    <webcam [height]="500" [width]="500" [trigger]="triggerObservable" (imageCapture)="handleImage($event)" *ngIf="showWebcam"
+                     [allowCameraSwitch]="allowCameraSwitch" [switchCamera]="nextWebcamObservable" [videoOptions]="videoOptions" (cameraSwitched)="cameraWasSwitched($event)"
+                     (initError)="handleInitError($event)"></webcam>
+                    <br/>
+                    <button pButton type="button" icon="pi pi-camera" class="p-button-rounded p-button-text" (click)="triggerSnapshot()"></button>
+                    <button pButton type="button" icon="pi pi-sync" class="p-button-rounded p-button-text" (click)="showNextWebcam(true)"></button>
+                </div>
+            </div>
+            <h4 *ngIf="errors.length > 0">Messages:</h4>
+            <ul *ngFor="let error of errors">
+                <li>{{error | json}}</li>
+            </ul>
+        </p-dialog>
+    </ng-template>
+

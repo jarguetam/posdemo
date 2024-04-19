@@ -1,0 +1,33 @@
+.custom-file-upload {
+    border-radius: 7px;
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid #bd022c;
+    color: #bd022c;
+    cursor: pointer;
+    text-align: center;
+    padding: 17px;
+    cursor: pointer;
+  }
+
+  .custom-file-upload:hover{
+    background: #efefef;
+  }
+  
+  input[type="file"] {
+    display: none;
+  }
+
+  .testimonial-group > .fila {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .testimonial-group > .fila > .col-1 {
+    display: inline-block;
+    float: none;
+  }
+
+  .custom-file-blue{
+    color: #0067ff;
+    border: 1px solid #0067ff;
+  }

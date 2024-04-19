@@ -1,0 +1,59 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} precios " [(visible)]="display" modal="true"
+    blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '90%'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        <skeleton-table-component [title]="title"></skeleton-table-component>
+    </ng-template>
+    <ng-template #data>
+        <p-table #dt [value]="priceListdetailList" [paginator]="true" [rows]="10" responsiveLayout="scroll"
+            styleClass="p-datatable-sm p-datatable-gridlines"
+            [globalFilterFields]="['itemCode','itemName','price', 'createByName', 'email']">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="itemCode">Codigo <p-sortIcon field="itemCode"></p-sortIcon> <p-columnFilter
+                            type="text" field="itemCode" display="menu" class="ml-auto"></p-columnFilter></th>
+                    <th pSortableColumn="itemName">Descripcion <p-sortIcon field="itemName"></p-sortIcon>
+                        <p-columnFilter type="text" field="itemName" display="menu" class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="price">Ganancia<p-sortIcon field="price"></p-sortIcon> <p-columnFilter
+                            type="text" field="price" display="menu" class="ml-auto"></p-columnFilter></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="caption">
+                <h4 class="mt-2">{{title}}</h4>
+                <div class="flex">
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')"
+                            placeholder="Buscar una palabra" />
+                    </span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="body" let-priceList>
+                <tr>
+                    <td style="width: 20%; min-width: 2rem;">{{priceList.itemCode }}</td>
+                    <td style="width: 35%; min-width: 7rem;">{{priceList.itemName}}</td>
+                    <td pEditableColumn>
+                        <p-cellEditor>
+                            <ng-template pTemplate="input">
+                                <p-inputNumber [(ngModel)]="priceList.price" [ngModelOptions]="{standalone: true}" (onInput)="addPrice(priceList)"
+                                    mode="currency" currency="LPS" locale="en-US">
+                                </p-inputNumber>
+                                <!-- <input pInputText type="text" [(ngModel)]="priceList.price" [ngModelOptions]="{standalone: true}"> -->
+                            </ng-template>
+                            <ng-template pTemplate="output">
+                                {{priceList.price | currency: 'L. '}}
+                            </ng-template>
+                        </p-cellEditor>
+                    </td>
+                    <!-- <td style="width: 35%; min-width: 7rem;">{{priceList.price | currency: 'L. '}}</td> -->
+
+                </tr>
+            </ng-template>
+        </p-table>
+
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <button pButton type="button" [disabled]="loading" (click)="savePrices()" label="Guardar" ></button>
+        <button pButton type="button" [disabled]="loading" (click)="close()" label="Cancelar" class="p-button-danger" ></button>
+    </ng-template>
+</p-dialog>

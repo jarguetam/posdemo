@@ -1,0 +1,58 @@
+<div class="grid">
+	<div class="col-12 xl:col-12">
+		<div class="card">
+			<ng-template [ngIf]="loading" [ngIfElse]="showTable">
+				<skeleton-table-component [title]="title"></skeleton-table-component>
+			</ng-template>
+
+			<ng-template #showTable>
+					<p-table #dt [value]="correlativeList" [paginator]="true"  [rows]="5"
+					responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['correlativeId','authorizeRangeFrom', 'authorizeRangeTo','typeDocumentName']">
+						<ng-template pTemplate="header">
+							<tr>
+								<th pSortableColumn="correlativeId">Id <p-sortIcon field="correlativeId"></p-sortIcon> <p-columnFilter type="text" field="correlativeId" display="menu" class="ml-auto" ></p-columnFilter></th>
+                                <th pSortableColumn="typeDocumentName">Documento <p-sortIcon field="typeDocumentName"></p-sortIcon> <p-columnFilter type="text" field="typeDocumentName" display="menu" class="ml-auto" ></p-columnFilter></th>
+                                <th pSortableColumn="description">Descripcion <p-sortIcon field="description"></p-sortIcon> <p-columnFilter type="text" field="typeDocumentName" display="menu" class="ml-auto" ></p-columnFilter></th>
+								<th pSortableColumn="authorizeRangeFrom">Rango valido desde <p-sortIcon field="authorizeRangeFrom"></p-sortIcon> <p-columnFilter type="text" field="authorizeRangeFrom" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="authorizeRangeTo">Rango valido hasta <p-sortIcon field="authorizeRangeTo"></p-sortIcon></th>
+                                <th pSortableColumn="currentCorrelative">Numero siguiente<p-sortIcon field="currentCorrelative"></p-sortIcon></th>
+                                <th pSortableColumn="cai">CAI<p-sortIcon field="cai"></p-sortIcon></th>
+                                <th pSortableColumn="dateLimit">Limite de emision <p-sortIcon field="dateLimit"></p-sortIcon></th>
+                                <th pSortableColumn="userName">Creado por<p-sortIcon field="userName"></p-sortIcon></th>
+								<th>Acción</th>
+							</tr>
+						</ng-template>
+                        <ng-template pTemplate="caption">
+                            <h4 class="mt-2"> {{title}} </h4>
+                            <div class="flex">
+                                <button pButton class="ml-2"  pRipple type="button" (click)="add()" pTooltip="Agregar nueva numeracion" tooltipPosition="bottom" label="Agregar" ></button>
+                                <span class="p-input-icon-left ml-auto">
+                                    <i class="pi pi-search"></i>
+                                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+                                </span>
+                            </div>
+                        </ng-template>
+
+						<ng-template pTemplate="body" let-mode>
+							<tr>
+								<td style="width: 10%; min-width: 2rem;">{{mode.correlativeId }}</td>
+                                <td style="width: 15%; min-width: 7rem;">{{mode.typeDocumentName}}</td>
+                                <td style="width: 15%; min-width: 7rem;">{{mode.description}}</td>
+								<td style="width: 15%; min-width: 7rem;">{{mode.authorizeRangeFrom}}</td>
+								<td style="width: 15%; min-width: 4rem;">{{mode.authorizeRangeTo}}</td>
+                                <td style="width: 15%; min-width: 4rem;">{{mode.currentCorrelative+1}}</td>
+                                <td style="width: 15%; min-width: 4rem;">{{mode.cai}}</td>
+                                <td style="width: 15%; min-width: 4rem;">{{mode.dateLimit | date}}</td>
+                                <td style="width: 15%; min-width: 4rem;">{{mode.userName}}</td>
+								<td style="width: 20%;">
+									<button (click)="editMode(mode)" pButton pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
+								</td>
+							</tr>
+						</ng-template>
+					</p-table>
+					<correlative-dialog (correlativeModify)="modeModify($event)"></correlative-dialog>
+			</ng-template>
+		</div>
+	</div>
+</div>
+

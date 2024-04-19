@@ -1,0 +1,52 @@
+<div class="col-12 md:col-12">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        <loading-component></loading-component>
+    </ng-template>
+    <ng-template #data>
+        <h4>Logo</h4>
+        <div class="container testimonial-group">
+            <div class="grid p-fluid text-center fila ">
+                <div class="sm:col-3 md:col-8 xl:col-2 xs:col-6">
+                    <label class="custom-file-upload custom-file-blue">
+                        <input type="file" name="file" placeholder="Seleccione un archivo"
+                            (change)="handleChangeFile($event, false)" [accept]="accept" />
+                        <i class="pi pi-plus-circle" style="font-size: 2.2rem"></i>
+                    </label>
+                    <!-- <button pButton type="button" icon="pi pi-camera" class="p-button-outlined p-button-lg" (click)="takePicture()" style="height: 68px; width:66px"></button> -->
+                </div>
+                <ng-container>
+                    <div *ngFor="let file of files; let i = index" class="sm:col-3 md:col-3 xl:col-2 xs:col-6">
+                        <container-element [ngSwitch]="file.extension">
+                            <ng-container *ngSwitchCase="'jpg'">
+                                <p-image src='{{ baseUrl  + file.path }}' [alt]="file.description" width="100"
+                                    height="68" [preview]="true"></p-image>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'png'">
+                                <p-image src='{{ baseUrl  + file.path }}' [alt]="file.description" width="100"
+                                    height="68" [preview]="true"></p-image>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'jpeg'">
+                                <p-image src='{{ baseUrl  + file.path }}' [alt]="file.description" width="100"
+                                    height="68" [preview]="true"></p-image>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'xlxs'">
+                                <div (click)="goToLink(file.path)" class="custom-file-upload mx-5"
+                                    [pTooltip]="file.description">
+                                    <i class="pi pi-file-excel" style="font-size: 2.2rem"></i>
+                                </div>
+                            </ng-container>
+                            <ng-container *ngSwitchCase="'pdf'">
+                                <div (click)="goToLink(file.path)" class="custom-file-upload mx-5"
+                                    [pTooltip]="file.description">
+                                    <i class="pi pi-file-pdf" style="font-size: 2.2rem"></i>
+                                </div>
+                            </ng-container>
+                        </container-element>
+                    </div>
+                </ng-container>
+
+            </div>
+            <!-- <camera-picker (capture)="handleChangeFile($event, true)"></camera-picker> -->
+        </div>
+    </ng-template>
+</div>

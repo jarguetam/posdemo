@@ -1,0 +1,112 @@
+<div class="grid">
+    <div class="col-12 xl:col-12">
+        <div class="card">
+            <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+                <skeleton-table-component [title]="title"></skeleton-table-component>
+            </ng-template>
+            <ng-template #showTable>
+                <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+                    <div class="grid p-fluid">
+                        <div class="col-12 md:col-4">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <i class="pi pi-calendar"></i>
+                                <input id="from" type="date" pInputText formControlName="from">
+                                <label for="from">Desde</label>
+                            </span>
+                            <div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty">
+                                <small *ngIf="formFilter.controls['from'].errors.required" id="from"
+                                    class="p-error block">Desde es requerido</small>
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-4">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <i class="pi pi-calendar"></i>
+                                <input id="to" type="date" pInputText formControlName="to">
+                                <label for="to">Hasta</label>
+                            </span>
+                            <div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty">
+                                <small *ngIf="formFilter.controls['to'].errors.required" id="to"
+                                    class="p-error block">Hasta es requerido</small>
+                            </div>
+                        </div>
+                        <div class="col-12 md:col-2">
+                            <button class="mt-4" pButton type="button" [disabled]="formFilter.invalid || loading"
+                                (click)="search()" label="Buscar"></button>
+                        </div>
+                    </div>
+
+
+                </form>
+                <p-table #dt [value]="invoiceList" [paginator]="true" [rows]="7" responsiveLayout="scroll"
+                    styleClass="p-datatable-sm p-datatable-gridlines"
+                    [globalFilterFields]="['docId','docTotal','invoice','supplierName','supplierCode']">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th pSortableColumn="docId">Id <p-sortIcon field="docId"></p-sortIcon> <p-columnFilter
+                                    type="text" field="docId" display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="supplierCode">Proveedor <p-sortIcon field="supplierCode"></p-sortIcon>
+                                <p-columnFilter type="text" field="supplierCode" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="supplierName">Nombre<p-sortIcon field="supplierName"></p-sortIcon>
+                                <p-columnFilter type="text" field="supplierName" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon>
+                                <p-columnFilter type="text" field="docTotal" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="invoice">Fecha de creacion<p-sortIcon field="invoice"></p-sortIcon>
+                                <p-columnFilter type="text" field="invoice" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="payConditionName">Condicion de pago<p-sortIcon
+                                    field="payConditionName"></p-sortIcon> <p-columnFilter type="text" field="invoice"
+                                    display="menu" class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="invoice">Creado por<p-sortIcon field="invoice"></p-sortIcon>
+                                <p-columnFilter type="text" field="invoice" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                            <th pSortableColumn="complete">Estatus<p-sortIcon field="complete"></p-sortIcon>
+                                <p-columnFilter type="text" field="invoice" display="menu"
+                                    class="ml-auto"></p-columnFilter></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="caption">
+                        <div class="header-container">
+                            <h4>{{title}}</h4>
+                            <div class="button-container">
+                                <button pButton pRipple label="Excel" pTooltip="Excel" icon="pi pi-file-excel"
+                                    class="p-button-success mr-2" (click)="exportToExcel()"></button>
+                                <button pButton pRipple label="PDF" icon="pi pi-file-pdf" (click)="exportToPDF()"
+                                    class="p-button-warning"></button>
+                            </div>
+                            <div class="search-container">
+                                <span class="p-input-icon-left">
+                                    <i class="pi pi-search"></i>
+                                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')"
+                                        placeholder="Buscar una palabra" />
+                                </span>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-invoice>
+                        <tr>
+                            <td style="width: 10%; min-width: 2rem;">{{invoice.docId}}</td>
+                            <td style="width: 15%; min-width: 5rem;">{{invoice.supplierCode}}</td>
+                            <td style="width: 15%; min-width: 4rem;">{{invoice.supplierName}}</td>
+                            <td style="width: 10%; min-width: 5rem;">{{invoice.docTotal | currency:'L. '}}</td>
+                            <td style="width: 15%; min-width: 4rem;">{{invoice.docDate |date:'dd/MM/yyyy H:mm a'}}</td>
+                            <td style="width: 10%; min-width: 4rem;">{{invoice.payConditionName}}</td>
+                            <td style="width: 10%; min-width: 4rem;">{{invoice.createByName}}</td>
+                            <td style="width: 15%; min-width: 4rem;">
+                                <ng-template [ngIf]="invoice.complete" [ngIfElse]="inactive">
+                                    <p-chip label="Pagada" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+                                </ng-template>
+                                <ng-template #inactive>
+                                    <p-chip label="Pendiente pago" icon="pi pi-check"></p-chip>
+                                </ng-template>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </ng-template>
+        </div>
+    </div>
+
+</div>

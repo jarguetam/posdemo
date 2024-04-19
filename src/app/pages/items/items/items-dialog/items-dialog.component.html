@@ -1,0 +1,191 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} articulo" [(visible)]="display" modal="true" blockScroll="true"
+    [breakpoints]="{'960px': '85vw', '640px': '100vw'}" [style]="{width: '75vw'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        <skeleton-table-component [title]="title"></skeleton-table-component>
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formItem" *ngIf="formItem" class="mb-5">
+            <div class="grid p-fluid">
+                <div  class="col-12 md:col-9">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-qrcode"></i>
+                        <input id="itemCode" type="text" pInputText formControlName="itemCode"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="itemCode">Codigo articulo</label>
+                    </span>
+                </div>
+                <div *ngIf="!isAdd" class="col-12 md:col-3">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <div class="p-inputgroup">
+                            <button [disabled]="disabled" type="button" pButton pRipple
+                                pTooltip="Historial transacciones" tooltipPosition="bottom" icon="pi pi-eye"
+                                (click)="showBpJornal()"></button>
+                                <p>&nbsp;</p>
+                            <button [disabled]="disabled" type="button" pButton pRipple pTooltip="Generar Codigos"
+                                tooltipPosition="bottom" icon="pi pi-bars" (click)="printBarcodes()"></button>
+                        </div>
+                    </span>
+                </div>
+                <div class="col-12 md:col-9">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-ticket"></i>
+                        <input id="itemName" type="text" pInputText formControlName="itemName"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="itemName">Nombre articulo</label>
+                    </span>
+                    <div *ngIf="formItem.controls['itemName'].invalid && formItem.controls['itemName'].dirty">
+                        <small *ngIf="formItem.controls['itemName'].errors.required" id="itemName"
+                            class="p-error block">Nombre es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-3">
+                    <br>
+                    <p-checkbox binary=true label="Articulo de venta" name="groupname"
+                        [formControl]="formItem.controls['salesItem']"></p-checkbox>
+                </div>
+                <div class="col-12 md:col-9">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-list"></i>
+                        <p-dropdown [options]="itemsCategoryList" formControlName="itemCategoryId"
+                            optionValue="itemCategoryId" optionLabel="itemCategoryName"></p-dropdown>
+                        <label for="itemCategoryId">Categoria de articulo</label>
+                    </span>
+                    <div
+                        *ngIf="formItem.controls['itemCategoryId'].invalid && formItem.controls['itemCategoryId'].dirty">
+                        <small *ngIf="formItem.controls['itemCategoryId'].errors.required" id="itemCategoryId"
+                            class="p-error block">Categoria de articulo es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-3">
+                    <br>
+                    <p-checkbox binary=true label="Articulo de compra" name="groupname"
+                        [formControl]="formItem.controls['purchaseItem']"></p-checkbox>
+                </div>
+                <div class="col-12 md:col-9">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-list"></i>
+                        <p-dropdown [options]="itemsSubCategoryList" formControlName="itemFamilyId"
+                            optionValue="itemFamilyId" optionLabel="itemFamilyName"></p-dropdown>
+                        <label for="itemFamilyId">Sub Categoria de articulo</label>
+                    </span>
+                    <div *ngIf="formItem.controls['itemFamilyId'].invalid && formItem.controls['itemFamilyId'].dirty">
+                        <small *ngIf="formItem.controls['itemFamilyId'].errors.required" id="itemFamilyId"
+                            class="p-error block">Sub Categoria de articulo es requerido</small>
+                    </div>
+                </div>
+
+                <div class="col-12 md:col-9">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-list"></i>
+                        <p-dropdown [options]="unitOfMeasureList" formControlName="unitOfMeasureId"
+                            optionValue="unitOfMeasureId" optionLabel="unitOfMeasureName"></p-dropdown>
+                        <label for="unitOfMeasureId">Unidad de medida</label>
+                    </span>
+                    <div
+                        *ngIf="formItem.controls['unitOfMeasureId'].invalid && formItem.controls['unitOfMeasureId'].dirty">
+                        <small *ngIf="formItem.controls['unitOfMeasureId'].errors.required" id="unitOfMeasureId"
+                            class="p-error block">Unidad de medida es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-3">
+                    <br>
+                    <p-checkbox binary=true label="Articulo de inventario" name="groupname"
+                        [formControl]="formItem.controls['inventoryItem']"></p-checkbox>
+                </div>
+                <div class="col-12 md:col-3">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-money-bill"></i>
+                        <input id="pricePurchase" type="text" pInputText formControlName="pricePurchase"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="pricePurchase">Precio de compra</label>
+                    </span>
+                    <div *ngIf="formItem.controls['pricePurchase'].invalid && formItem.controls['pricePurchase'].dirty">
+                        <small *ngIf="formItem.controls['pricePurchase'].errors.required" id="pricePurchase"
+                            class="p-error block">Precio de compra</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-2">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-filter-fill"></i>
+                        <input id="weight" type="text" pInputText formControlName="weight"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="weight">Peso</label>
+                    </span>
+                    <div *ngIf="formItem.controls['weight'].invalid && formItem.controls['weight'].dirty">
+                        <small *ngIf="formItem.controls['weight'].errors.required" id="weight"
+                            class="p-error block">Peso es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-4">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-bars"></i>
+                        <input id="barCode" type="text" pInputText formControlName="barCode"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="barCode">Codigo de barras</label>
+                    </span>
+                    <div *ngIf="formItem.controls['barCode'].invalid && formItem.controls['barCode'].dirty">
+                        <small *ngIf="formItem.controls['barCode'].errors.required" id="barCode"
+                            class="p-error block">Codigo de barra es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-2">
+                    <br><br>
+                    <p-checkbox binary=true label="Impuesto" name="groupname"
+                        [formControl]="formItem.controls['tax']"></p-checkbox>
+                </div>
+                <div *ngIf="!isAdd" class="col-12 md:col-3">
+                    <br><br>
+                    <p-checkbox binary=true label="Activo" name="groupname"
+                        [formControl]="formItem.controls['active']"></p-checkbox>
+                </div>
+
+            </div>
+        </form>
+        <div *ngIf="isAdd">
+            <br><br><br><br>
+            <br><br><br><br>
+        </div>
+    </ng-template>
+    <ng-template [ngIf]="item?.itemWareHouse?.length>0">
+        <p-table #dt [value]="item.itemWareHouse" [paginator]="true" [rows]="5" responsiveLayout="scroll"
+            styleClass="p-datatable-sm p-datatable-gridlines"
+            [globalFilterFields]="['itemId','itemName', 'itemCategoryName','stock', 'unitOfMeasureName']">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="whsName">Almacen <p-sortIcon field="whsName"></p-sortIcon> </th>
+                    <th pSortableColumn="stock">Stock <p-sortIcon field="stock"></p-sortIcon> </th>
+                    <th pSortableColumn="avgPrice">Costo <p-sortIcon field="avgPrice"></p-sortIcon></th>
+                    <th pSortableColumn="isActive">Bloqueo <p-sortIcon field="isActive"></p-sortIcon></th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-item>
+                <tr>
+                    <td style="width: 15%; min-width: 2rem;">{{item.whsName }}</td>
+                    <td style="width: 25%; min-width: 7rem;">{{item.stock}}</td>
+                    <td style="width: 15%; min-width: 4rem;">{{item.avgPrice | currency:'L. '}}</td>
+                    <td style="width: 15%; min-width: 4rem;">
+                        <ng-template [ngIf]="item.active" [ngIfElse]="inactive">
+                            <p-chip label="Habilitado" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+                        </ng-template>
+                        <ng-template #inactive>
+                            <p-chip label="Bloqueado" icon="pi pi-check"></p-chip>
+                        </ng-template>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formItem.invalid || loading" (click)="add()"
+                label="Agregar"></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formItem.invalid || loading" (click)="edit()"
+                label="Editar"></button>
+        </ng-template>
+    </ng-template>
+    <app-view-jornal-items-dialog></app-view-jornal-items-dialog>
+</p-dialog>

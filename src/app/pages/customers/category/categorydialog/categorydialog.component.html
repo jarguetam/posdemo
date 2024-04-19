@@ -1,0 +1,38 @@
+<p-dialog  header="{{isAdd ? 'Agregar': 'Editar'}} categoria de cliente" [(visible)]="display"
+modal="true" blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '50%'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        Cargando...
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formCustomerCategory" *ngIf="formCustomerCategory" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="customerCategoryName" type="text" pInputText  formControlName="customerCategoryName" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="customerCategoryName">Nombre categoria</label>
+                    </span>
+                    <div *ngIf="formCustomerCategory.controls['customerCategoryName'].invalid && formCustomerCategory.controls['customerCategoryName'].dirty" >
+                        <small  *ngIf="formCustomerCategory.controls['customerCategoryName'].errors.required" id="customerCategoryName" class="p-error block">Nombre es requerido</small>
+                    </div>
+                </div>
+
+                <div *ngIf="!isAdd" class="col-12 md:col-12">
+                    <p-checkbox binary=true label="Activo"  name="groupname" [formControl]="formCustomerCategory.controls['active']"></p-checkbox>
+                </div>
+            </div>
+        </form>
+        <br><br><br><br>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formCustomerCategory.invalid || loading" (click)="add()" label="Agregar" ></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formCustomerCategory.invalid || loading" (click)="edit()" label="Editar" ></button>
+        </ng-template>
+    </ng-template>
+</p-dialog>
+
+

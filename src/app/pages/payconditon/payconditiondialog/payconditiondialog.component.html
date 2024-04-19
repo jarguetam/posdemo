@@ -1,0 +1,48 @@
+<p-dialog  header="{{isAdd ? 'Agregar': 'Editar'}} condicion de pago" [(visible)]="display"
+modal="true" blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '50%'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        Cargando...
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formPayCondition" *ngIf="formPayCondition" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="payConditionName" type="text" pInputText  formControlName="payConditionName" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="payConditionName">Nombre condicion</label>
+                    </span>
+                    <div *ngIf="formPayCondition.controls['payConditionName'].invalid && formPayCondition.controls['payConditionName'].dirty" >
+                        <small  *ngIf="formPayCondition.controls['payConditionName'].errors.required" id="payConditionName" class="p-error block">Nombre es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <label for="payConditionDays">Dias de pago</label>
+                        <p-inputNumber formControlName="payConditionDays" mode="decimal" [showButtons]="true" inputId="minmax-buttons" [min]="0" [max]="1000">
+                        </p-inputNumber>
+                    </span>
+                    <div *ngIf="formPayCondition.controls['payConditionDays'].invalid && formPayCondition.controls['payConditionDays'].dirty" >
+                        <small  *ngIf="formPayCondition.controls['payConditionDays'].errors.required" id="payConditionDays" class="p-error block">Posicion es requerido</small>
+                    </div>
+                </div>
+
+
+                <div *ngIf="!isAdd" class="col-12 md:col-12">
+                    <p-checkbox binary=true label="Activo"  name="groupname" [formControl]="formPayCondition.controls['active']"></p-checkbox>
+                </div>
+            </div>
+        </form>
+        <br><br><br><br>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formPayCondition.invalid || loading" (click)="add()" label="Agregar" ></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formPayCondition.invalid || loading" (click)="edit()" label="Editar" ></button>
+        </ng-template>
+    </ng-template>
+</p-dialog>
+

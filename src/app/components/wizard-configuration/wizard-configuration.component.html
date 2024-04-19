@@ -1,0 +1,20 @@
+<div class="card item-center">
+    <div class="content">
+        <h4>Configuracion inicial del sistema</h4>
+        <br>
+        <p-steps [model]="items" [(activeIndex)]="activeIndex" [readonly]="false"></p-steps>
+        <br><br>
+        <p-progressBar [value]="avance"></p-progressBar>
+        <br><br>
+        <ng-template [ngIf]="isComplete">
+            <button pButton  class="ml-2" pRipple type="button" (click)="finallyWizard()" pTooltip="Finalizar configuracion" tooltipPosition="bottom" label="Finalizar" ></button>
+        </ng-template>
+        <company-info-dialog (companyModify)="companyModify()"></company-info-dialog>
+        <app-seller-region-dialog (SellerRegionModify)="sellerRegionModify()"></app-seller-region-dialog>
+        <app-seller-dialog (SellerModify)="sellerModify()"></app-seller-dialog>
+        <app-ware-house-dialog (WareHouseModify)="wareHouseModify()"></app-ware-house-dialog>
+        <correlative-dialog (correlativeModify)="correlativeModify()"></correlative-dialog>
+    </div>
+</div>
+
+

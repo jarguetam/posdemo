@@ -1,0 +1,20 @@
+p-chip {
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
+    i {
+        margin-right: 5px;
+    }
+
+    &[style*="background-color: #00b300"] {
+        background: linear-gradient(135deg, #00b300, #00e600);
+        box-shadow: 0 0 10px #00b300, 0 0 40px #00b300, 0 0 80px #00b300;
+    }
+
+    &[style*="background-color: #ff0000"] {
+        background: linear-gradient(135deg, #ff0000, #ff3300);
+        box-shadow: 0 0 10px #ff0000, 0 0 40px #ff0000, 0 0 80px #ff0000;
+    }
+}

@@ -1,0 +1,48 @@
+.layout-topbar-status {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Mueve el indicador al lado derecho de la topbar */
+}
+
+.layout-topbar-status i {
+    font-size: 1.5rem; /* Tamaño del ícono */
+    margin-right: 0.5rem; /* Espacio entre el ícono y el texto */
+}
+
+.layout-topbar-status span {
+    font-size: 1rem; /* Tamaño del texto */
+}
+
+.connected {
+    color: green; /* Cambia el color a verde para conectado */
+}
+
+.disconnected {
+    color: red; /* Cambia el color a rojo para desconectado */
+}
+
+.app-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Alinear al extremo derecho de la barra */
+    height: 60px; /* Ajusta la altura según tus necesidades */
+    padding: 0 20px; /* Espaciado interno de la barra */
+}
+
+// .seller-chip {
+//     margin-left: 10px; /* Espacio entre el chip y otros elementos en la barra */
+//     font-size: 14px; /* Tamaño de fuente */
+//     background-color: #007bff; /* Color de fondo del chip */
+//     color: #007bff; /* Color del texto del chip */
+//     border-radius: 20px; /* Bordes redondeados */
+//     padding: 5px 10px; /* Espaciado interno del chip */
+// }
+
+:host ::ng-deep .p-chip.seller-chip {
+    background: #007bff !important;
+    color: var(--primary-color-text) !important;
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 14px;
+    margin-left: 5px;
+}

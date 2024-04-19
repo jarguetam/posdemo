@@ -1,0 +1,258 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} cliente" [(visible)]="display" modal="true"
+blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '1050px', height: '800px'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        <skeleton-table-component [title]="title"></skeleton-table-component>
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formCustomer" *ngIf="formCustomer" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="customerName" type="text" pInputText formControlName="customerName"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="customerName">Nombre de cliente</label>
+                    </span>
+                    <div
+                        *ngIf="formCustomer.controls['customerName'].invalid && formCustomer.controls['customerName'].dirty">
+                        <small *ngIf="formCustomer.controls['customerName'].errors.required" id="customerName"
+                            class="p-error block">Nombre es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-hashtag"></i>
+                        <input id="rtn" type="text" pInputText formControlName="rtn"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="rtn">RTN ó DNI</label>
+                    </span>
+                    <div *ngIf="formCustomer.controls['rtn'].invalid && formCustomer.controls['rtn'].dirty">
+                        <small *ngIf="formCustomer.controls['rtn'].errors.required" id="rtn" class="p-error block">RTN
+                            es requerido</small>
+                    </div>
+                    <div *ngIf="formCustomer.controls['rtn'].invalid && formCustomer.controls['rtn'].dirty">
+                        <small *ngIf="formCustomer.controls['rtn'].errors" id="rtn" class="p-error block">RTN ó DNI debe
+                            tener 13 o 14 digitos</small>
+                    </div>
+                    <div *ngIf="formCustomer.controls['rtn'].invalid && formCustomer.controls['rtn'].dirty">
+                        <small *ngIf="formCustomer.controls['rtn'].hasError('pattern')" id="rtn"
+                            class="p-error block">Debe ser numerico</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-phone"></i>
+                        <input id="phone" type="text" pInputText formControlName="phone"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="phone">Telefono</label>
+                    </span>
+                    <div *ngIf="formCustomer.controls['phone'].invalid && formCustomer.controls['phone'].dirty">
+                        <small *ngIf="formCustomer.controls['phone'].errors.required" id="phone"
+                            class="p-error block">Telefono es requerido</small>
+                    </div>
+                    <div *ngIf="formCustomer.controls['phone'].invalid && formCustomer.controls['phone'].dirty">
+                        <small *ngIf="formCustomer.controls['phone'].errors" id="phone" class="p-error block">Telefono
+                            debe tener 8 digitos</small>
+                    </div>
+                    <div *ngIf="formCustomer.controls['phone'].invalid && formCustomer.controls['phone'].dirty">
+                        <small *ngIf="formCustomer.controls['phone'].hasError('pattern')" id="phone"
+                            class="p-error block">Telefono debe ser numerico</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-building"></i>
+                        <input id="address" type="text" pInputText formControlName="address"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="address">Direccion</label>
+                    </span>
+                    <div *ngIf="formCustomer.controls['address'].invalid && formCustomer.controls['address'].dirty">
+                        <small *ngIf="formCustomer.controls['address'].errors.required" id="address"
+                            class="p-error block">Direccion es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-at"></i>
+                        <input id="email" type="text" pInputText formControlName="email"
+                            [ngClass]="{ 'is-invalid': submitted && f.email.errors }">
+                        <label for="email">Email</label>
+                    </span>
+                    <div *ngIf="formCustomer.controls['email'].invalid && formCustomer.controls['email'].dirty">
+                        <small *ngIf="formCustomer.controls['email'].errors.required" id="email"
+                            class="p-error block">Email es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="contactPerson" type="text" pInputText formControlName="contactPerson"
+                            [ngClass]="{ 'is-invalid': submitted && f.contactPerson.errors }">
+                        <label for="contactPerson">Nombre Contacto</label>
+                    </span>
+                    <div *ngIf="formCustomer.controls['contactPerson'].invalid && formCustomer.controls['contactPerson'].dirty">
+                        <small *ngIf="formCustomer.controls['contactPerson'].errors.required" id="contactPerson"
+                            class="p-error block">Nombre Contacto es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown [options]="categoryList" formControlName="customerCategoryId"
+                            optionValue="customerCategoryId" optionLabel="customerCategoryName"></p-dropdown>
+                        <label for="customerCategoryId">Categoria Cliente</label>
+                    </span>
+                    <div
+                        *ngIf="formCustomer.controls['customerCategoryId'].invalid && formCustomer.controls['customerCategoryId'].dirty">
+                        <small *ngIf="formCustomer.controls['customerCategoryId'].errors.required"
+                            id="customerCategoryId" class="p-error block">Categoria de cliente es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown [options]="sellerList" formControlName="sellerId" optionValue="sellerId"
+                            optionLabel="sellerName"></p-dropdown>
+                        <label for="sellerId">Ruta</label>
+                    </span>
+                    <div *ngIf="formCustomer.controls['sellerId'].invalid && formCustomer.controls['sellerId'].dirty">
+                        <small *ngIf="formCustomer.controls['sellerId'].errors.required" id="sellerId"
+                            class="p-error block">Ruta es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown [options]="regionList" formControlName="regionId" optionValue="regionId"
+                            optionLabel="nameRegion"></p-dropdown>
+                        <label for="regionId">Vendedor</label>
+                    </span>
+                    <div *ngIf="formCustomer.controls['regionId'].invalid && formCustomer.controls['regionId'].dirty">
+                        <small *ngIf="formCustomer.controls['regionId'].errors.required" id="regionId"
+                            class="p-error block">Vendedor es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown [options]="zoneList" formControlName="zoneId" optionValue="id"
+                            optionLabel="zoneName"></p-dropdown>
+                        <label for="zoneId">Zona</label>
+                    </span>
+                    <div *ngIf="formCustomer.controls['zoneId'].invalid && formCustomer.controls['zoneId'].dirty">
+                        <small *ngIf="formCustomer.controls['zoneId'].errors.required" id="zoneId"
+                            class="p-error block">Zona es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown [options]="frequencyList" formControlName="frequencyId" optionValue="id"
+                            optionLabel="frequencyName"></p-dropdown>
+                        <label for="frequencyId">Frecuencia</label>
+                    </span>
+                    <div *ngIf="formCustomer.controls['frequencyId'].invalid && formCustomer.controls['frequencyId'].dirty">
+                        <small *ngIf="formCustomer.controls['frequencyId'].errors.required" id="frequencyId"
+                            class="p-error block">Frecuencia es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown [options]="payConditionList" formControlName="payConditionId"
+                            optionValue="payConditionId" optionLabel="payConditionName"></p-dropdown>
+                        <label for="payConditionId">Condicion de pago</label>
+                    </span>
+                    <div
+                        *ngIf="formCustomer.controls['payConditionId'].invalid && formCustomer.controls['payConditionId'].dirty">
+                        <small *ngIf="formCustomer.controls['payConditionId'].errors.required" id="payConditionId"
+                            class="p-error block">Condicion de pago es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown [options]="priceList" formControlName="listPriceId" optionValue="listPriceId"
+                            optionLabel="listPriceName"></p-dropdown>
+                        <label for="listPriceId">Lista de precio</label>
+                    </span>
+                    <div
+                        *ngIf="formCustomer.controls['listPriceId'].invalid && formCustomer.controls['listPriceId'].dirty">
+                        <small *ngIf="formCustomer.controls['listPriceId'].errors.required" id="listPriceId"
+                            class="p-error block">Condicion de pago es requerido</small>
+                    </div>
+                </div>
+
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <p-inputNumber formControlName="creditLine" inputId="creditLine" mode="currency" currency="LPS"
+                            locale="en-US" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        </p-inputNumber>
+                        <label for="creditLine">Limite de credito</label>
+                    </span>
+                    <div
+                        *ngIf="formCustomer.controls['creditLine'].invalid && formCustomer.controls['creditLine'].dirty">
+                        <small *ngIf="formCustomer.controls['creditLine'].errors.required" id="creditLine"
+                            class="p-error block">Nombre es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <p-inputNumber formControlName="limitInvoiceCredit" inputId="limitInvoiceCredit" mode="decimal"
+                            [showButtons]="true" [min]="0" [max]="10000"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        </p-inputNumber>
+                        <label for="limitInvoiceCredit">Limite de facturas credito</label>
+                    </span>
+                    <div
+                        *ngIf="formCustomer.controls['limitInvoiceCredit'].invalid && formCustomer.controls['limitInvoiceCredit'].dirty">
+                        <small *ngIf="formCustomer.controls['limitInvoiceCredit'].errors.required"
+                            id="limitInvoiceCredit" class="p-error block">Limite de facturas credito</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <br>
+                    <p-checkbox binary=true label="Compra" name="groupname"
+                        [formControl]="formCustomer.controls['purchase']"></p-checkbox>
+                </div>
+                <div *ngIf="!isAdd" class="col-13 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <div class="p-inputgroup">
+                            <p-inputNumber formControlName="balance" inputId="balance" mode="currency" currency="LPS"
+                                locale="en-US" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            </p-inputNumber>
+                            <button [disabled]="disabled" type="button" pButton pRipple
+                                pTooltip="Historial transacciones" tooltipPosition="bottom" icon="pi pi-eye"
+                                (click)="showBpJornal()"></button>
+                        </div>
+                    </span>
+                </div>
+                <!-- <div class="col-12 md:col-6">
+                    <br><br>
+                    <p-checkbox binary=true label="Impuestos" name="groupname"
+                        [formControl]="formCustomer.controls['tax']"></p-checkbox>
+                </div> -->
+                <div *ngIf="!isAdd" class="col-12 md:col-12">
+                    <p-checkbox binary=true label="Activo" name="groupname"
+                        [formControl]="formCustomer.controls['active']"></p-checkbox>
+                </div>
+
+            </div>
+        </form>
+        <br><br><br><br>
+        <br><br><br><br>
+        <br><br><br><br>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formCustomer.invalid || loading" (click)="add()"
+                label="Agregar"></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formCustomer.invalid || loading" (click)="edit()"
+                label="Editar"></button>
+        </ng-template>
+    </ng-template>
+    <app-view-jornal-bp-dialog></app-view-jornal-bp-dialog>
+</p-dialog>

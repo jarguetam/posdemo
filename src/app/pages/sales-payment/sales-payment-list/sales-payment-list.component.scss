@@ -1,0 +1,34 @@
+:host ::ng-deep .p-chip.custom-chip {
+    background: #498b49 !important;
+    color: var(--primary-color-text) !important;
+}
+
+:host ::ng-deep .p-chip.custom-chip-canceled {
+    background: #ff0000 !important;
+    color: var(--primary-color-text) !important;
+}
+
+:host ::ng-deep .p-chip.custom-chip-pending {
+    /* Estilo para el estado "Pendiente pago" */
+    background: #ffcc00 !important;
+    color: var(--primary-color-text) !important;
+}
+:host ::ng-deep .p-chip.offline-chip {
+    background: #ff0000 !important;
+    color: var(--primary-color-text) !important;
+}
+
+.button-container {
+    display: flex;
+    align-items: center; /* Alinea los botones verticalmente en el centro */
+
+    gap: 5px; /* Espacio entre elementos */
+
+    /* Agrega una media query para pantallas más pequeñas */
+    @media only screen and (max-width: 600px) {
+        flex-direction: column; /* Cambia la dirección de flexión a columna */
+        align-items: stretch; /* Asegura que los botones se estiren para ocupar todo el ancho */
+    }
+}
+
+

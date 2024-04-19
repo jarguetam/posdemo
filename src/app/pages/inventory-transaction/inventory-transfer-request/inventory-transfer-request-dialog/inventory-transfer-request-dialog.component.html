@@ -1,0 +1,237 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} solicitud de transferencia de mercaderia" [(visible)]="display" modal="true"
+    blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '950px', height: '800px'}">
+    <ng-container>
+        <ng-template [ngIf]="loading" [ngIfElse]="data">
+            <skeleton-table-component [title]="title"></skeleton-table-component>
+        </ng-template>
+        <ng-template #data readonly="disable">
+            <form [formGroup]="formTransfer" *ngIf="formTransfer" class="mb-5">
+                <div class="grid p-fluid">
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <p-dropdown [disabled]="disabled" [options]="wareHouseList" formControlName="fromWhsCode"
+                                optionValue="whsCode" optionLabel="whsName"></p-dropdown>
+                            <label for="fromWhsCode">Almacen origen</label>
+                        </span>
+                        <div
+                            *ngIf="formTransfer.controls['fromWhsCode'].invalid && formTransfer.controls['fromWhsCode'].dirty">
+                            <small *ngIf="formTransfer.controls['fromWhsCode'].errors.required" id="fromWhsCode"
+                                class="p-error block">Almacen es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <p-dropdown [disabled]="!changeWareHouse" [options]="wareHouseList" formControlName="toWhsCode"
+                                optionValue="whsCode" optionLabel="whsName"
+                                ></p-dropdown>
+                            <label for="toWhsCode">Almacen destino</label>
+                        </span>
+                        <div
+                            *ngIf="formTransfer.controls['toWhsCode'].invalid && formTransfer.controls['toWhsCode'].dirty">
+                            <small *ngIf="formTransfer.controls['toWhsCode'].errors.required" id="toWhsCode"
+                                class="p-error block">Almacen es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-comments"></i>
+                            <input id="comment" [disabled]="disabled" type="text" pInputText formControlName="comment"
+                                [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <label for="comment">Comentario</label>
+                        </span>
+                        <div *ngIf="formTransfer.controls['comment'].invalid && formTransfer.controls['comment'].dirty">
+                            <small *ngIf="formTransfer.controls['comment'].errors.required" id="comment"
+                                class="p-error block">Comentario es requerido</small>
+                        </div>
+                    </div>
+
+                    <div class="col-12 md:col-12">
+                        <p-table #dt [value]="transfer.detail" responsiveLayout="stack"
+                            styleClass="p-datatable-sm p-datatable-striped"
+                            [globalFilterFields]="['itemCode','itemName', 'quantity', 'itemName']">
+                            <ng-template pTemplate="header">
+                                <tr [pSelectableRow]="rowData">
+                                    <th pSortableColumn="itemCode">Codigo<p-sortIcon field="itemCode"></p-sortIcon>
+                                        <p-columnFilter type="text" field="itemCode" display="menu"
+                                            class="ml-auto"></p-columnFilter>
+                                    </th>
+                                    <th pSortableColumn="itemName">Descripcion <p-sortIcon
+                                            field="itemName"></p-sortIcon> <p-columnFilter type="text" field="itemName"
+                                            display="menu" class="ml-auto"></p-columnFilter></th>
+                                    <th pSortableColumn="quantity">Cantidad<p-sortIcon
+                                            field="quantity"></p-sortIcon><p-columnFilter type="text" field="quantity"
+                                            display="menu" class="ml-auto"></p-columnFilter></th>
+                                    <th pSortableColumn="price">Precio<p-sortIcon
+                                            field="price"></p-sortIcon><p-columnFilter type="text" field="price"
+                                            display="menu" class="ml-auto"></p-columnFilter></th>
+                                    <th pSortableColumn="dueDate">Vencimiento<p-sortIcon
+                                            field="dueDate"></p-sortIcon><p-columnFilter type="text" field="dueDate"
+                                            display="menu" class="ml-auto"></p-columnFilter></th>
+                                    <th pSortableColumn="unitOfMeasureName">Medida<p-sortIcon
+                                            field="unitOfMeasureName"></p-sortIcon><p-columnFilter type="text"
+                                            field="lineTotal" display="menu" class="ml-auto"></p-columnFilter></th>
+                                    <th pSortableColumn="lineTotal">Total<p-sortIcon
+                                            field="lineTotal"></p-sortIcon><p-columnFilter type="text" field="lineTotal"
+                                            display="menu" class="ml-auto"></p-columnFilter></th>
+                                    <th>Accion</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="caption">
+                                <!-- <div style="width: 200px;">
+                                    <button [disabled]="disabled" pButton class="ml-2" pRipple type="button"
+                                        (click)="addLine(transfer.detail)" pTooltip="Agregar nueva linea"
+                                        tooltipPosition="bottom" label="Agregar Linea"></button>
+                                </div> -->
+                                <div class="p-inputgroup">
+                                    <input #barcode id="barcode" [disabled]="disabled" type="text" pInputText
+                                        (keydown.enter)="findBarcode(barcode.value); barcode.value=''"
+                                        placeholder="Escanear producto o F2 para buscar"
+                                        [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                                    <button [disabled]="disabled" type="button" pButton pRipple icon="pi pi-search" pTooltip="Buscar Productos"
+                                    tooltipPosition="bottom"
+                                        (click)="addLine(transfer.detail, rowIndex)"></button>
+                                </div>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-detail let-rowIndex="rowIndex">
+                                <tr>
+                                    <td pEditableColumn>
+                                        <span class="p-column-title">Codigo</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <div class="p-inputgroup">
+                                                    <button [disabled]="disabled" type="button" pButton pRipple
+                                                        icon="pi pi-search" (click)="showDialogItem(rowIndex)"></button>
+                                                    <!-- <button type="button" pButton (click)="showDialogCustomer(rowIndex)" icon="pi pi-search" class="p-button-rounded p-button-outlined"></button> -->
+                                                    <input [disabled]="disabled" id="itemCode" type="text" pInputText
+                                                        [(ngModel)]="detail.itemCode"
+                                                        [ngModelOptions]="{standalone: true}" disabled="true"
+                                                        placeholder="Buscar Articulos">
+                                                </div>
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.itemCode}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+
+                                    <td>
+                                        <span class="p-column-title">Descripcion</span>
+                                        <p-cellEditor>
+
+                                            <ng-template pTemplate="output">
+                                                {{detail.itemName}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+
+                                    <td pEditableColumn>
+                                        <span class="p-column-title">Cantidad</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="number"
+                                                    (ngModelChange)="calculate()" [(ngModel)]="detail.quantity"
+                                                    mode="decimal"
+                                                    [minFractionDigits]="2" [min]="0" [max]="1000000"
+                                                    [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.quantity }}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title">Precio</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="text"
+                                                    (ngModelChange)="calculate()" [(ngModel)]="detail.price"
+                                                    [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.price | currency:'L. '}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title">Vencimiento</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="date"
+                                                    [(ngModel)]="detail.dueDate" [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.dueDate |date:'dd/MM/yyyy'}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title">Medida</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="text"
+                                                    [(ngModel)]="detail.unitOfMeasureName"
+                                                    [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.unitOfMeasureName}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title">Total</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="text"
+                                                    [(ngModel)]="detail.lineTotal"
+                                                    [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.lineTotal | currency: 'L. '}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td style="width: 20%;"><span class="p-column-title">Acción</span>
+                                        <button [disabled]="disabled" (click)="deleteLine(detail.itemId)" pButton pRipple type="button"
+                                            icon="pi pi-trash"
+                                            class="p-button p-component p-button-text p-button-icon-only"></button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="footer">
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td>{{docQuantity}}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>{{doctotal | currency: 'L. '}}</td>
+                                    <td></td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </div>
+            </form>
+            <app-items-browser-ware-house (ItemSelect)="browserItems($event)"></app-items-browser-ware-house>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+                <button pButton type="button" [disabled]="formTransfer.invalid || loading" (click)="add()"
+                    label="Agregar"></button>
+            </ng-template>
+            <ng-template #addButton>
+                <button pButton type="button" [disabled]="formTransfer.invalid || loading" (click)="print()"
+                    label="Imprimir"></button>
+            </ng-template>
+        </ng-template>
+        <br><br><br><br><br>
+    </ng-container>
+</p-dialog>
+

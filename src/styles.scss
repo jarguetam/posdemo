@@ -1,0 +1,113 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import "../node_modules/primeng/resources/primeng.min.css";
+@import "../node_modules/primeflex/primeflex.scss";
+@import "../node_modules/primeicons/primeicons.css";
+@import "../node_modules/prismjs/themes/prism-coy.css";
+@import "assets/demo/flags/flags.css";
+@import "assets/demo/documentation.scss";
+@import "assets/sass/layout/_variables";
+@import "assets/sass/layout/_layout";
+@import "assets/sass/overrides/_overrides";
+
+
+body.swal2-toast-shown .swal2-container.swal2-top-end, body.swal2-toast-shown .swal2-container.swal2-top-right{
+    z-index: 4201 !important;
+}
+
+.swal2-container{
+    z-index: 4201 !important;
+}
+
+:host ::ng-deep .p-chip.custom-chip {
+    background: var(--primary-color) !important;
+    color: var(--primary-color-text) !important;
+}
+
+*{
+    touch-action: pan-y !important;
+  }
+
+
+.status-1{
+    background: #b3e5fc;
+    color: #23547b;
+    border-radius: 2px;
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+}
+.status-2{
+    background: #c8e6c9;
+    color: #256029;
+    border-radius: 2px;
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+}
+
+.status-3{
+    background: #ffcdd2;
+    color: #c63737;
+    border-radius: 2px;
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+}
+
+.channel-container{
+    width: 13px;
+    height: 13px;
+    color: #000;
+    border: 1px solid #b9b9b9;
+    display: inline-block;
+    border-radius: 50%;
+}
+
+.title-totales{
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.detail-totales{
+    font-size: 18px;
+    margin-left: 15px;
+    font-weight: 400;
+}
+
+
+.title-header{
+    padding: 0px;
+    margin: 0px;
+    color: #000 !important;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.title-item{
+    font-size: 14px;
+    color: black !important;
+    font-weight: 400;
+}
+
+.price-item .price, .price-original{
+    padding: 0px;
+    margin: 0px;
+}
+
+.price-original {
+    font-size: 11px;
+    font-weight: 700;
+    color: #4e4e4e;
+}
+.price {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1a1a1a;
+}

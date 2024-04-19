@@ -1,0 +1,31 @@
+.circular-chart {
+    display: block;
+    margin: 10px auto;
+    max-width: 80%;
+    max-height: 250px;
+  }
+
+  .circle {
+    fill: none;
+    stroke: #ab0505;
+    stroke-width: 2;
+    stroke-dasharray: 0, 100;
+    stroke-linecap: round;
+    animation: countdown 30s linear infinite forwards;
+  }
+
+  .countdown-text {
+    fill: #333;
+    font-size: 0.6em;
+    text-anchor: middle;
+    alignment-baseline: middle;
+  }
+
+  @keyframes countdown {
+    from {
+      stroke-dasharray: 100, 0;
+    }
+    to {
+      stroke-dasharray: 0, 100;
+    }
+  }

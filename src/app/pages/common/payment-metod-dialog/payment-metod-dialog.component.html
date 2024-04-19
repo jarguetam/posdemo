@@ -1,0 +1,100 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} metodo de pago" [(visible)]="display" modal="true"
+    blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '450px'}">
+    <ng-container>
+        <ng-template [ngIf]="loading" [ngIfElse]="data">
+            <skeleton-table-component [title]="title"></skeleton-table-component>
+        </ng-template>
+        <ng-template #data readonly="disable">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-cashSums"></i>
+                        <p-inputNumber id="cashSum" class="custom-input-total" [(ngModel)]="totalPay" disabled="true"  mode="currency" currency="HNL" locale="es-HN"></p-inputNumber>
+                        <label for="cashSum">Total a Pagar</label>
+                    </span>
+                </div>
+            </div>
+            <form [formGroup]="formPayment" *ngIf="formPayment" class="mb-5">
+                <div class="grid p-fluid">
+                    <div class="col-12 md:col-12">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-cashSums"></i>
+                            <input id="cashSum"  type="text" pInputText formControlName="cashSum"
+                                [ngClass]="{ 'is-invalid': submitted && f.name.errors }"  (ngModelChange)="updateSaldo()" (keyup.enter)="selectMetod()">
+                            <label for="cashSum">Efectivo</label>
+                        </span>
+                        <div *ngIf="formPayment.controls['cashSum'].invalid && formPayment.controls['cashSum'].dirty">
+                            <small *ngIf="formPayment.controls['cashSum'].errors.required" id="cashSum"
+                                class="p-error block">Efectivo es requerido</small>
+                        </div>
+                    </div>
+
+                    <div class="col-12 md:col-12">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-cashSums"></i>
+                            <input id="transferSum"  type="text" pInputText (ngModelChange)="updateSaldo()"
+                                formControlName="transferSum" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" (keyup.enter)="selectMetod()">
+                            <label for="transferSum">Transferencia</label>
+                        </span>
+                        <div
+                            *ngIf="formPayment.controls['transferSum'].invalid && formPayment.controls['transferSum'].dirty">
+                            <small *ngIf="formPayment.controls['transferSum'].errors.required" id="transferSum"
+                                class="p-error block">Transferencia es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-12">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-cashSums"></i>
+                            <input id="cardSum"  type="text" pInputText (ngModelChange)="updateSaldo()"
+                                formControlName="cardSum" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" (keyup.enter)="selectMetod()">
+                            <label for="cardSum">Tarjeta de credito</label>
+                        </span>
+                        <div
+                            *ngIf="formPayment.controls['cardSum'].invalid && formPayment.controls['cardSum'].dirty">
+                            <small *ngIf="formPayment.controls['cardSum'].errors.required" id="cardSum"
+                                class="p-error block">Tarjeta de credito es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-12">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-cashSums"></i>
+                            <input id="chekSum"  type="text" pInputText (ngModelChange)="updateSaldo()"
+                                formControlName="chekSum" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" (keyup.enter)="selectMetod()">
+                            <label for="chekSum">Cheque</label>
+                        </span>
+                        <div
+                            *ngIf="formPayment.controls['chekSum'].invalid && formPayment.controls['chekSum'].dirty">
+                            <small *ngIf="formPayment.controls['chekSum'].errors.required" id="chekSum"
+                                class="p-error block">Cheque es requerido</small>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-cashSums"></i>
+                        <p-inputNumber class="custom-input-total" id="cashSum" [(ngModel)]="saldo" disabled="true"  mode="currency" currency="HNL" locale="es-HN"></p-inputNumber>
+                        <label for="cashSum">Diferencia</label>
+                    </span>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+                <button pButton type="button" [disabled]="formPayment.invalid || loading" (click)="selectMetod()"
+                    label="Aceptar"></button>
+            </ng-template>
+            <ng-template #addButton>
+
+            </ng-template>
+        </ng-template>
+    </ng-container>
+</p-dialog>
+

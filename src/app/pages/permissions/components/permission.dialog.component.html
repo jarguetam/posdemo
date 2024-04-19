@@ -1,0 +1,86 @@
+<p-dialog  header="{{isAdd ? 'Agregar': 'Editar'}} Permiso" [(visible)]="display"
+modal="true" blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '90%'}">
+
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        Cargando...
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formPermission" *ngIf="formPermission" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="description" type="text" pInputText  formControlName="description" [ngClass]="{ 'is-invalid': submitted && f.description.errors }">
+                        <label for="name">Descripción</label>
+                    </span>
+                    <div *ngIf="formPermission.controls['description'].invalid && formPermission.controls['description'].dirty" >
+                        <small  *ngIf="formPermission.controls['description'].errors.required" id="description" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-table"></i>
+                        <p-dropdown [options]="typePermissions" formControlName="typeId" optionValue="typeId" optionLabel="description"></p-dropdown>
+                        <label for="typeId">Tipo</label>
+                    </span>
+                    <div *ngIf="formPermission.controls['typeId'].invalid && formPermission.controls['typeId'].dirty" >
+                        <small  *ngIf="formPermission.controls['typeId'].errors.required" id="typeId" class="p-error block">Tipo es requerido</small>
+                    </div>
+                </div>
+
+
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-bolt"></i>
+                        <input id="icon" type="text" pInputText  formControlName="icon" [ngClass]="{ 'is-invalid': submitted && f.icon.errors }">
+                        <label for="icon">Icono</label>
+                    </span>
+                    <div *ngIf="formPermission.controls['icon'].invalid && formPermission.controls['icon'].dirty" >
+                        <small  *ngIf="formPermission.controls['icon'].errors.required" id="icon" class="p-error block">Icono es requerido</small>
+                    </div>
+                </div>
+
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-directions"></i>
+                        <input id="path" type="text" pInputText  formControlName="path" [ngClass]="{ 'is-invalid': submitted && f.path.errors }">
+                        <label for="path">Ruta</label>
+                    </span>
+                    <div *ngIf="formPermission.controls['path'].invalid && formPermission.controls['path'].dirty" >
+                        <small  *ngIf="formPermission.controls['path'].errors.required" id="path" class="p-error block">Ruta es requerido</small>
+                    </div>
+                </div>
+
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <!-- <i class="pi pi-sort-numeric-down-alt"></i> -->
+                        <!-- <input id="position" type="text" pInputText  formControlName="position" [ngClass]="{ 'is-invalid': submitted && f.position.errors }"> -->
+                        <label for="position">Posicion</label>
+                        <p-inputNumber formControlName="position" mode="decimal" [showButtons]="true" inputId="minmax-buttons" [min]="0" [max]="100">
+                        </p-inputNumber>
+                    </span>
+                    <div *ngIf="formPermission.controls['position'].invalid && formPermission.controls['position'].dirty" >
+                        <small  *ngIf="formPermission.controls['position'].errors.required" id="position" class="p-error block">Posicion es requerido</small>
+                    </div>
+                </div>
+
+                <div *ngIf="!isAdd" class="col-12 md:col-12">
+                    <p-checkbox binary=true label="Activo"  name="groupname" [formControl]="formPermission.controls['active']"></p-checkbox>
+                </div>
+            </div>
+        </form>
+
+
+
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formPermission.invalid || loading" (click)="add()" label="Agregar" ></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formPermission.invalid || loading" (click)="edit()" label="Editar" ></button>
+        </ng-template>
+    </ng-template>
+</p-dialog>

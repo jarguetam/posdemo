@@ -1,0 +1,50 @@
+<div class="grid">
+	<div class="col-12 xl:col-12">
+		<div class="card">
+			<ng-template [ngIf]="loading" [ngIfElse]="showTable">
+				<skeleton-table-component [title]="title"></skeleton-table-component>
+			</ng-template>
+
+			<ng-template #showTable>
+					<p-table #dt [value]="pointSaleList" [paginator]="true"  [rows]="5"
+					responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['pointSaleId','branchName', 'name','branchId']">
+						<ng-template pTemplate="header">
+							<tr>
+								<th pSortableColumn="pointSaleId">Id <p-sortIcon field="pointSaleId"></p-sortIcon> <p-columnFilter type="text" field="pointSaleId" display="menu" class="ml-auto" ></p-columnFilter></th>
+                                <th pSortableColumn="branchId">Sucursal id<p-sortIcon field="branchId"></p-sortIcon> <p-columnFilter type="text" field="branchId" display="menu" class="ml-auto" ></p-columnFilter></th>
+								<th pSortableColumn="branchName">Sucursal<p-sortIcon field="branchName"></p-sortIcon> <p-columnFilter type="text" field="branchName" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="name">Punto de facturacion <p-sortIcon field="name"></p-sortIcon></th>
+                                <th pSortableColumn="userName">Creado por<p-sortIcon field="userName"></p-sortIcon></th>
+								<th>Acción</th>
+							</tr>
+						</ng-template>
+                        <ng-template pTemplate="caption">
+                            <h4 class="mt-2"> {{title}} </h4>
+                            <div class="flex">
+                                <button pButton class="ml-2"  pRipple type="button" (click)="add()" pTooltip="Agregar nueva numeracion" tooltipPosition="bottom" label="Agregar" ></button>
+                                <span class="p-input-icon-left ml-auto">
+                                    <i class="pi pi-search"></i>
+                                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+                                </span>
+                            </div>
+                        </ng-template>
+
+						<ng-template pTemplate="body" let-mode>
+							<tr>
+								<td style="width: 10%; min-width: 2rem;">{{mode.pointSaleId }}</td>
+                                <td style="width: 15%; min-width: 7rem;">{{mode.branchId}}</td>
+								<td style="width: 15%; min-width: 7rem;">{{mode.branchName}}</td>
+								<td style="width: 15%; min-width: 4rem;">{{mode.name}}</td>
+                                <td style="width: 15%; min-width: 4rem;">{{mode.userName}}</td>
+								<td style="width: 20%;">
+									<button (click)="editMode(mode)" pButton pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
+								</td>
+							</tr>
+						</ng-template>
+					</p-table>
+					<point-sale-dialog (pointModify)="modeModify($event)"></point-sale-dialog>
+			</ng-template>
+		</div>
+	</div>
+</div>
+

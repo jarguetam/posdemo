@@ -1,0 +1,50 @@
+<p-dialog  header="{{isAdd ? 'Agregar': 'Editar'}} tipo de transaccion de inventario" [(visible)]="display"
+modal="true" blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '50%'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        Cargando...
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formInventoryTransactionType" *ngIf="formInventoryTransactionType" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="name" type="text" pInputText  formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="name">Nombre del tipo de ajuste</label>
+                    </span>
+                    <div *ngIf="formInventoryTransactionType.controls['name'].invalid && formInventoryTransactionType.controls['name'].dirty" >
+                        <small  *ngIf="formInventoryTransactionType.controls['name'].errors.required" id="name" class="p-error block">Nombre es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-list"></i>
+                        <p-dropdown [options]="transactionList" formControlName="transaction" optionValue="id"
+                            optionLabel="value"></p-dropdown>
+                        <label for="transaction">Documento</label>
+                    </span>
+                    <div
+                        *ngIf="formInventoryTransactionType.controls['transaction'].invalid && formInventoryTransactionType.controls['transaction'].dirty">
+                        <small *ngIf="formInventoryTransactionType.controls['transaction'].errors.required" id="transaction"
+                            class="p-error block">Documento es requerido</small>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+        <br><br><br><br>
+        <br><br><br><br>
+        <br><br><br><br>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formInventoryTransactionType.invalid || loading" (click)="add()" label="Agregar" ></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formInventoryTransactionType.invalid || loading" (click)="edit()" label="Editar" ></button>
+        </ng-template>
+    </ng-template>
+</p-dialog>
+
+

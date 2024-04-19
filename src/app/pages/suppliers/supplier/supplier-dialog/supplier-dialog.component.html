@@ -1,0 +1,163 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} proveedor" [(visible)]="display" modal="true" blockScroll="true"
+[breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '90%'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        Cargando...
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formSupplier" *ngIf="formSupplier" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="supplierName" type="text" pInputText formControlName="supplierName"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="supplierName">Nombre de proveedor</label>
+                    </span>
+                    <div
+                        *ngIf="formSupplier.controls['supplierName'].invalid && formSupplier.controls['supplierName'].dirty">
+                        <small *ngIf="formSupplier.controls['supplierName'].errors.required" id="supplierName"
+                            class="p-error block">Nombre es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-hashtag"></i>
+                        <input id="rtn" type="text" pInputText formControlName="rtn"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="rtn">RTN ó DNI</label>
+                    </span>
+                    <div *ngIf="formSupplier.controls['rtn'].invalid && formSupplier.controls['rtn'].dirty">
+                        <small *ngIf="formSupplier.controls['rtn'].errors.required" id="rtn" class="p-error block">RTN
+                            es requerido</small>
+                    </div>
+                    <div *ngIf="formSupplier.controls['rtn'].invalid && formSupplier.controls['rtn'].dirty">
+                        <small *ngIf="formSupplier.controls['rtn'].errors" id="rtn" class="p-error block">RTN ó DNI debe
+                            tener 13 o 14 digitos</small>
+                    </div>
+                    <div *ngIf="formSupplier.controls['rtn'].invalid && formSupplier.controls['rtn'].dirty">
+                        <small *ngIf="formSupplier.controls['rtn'].hasError('pattern')" id="rtn"
+                            class="p-error block">Debe ser numerico</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-phone"></i>
+                        <input id="phone" type="text" pInputText formControlName="phone"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="phone">Telefono</label>
+                    </span>
+                    <div *ngIf="formSupplier.controls['phone'].invalid && formSupplier.controls['phone'].dirty">
+                        <small *ngIf="formSupplier.controls['phone'].errors.required" id="phone"
+                            class="p-error block">Telefono es requerido</small>
+                    </div>
+                    <div *ngIf="formSupplier.controls['phone'].invalid && formSupplier.controls['phone'].dirty">
+                        <small *ngIf="formSupplier.controls['phone'].errors" id="phone" class="p-error block">Telefono
+                            debe tener 8 digitos</small>
+                    </div>
+                    <div *ngIf="formSupplier.controls['phone'].invalid && formSupplier.controls['phone'].dirty">
+                        <small *ngIf="formSupplier.controls['phone'].hasError('pattern')" id="phone"
+                            class="p-error block">Telefono debe ser numerico</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-building"></i>
+                        <input id="address" type="text" pInputText formControlName="address"
+                            [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="address">Direccion</label>
+                    </span>
+                    <div *ngIf="formSupplier.controls['address'].invalid && formSupplier.controls['address'].dirty">
+                        <small *ngIf="formSupplier.controls['address'].errors.required" id="address"
+                            class="p-error block">Direccion es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-at"></i>
+                        <input id="email" type="text" pInputText formControlName="email"
+                            [ngClass]="{ 'is-invalid': submitted && f.email.errors }">
+                        <label for="email">Email</label>
+                    </span>
+                    <div *ngIf="formSupplier.controls['email'].invalid && formSupplier.controls['email'].dirty">
+                        <small *ngIf="formSupplier.controls['email'].errors.required" id="email"
+                            class="p-error block">Email es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown [options]="categoryList" formControlName="supplierCategoryId"
+                            optionValue="supplierCategoryId" optionLabel="supplierCategoryName"></p-dropdown>
+                        <label for="supplierCategoryId">Categoria proveedor</label>
+                    </span>
+                    <div
+                        *ngIf="formSupplier.controls['supplierCategoryId'].invalid && formSupplier.controls['supplierCategoryId'].dirty">
+                        <small *ngIf="formSupplier.controls['supplierCategoryId'].errors.required"
+                            id="supplierCategoryId" class="p-error block">Categoria de cliente es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown [options]="payConditionList" formControlName="payConditionId"
+                            optionValue="payConditionId" optionLabel="payConditionName"></p-dropdown>
+                        <label for="payConditionId">Condicion de pago</label>
+                    </span>
+                    <div
+                        *ngIf="formSupplier.controls['payConditionId'].invalid && formSupplier.controls['payConditionId'].dirty">
+                        <small *ngIf="formSupplier.controls['payConditionId'].errors.required" id="payConditionId"
+                            class="p-error block">Condicion de pago es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <p-inputNumber formControlName="creditLine" inputId="creditLine" mode="currency" currency="LPS"
+                            locale="en-US" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        </p-inputNumber>
+                        <label for="creditLine">Limite de credito</label>
+                    </span>
+                    <div
+                        *ngIf="formSupplier.controls['creditLine'].invalid && formSupplier.controls['creditLine'].dirty">
+                        <small *ngIf="formSupplier.controls['creditLine'].errors.required" id="creditLine"
+                            class="p-error block">Nombre es requerido</small>
+                    </div>
+                </div>
+                <!-- <div class="col-12 md:col-6">
+                    <br><br>
+                    <p-checkbox binary=true label="Impuestos" name="groupname"
+                        [formControl]="formSupplier.controls['tax']"></p-checkbox>
+                </div> -->
+                <div *ngIf="!isAdd" class="col-13 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <div class="p-inputgroup">
+                            <p-inputNumber formControlName="balance" inputId="balance" mode="currency" currency="LPS"
+                                locale="en-US" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            </p-inputNumber>
+                            <button [disabled]="disabled" type="button" pButton pRipple pTooltip="Historial transacciones" tooltipPosition="bottom" icon="pi pi-eye"
+                                (click)="showBpJornal()"></button>
+                        </div>
+                    </span>
+                </div>
+                <div *ngIf="!isAdd" class="col-12 md:col-12">
+                    <p-checkbox binary=true label="Activo" name="groupname"
+                        [formControl]="formSupplier.controls['active']"></p-checkbox>
+                </div>
+            </div>
+        </form>
+        <br><br><br><br>
+        <br><br><br><br>
+        <br><br><br><br>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formSupplier.invalid || loading" (click)="add()"
+                label="Agregar"></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formSupplier.invalid || loading" (click)="edit()"
+                label="Editar"></button>
+        </ng-template>
+    </ng-template>
+    <app-view-jornal-bp-dialog></app-view-jornal-bp-dialog>
+</p-dialog>

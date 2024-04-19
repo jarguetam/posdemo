@@ -1,0 +1,293 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} factura de compra" [(visible)]="display" modal="true"
+    blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '950px', height: '800px'}">
+    <ng-container>
+        <ng-template [ngIf]="loading" [ngIfElse]="data">
+            <skeleton-table-component [title]="title"></skeleton-table-component>
+        </ng-template>
+        <ng-template #data readonly="disable">
+            <form [formGroup]="formInvoice" *ngIf="formInvoice" class="mb-5">
+                <div class="grid p-fluid">
+                    <div class="col-12 md:col-12">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <div class="p-inputgroup">
+                                <button [disabled]="disabled" type="button" pButton pRipple icon="pi pi-search"
+                                    (click)="showDialogSupplier()"></button>
+                                <input id="supplierCode" [disabled]="disabled" type="text" pInputText
+                                    formControlName="supplierCode" [attr.disabled]="true" placeholder="Buscar Proveedor"
+                                    [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                                <input [disabled]="disabled" id="itemCode" type="text" pInputText
+                                    formControlName="supplierName" [attr.disabled]="true"
+                                    [ngClass]="{ 'is-invalid': submitted && f.name.errors }" placeholder="">
+                            </div>
+                        </span>
+                        <div
+                            *ngIf="formInvoice.controls['supplierName'].invalid && formInvoice.controls['supplierName'].dirty">
+                            <small *ngIf="formInvoice.controls['supplierName'].errors.required" id="supplierName"
+                                class="p-error block">Proveedor es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <p-dropdown [disabled]="disabled" [options]="wareHouseList" formControlName="whsCode"
+                                optionValue="whsCode" optionLabel="whsName"></p-dropdown>
+                            <label for="whsCode">Almacen</label>
+                        </span>
+                        <div *ngIf="formInvoice.controls['whsCode'].invalid && formInvoice.controls['whsCode'].dirty">
+                            <small *ngIf="formInvoice.controls['whsCode'].errors.required" id="whsCode"
+                                class="p-error block">Alamacen es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-comments"></i>
+                            <input id="payConditionName" [disabled]="disabled" type="text" pInputText
+                                formControlName="payConditionName" [attr.disabled]="true"
+                                [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <label for="payConditionName">Condicion de pago</label>
+                        </span>
+                        <div
+                            *ngIf="formInvoice.controls['payConditionName'].invalid && formInvoice.controls['payConditionName'].dirty">
+                            <small *ngIf="formInvoice.controls['payConditionName'].errors.required"
+                                id="payConditionName" class="p-error block">Condicion es requerido</small>
+                        </div>
+                    </div>
+
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-comments"></i>
+                            <input id="comment" [disabled]="disabled" type="text" pInputText formControlName="comment"
+                                [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <label for="comment">Comentario</label>
+                        </span>
+                        <div *ngIf="formInvoice.controls['comment'].invalid && formInvoice.controls['comment'].dirty">
+                            <small *ngIf="formInvoice.controls['comment'].errors.required" id="comment"
+                                class="p-error block">Comentario es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-comments"></i>
+                            <input id="reference" [disabled]="disabled" type="text" pInputText
+                                formControlName="reference" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <label for="reference">Referencia</label>
+                        </span>
+                        <div
+                            *ngIf="formInvoice.controls['reference'].invalid && formInvoice.controls['reference'].dirty">
+                            <small *ngIf="formInvoice.controls['reference'].errors.required" id="reference"
+                                class="p-error block">Referencia es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-12">
+                        <p-table #dt [value]="invoice.detail" responsiveLayout="stack"
+                            styleClass="p-datatable-sm p-datatable-striped"
+                            [globalFilterFields]="['itemCode','itemName', 'quantity', 'itemName']">
+                            <ng-template pTemplate="header">
+                                <tr [pSelectableRow]="rowData">
+                                    <th pSortableColumn="itemCode">Codigo
+                                    </th>
+                                    <th pSortableColumn="itemName">Descripcion </th>
+                                    <th pSortableColumn="quantity">Cantidad</th>
+                                    <th pSortableColumn="price">Precio</th>
+                                    <th pSortableColumn="stock">Stock Actual</th>
+                                    <th pSortableColumn="dueDate">Vencimiento</th>
+                                    <th pSortableColumn="Unidad">Unidad</th>
+                                    <th pSortableColumn="lineTotal">Total</th>
+                                    <th>Accion</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="caption">
+                                <!-- <div style="width: 200px;">
+                                    <button [disabled]="disabled" pButton class="ml-2" pRipple type="button"
+                                        (click)="addLine(invoice.detail)" pTooltip="Agregar nueva linea"
+                                        tooltipPosition="bottom" label="Agregar Linea"></button>
+                                </div> -->
+                                <div class="p-inputgroup">
+                                    <input #barcode id="barcode" [disabled]="disabled" type="text" pInputText
+                                        (keydown.enter)="findBarcode(barcode.value); barcode.value=''"
+                                        placeholder="Escanear producto"
+                                        [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                                    <button [disabled]="disabled" type="button" pButton pRipple icon="pi pi-search"
+                                        pTooltip="Buscar Productos" tooltipPosition="bottom"
+                                        (click)="addLine(invoice.detail, rowIndex)"></button>
+                                </div>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-detail let-rowIndex="rowIndex">
+                                <tr>
+                                    <td pEditableColumn>
+                                        <span class="p-column-title">Codigo</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <div class="p-inputgroup">
+                                                    <button [disabled]="disabled" type="button" pButton pRipple
+                                                        icon="pi pi-search" (click)="showDialogItem(rowIndex)"></button>
+                                                    <!-- <button type="button" pButton (click)="showDialogCustomer(rowIndex)" icon="pi pi-search" class="p-button-rounded p-button-outlined"></button> -->
+                                                    <input [disabled]="disabled" id="itemCode" type="text" pInputText
+                                                        [(ngModel)]="detail.itemCode"
+                                                        [ngModelOptions]="{standalone: true}" disabled="true"
+                                                        placeholder="Buscar Articulos">
+                                                </div>
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.itemCode}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+
+                                    <td>
+                                        <span class="p-column-title">Descripcion</span>
+                                        <p-cellEditor>
+
+                                            <ng-template pTemplate="output">
+                                                {{detail.itemName}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+
+                                    <td>
+
+                                        <span class="p-column-title">Cantidad</span>
+                                        <input #quantity id="quantity" [disabled]="disabled" pInputText type="number"
+                                            (ngModelChange)="calculate()" [(ngModel)]="detail.quantity" mode="decimal"
+                                            [minFractionDigits]="2" [min]="0" [max]="1000000"
+                                            [ngModelOptions]="{standalone: true}" />
+                                    </td>
+                                    <td pEditableColumn>
+                                        <span class="p-column-title">Precio</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="text"
+                                                    (ngModelChange)="calculate()" [(ngModel)]="detail.price"
+                                                    [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.price | currency:'L. '}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title">Stock Actual</span>
+                                        {{detail.stock}}
+                                    </td>
+                                    <td pEditableColumn>
+                                        <span class="p-column-title">Vencimiento</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="date"
+                                                    [(ngModel)]="detail.dueDate" [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.dueDate |date:'dd/MM/yyyy'}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title">Medida</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="date"
+                                                    [(ngModel)]="detail.unitOfMeasureName"
+                                                    [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.unitOfMeasureName}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title">Total</span>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="input">
+                                                <input [disabled]="disabled" pInputText type="text"
+                                                    [(ngModel)]="detail.lineTotal"
+                                                    [ngModelOptions]="{standalone: true}">
+                                            </ng-template>
+                                            <ng-template pTemplate="output">
+                                                {{detail.lineTotal | currency: 'L. '}}
+                                            </ng-template>
+                                        </p-cellEditor>
+                                    </td>
+                                    <td style="width: 12%;"><span class="p-column-title">Acción</span>
+                                        <button [disabled]="disabled" (click)="deleteLine(detail.itemCode)" pButton
+                                            pRipple type="button" icon="pi pi-trash"
+                                            class="p-button p-component p-button-text p-button-icon-only"></button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="footer">
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Sub total</td>
+                                    <td>{{subdoctotal | currency: 'L. '}}</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Descuento</td>
+                                    <td>
+                                        <p-inputNumber [disabled]="disabled" inputId="percent" prefix="%"
+                                            [(ngModel)]="descuento" (ngModelChange)="calculate()"
+                                            [ngModelOptions]="{standalone: true}"></p-inputNumber>
+                                    </td>
+                                    <td>{{descuentoTotal | currency: 'L. '}}</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Impuesto</td>
+                                    <td>{{tax | currency: 'L. '}}</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Total:</td>
+                                    <td></td>
+                                    <td>{{docQuantity}}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>Total</td>
+                                    <td>{{doctotal | currency: 'L. '}}</td>
+                                    <td></td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </div>
+            </form>
+            <app-items-browser (ItemSelect)="browserItems($event)"></app-items-browser>
+            <app-supplier-browser (SupplierSelect)="browserSupplier($event)"></app-supplier-browser>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+
+            <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+                <button pButton type="button" [disabled]="formInvoice.invalid || loading" (click)="add()"
+                    label="Agregar"></button>
+            </ng-template>
+            <ng-template #addButton>
+                <button pButton type="button" [disabled]="formInvoice.invalid || loading" (click)="edit()"
+                    label="Editar"></button>
+                <button pButton type="button" (click)="cancelInvoice()" class="p-button-danger" label="Anular"></button>
+            </ng-template>
+        </ng-template>
+        <br><br><br><br><br>
+    </ng-container>
+</p-dialog>

@@ -1,0 +1,146 @@
+<div class="grid">
+    <div class="col-12 lg:col-6 xl:col-3" *ngIf="ver_cliente">
+        <div class="custom-card mb-0">
+            <div class="flex justify-content-between mb-3">
+                <div>
+                    <span class="block font-medium mb-3">Clientes</span>
+                    <div class="text-900 text-green-500 font-medium text-xl">{{ dataDashboard[0]?.data[0]?.qty | number
+                        }}</div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
+                    [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+                    <i class="pi pi-users text-blue-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 lg:col-6 xl:col-3" *ngIf="ver_provedor">
+        <div class="custom-card mb-0">
+            <div class="flex justify-content-between mb-3">
+                <div>
+                    <span class="block font-medium mb-3">Proveedores</span>
+                    <div class="text-900 text-green-500  font-medium text-xl">{{dataDashboard[1]?.data[0]?.qty |
+                        number}}
+                    </div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-orange-100 border-round"
+                    [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+                    <i class="pi pi-car text-orange-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 lg:col-6 xl:col-3" *ngIf="ver_articulos">
+        <div class="custom-card mb-0">
+            <div class="flex justify-content-between mb-3">
+                <div>
+                    <span class="block font-medium mb-3">Articulos</span>
+                    <div class="text-900  text-green-500  font-medium text-xl">{{dataDashboard[2]?.data[0]?.qty |
+                        number}}
+                    </div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-cyan-100 border-round"
+                    [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+                    <i class="pi pi-inbox text-cyan-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 lg:col-6 xl:col-3" *ngIf="ver_almacen">
+        <div class="custom-card mb-0">
+            <div class="flex justify-content-between mb-3">
+                <div>
+                    <span class="block font-medium mb-3">Almacenes</span>
+                    <div class="text-900  text-green-500  font-medium text-xl">{{dataDashboard[3]?.data[0]?.qty |
+                        number}}
+                    </div>
+                </div>
+                <div class="flex align-items-center justify-content-center bg-purple-100 border-round"
+                    [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+                    <i class="pi pi-database text-purple-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Columna izquierda -->
+    <div class="col-12 xl:col-6">
+        <div class="custom-card" *ngIf="ver_rentabilidad">
+            <h5>Rentabilidad por mes</h5>
+            <p-chart type="line" [data]="charMargenMonth" [options]="chartOptions"></p-chart>
+        </div>
+        <div class="custom-card" *ngIf="ver_ventas_7_dias">
+            <h5>Venta ultimos 7 dias</h5>
+            <p-chart type="bar" [data]="charLastSaleDay" [options]="chartOptions"></p-chart>
+        </div>
+        <div class="custom-card" *ngIf="ver_facturacion_mes">
+            <h5>Facturacion por mes</h5>
+            <p-chart type="line" [data]="charInvoiceMonth" [options]="chartOptions"></p-chart>
+        </div>
+        <div class="custom-card" *ngIf="ver_pedidos_vendedor">
+            <h5>Pedidos por vendedor mes actual</h5>
+            <p-chart type="bar" [data]="charOrderSeller" [options]="chartOptions"></p-chart>
+        </div>
+        <div class="custom-card" *ngIf="ver_inventario_almacen">
+            <h5>Total inventario por almacen</h5>
+            <p-chart type="bar" [data]="charStockWarehouse" [options]="chartOptions"></p-chart>
+        </div>
+        <div class="col-12 lg:col-12 xl:col-12" *ngIf="ver_cxp">
+            <div class="custom-card mb-0">
+                <div class="flex justify-content-between mb-3">
+                    <div>
+                        <span class="block font-medium mb-3">Cuentas por Pagar</span>
+                        <div class="text-900 text-green-500 font-medium text-xl">L. {{ dataDashboard[12]?.data[0]?.qty | number}}</div>
+                    </div>
+                    <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
+                        [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+                        <i class="pi pi-users text-blue-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 lg:col-12 xl:col-12" *ngIf="ver_cxc">
+            <div class="custom-card mb-0">
+                <div class="flex justify-content-between mb-3">
+                    <div>
+                        <span class="block font-medium mb-3">Cuentas por Cobrar</span>
+                        <div class="text-900 text-green-500 font-medium text-xl">L. {{ dataDashboard[10]?.data[0]?.qty | number}}</div>
+                    </div>
+                    <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
+                        [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
+                        <i class="pi pi-users text-blue-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Columna derecha -->
+    <div class="col-12 xl:col-6">
+        <div class="custom-card" *ngIf="ver_ventas_vendedor">
+            <h5>Ventas por vendedor mes actual</h5>
+            <p-chart type="bar" [data]="charSaleSeller" [options]="chartOptions"></p-chart>
+        </div>
+        <div class="custom-card" *ngIf="ver_inventario_categoria">
+            <h5>Total inventario por categoria</h5>
+            <p-chart type="bar" [data]="charStockCategory" [options]="chartOptions"></p-chart>
+        </div>
+        <div class="custom-card" *ngIf="ver_top_item_sale">
+            <h5>Top 5 articulos de venta</h5>
+            <p-chart type="bar" [data]="charTop5iItemSale" [options]="horizontalOptions "></p-chart>
+        </div>
+        <div class="custom-card" *ngIf="ver_top_item_purchase">
+            <h5>Top 5 articulos de compra</h5>
+            <p-chart type="bar" [data]="charTop5iItemPurchase" [options]="horizontalOptions "
+                [style]="{'width': '50%'}"></p-chart>
+        </div>
+        <div class="custom-card" *ngIf="ver_compras_7_dias">
+            <h5>Compras ultimos 7 dias</h5>
+            <p-chart type="bar" [data]="charLastPurchaseDay" [options]="chartOptions"></p-chart>
+        </div>
+        <div class="custom-card" *ngIf="ver_compras_mes">
+            <h5>Compras por mes</h5>
+            <p-chart type="line" [data]="charInvoicePurchaseMonth" [options]="chartOptions"></p-chart>
+        </div>
+    </div>
+
+
+</div>

@@ -1,0 +1,64 @@
+<p-dialog header="Movimientos" [(visible)]="display" modal="true" blockScroll="true"
+    [breakpoints]="{'960px': '85vw', '640px': '100vw'}" [style]="{width: '850px', height: '800px'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+        <skeleton-table-component [title]="title"></skeleton-table-component>
+    </ng-template>
+    <ng-template #showTable>
+        <p-table #dt [value]="jornalBpList" [rowHover]="true" [paginator]="true" [rows]="10" responsiveLayout="stack"
+            styleClass="p-datatable-sm p-datatable-gridlines"
+            [globalFilterFields]="['businnesPartnersCode','businnesName', 'documents', 'createByName','documentReferent', 'createDate']">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="createDate">Fecha <p-sortIcon field="createDate"></p-sortIcon>
+                    <th pSortableColumn="businnesPartnersCode">Codigo <p-sortIcon
+                            field="businnesPartnersCode"></p-sortIcon>
+                        <p-columnFilter type="text" field="businnesPartnersCode" display="menu" class="ml-auto">
+                        </p-columnFilter>
+                    </th>
+                    <th pSortableColumn="businnesName">Nombre <p-sortIcon field="businnesName"></p-sortIcon>
+                        <p-columnFilter type="text" field="businnesName" display="menu"
+                            class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="documents">Documento <p-sortIcon field="documents"></p-sortIcon>
+                        <p-columnFilter type="text" field="documents" display="menu" class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="transValue">Valor <p-sortIcon field="transValue"></p-sortIcon>
+                        <p-columnFilter type="text" field="transValue" display="menu" class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="transValue">Acumulado <p-sortIcon field="transValue"></p-sortIcon>
+                        <p-columnFilter type="text" field="transValue" display="menu" class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="documentReferent">Referencia <p-sortIcon field="documentReferent"></p-sortIcon>
+                        <p-columnFilter type="text" field="documentReferent" display="menu"
+                            class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="createByName">Creado por <p-sortIcon field="createByName"></p-sortIcon>
+                        <p-columnFilter type="text" field="createByName" display="menu"
+                            class="ml-auto"></p-columnFilter>
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="caption">
+                <div class="flex">
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')"
+                            placeholder="Buscar una palabra" />
+                    </span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+                <tr [pSelectableRow]="rowData" [ngStyle]="{'background-color': getBackgroundColor(item.transValue)}">
+                    <td style="width: 15%; min-width: 2rem;"><span class="p-column-title">Fecha:</span>{{item.createDate | date:'dd/MM/yyyy H:mm a'}}</td>
+                    <td style="width: 15%; min-width: 2rem;"><span class="p-column-title">Codigo:</span>{{item.businnesPartnersCode}}</td>
+                    <td style="width: 35%; min-width: 7rem;"><span class="p-column-title">Nombre:</span>{{item.businnesName}}</td>
+                    <td style="width: 25%; min-width: 7rem;"><span class="p-column-title">Documento:</span>{{item.documents}}</td>
+                    <td style="width: 15%; min-width: 7rem;"><span class="p-column-title">Valor:</span>{{item.transValue | currency:'L'}}</td>
+                    <td style="width: 15%; min-width: 7rem;"><span class="p-column-title">Acumulado:</span>{{item.balance | currency:'L'}}</td>
+                    <td style="width: 15%; min-width: 7rem;"><span class="p-column-title">Referencia:</span>{{item.documentReferent}}</td>
+                    <td style="width: 15%; min-width: 7rem;"><span class="p-column-title">Usuario:</span>{{item.createByName}}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </ng-template>
+</p-dialog>

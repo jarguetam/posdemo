@@ -1,0 +1,36 @@
+export class CustomerModel {
+    customerId: number;
+    customerName: string;
+    customerCode: string;
+    rtn: string;
+    phone: string;
+    email: string;
+    address: string;
+    sellerId: number;
+    sellerName: string;
+    customerCategoryId: number;
+    categoryName: string;
+    payConditionId: number;
+    payConditionName: string;
+    payConditionDays: number;
+    listPriceId: number;
+    priceListName: string;
+    balance: number;
+    creditLine: number;
+    tax: true;
+    createBy: number;
+    createByName: string;
+    createDate: Date;
+    updateBy: number;
+    updateDate: Date;
+    active: true;
+    limitInvoiceCredit: number;
+    totalInvoiceCredit: number;
+    contactPerson: string;
+    purchase: boolean;
+    frequencyId: number;
+    zoneId: number;
+    regionId: number;
+    frequencyName: string;
+    zoneName: string;
+}

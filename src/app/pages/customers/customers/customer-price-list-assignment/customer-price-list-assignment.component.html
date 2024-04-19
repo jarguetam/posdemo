@@ -1,0 +1,76 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} precios especiales cliente: {{customerCode}} {{customerName}}"
+    [(visible)]="display" modal="true" blockScroll="true" [style]="{width: '95vw'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        <skeleton-table-component [title]="title"></skeleton-table-component>
+    </ng-template>
+    <ng-template #data>
+        <p-table #dt [value]="priceListdetailList" [paginator]="true" [rows]="10" responsiveLayout="scroll"
+            styleClass="p-datatable-sm p-datatable-gridlines"
+            [globalFilterFields]="['itemCode','itemName','price', 'createByName', 'email']" [(selection)]="selected">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="itemCode">Codigo <p-sortIcon field="itemCode"></p-sortIcon> <p-columnFilter
+                            type="text" field="itemCode" display="menu" class="ml-auto"></p-columnFilter></th>
+                    <th pSortableColumn="itemName">Descripcion <p-sortIcon field="itemName"></p-sortIcon>
+                        <p-columnFilter type="text" field="itemName" display="menu" class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th *ngFor="let name of listNameList">
+                        <p-checkbox [value]="name" [(ngModel)]="name.active"
+                            (click)="selectAllPriceList(name.listPriceId)" binary="true" #e></p-checkbox>
+                        {{name.listPriceName}}
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="caption">
+                <h4 class="mt-2"> Lista de precio {{listName}}</h4>
+                <div class="flex">
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')"
+                            placeholder="Buscar una palabra" />
+                    </span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="body" let-priceList>
+                <tr>
+                    <td style="width: 15%; min-width: 2rem;">{{priceList.itemCode }}</td>
+                    <td style="width: 15%; min-width: 7rem;">{{priceList.itemName}}</td>
+                    <td style="width: 10%;" *ngFor="let name of listNameList">
+                        <p-checkbox [value]="priceList" [name]="name.listPriceId"
+                            label="{{priceList['priceList'+name.listPriceId] | currency: 'L. '}}"
+                            [(ngModel)]="priceList['priceList'+ name.listPriceId + 'Enabled' ]"
+                            [ngModelOptions]="{standalone: true}" binary="true"
+                            (ngModelChange)="seleccionarListaPrecio(priceList, 'priceList'+name.listPriceId + 'Enabled')"></p-checkbox>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <!-- <table>
+            <thead>
+              <tr>
+                <th>Código del artículo</th>
+                <th>Nombre del artículo</th>
+                <th>Lista de precios 1</th>
+                <th>Lista de precios 2</th>
+                <th>Lista de precios 3</th>
+                <th>Lista de precios 3</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of priceListdetailList">
+                <td>{{ item.itemCode }}</td>
+                <td>{{ item.itemName }}</td>
+                <td><p-checkbox name="priceList1" [(ngModel)]="item.priceList1Enabled" [ngModelOptions]="{standalone: true}"  binary="true"></p-checkbox></td>
+                <td><p-checkbox name="priceList2" [(ngModel)]="item.priceList2Enabled" [ngModelOptions]="{standalone: true}"  binary="true"></p-checkbox></td>
+                <td><p-checkbox name="priceList3" [(ngModel)]="item.priceList3Enabled" [ngModelOptions]="{standalone: true}"  binary="true"></p-checkbox></td>
+              </tr>
+            </tbody>
+          </table> -->
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <button pButton type="button" [disabled]="loading" (click)="savePrices()" label="Guardar"></button>
+        <button pButton type="button" [disabled]="loading" (click)="close()" label="Cancelar"
+            class="p-button-danger"></button>
+    </ng-template>
+</p-dialog>

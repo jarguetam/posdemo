@@ -1,0 +1,59 @@
+<p-dialog  header="{{isAdd ? 'Agregar': 'Editar'}} Punto de facturacion" [(visible)]="display"
+modal="true" blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '90%'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        Cargando...
+    </ng-template>
+    <ng-template #data>
+         <form [formGroup]="formMode" *ngIf="formMode" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="pointSaleId" type="text" pInputText  formControlName="pointSaleId" [ngClass]="{ 'is-invalid': submitted && f.pointSaleId.errors }">
+                        <label for="pointSaleId">Punto de facturacion</label>
+                    </span>
+                    <div *ngIf="formMode.controls['pointSaleId'].invalid && formMode.controls['pointSaleId'].dirty" >
+                        <small  *ngIf="formMode.controls['pointSaleId'].errors.required" id="pointSaleId" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="name" type="text" pInputText  formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="name">Nombre</label>
+                    </span>
+                    <div *ngIf="formMode.controls['name'].invalid && formMode.controls['name'].dirty" >
+                        <small  *ngIf="formMode.controls['name'].errors.required" id="name" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p-dropdown id="branchId" [options]="branchList"
+                            formControlName="branchId" optionValue="branchId" optionLabel="name">
+                        </p-dropdown>
+                        <label for="branchId">Sucursal</label>
+                    </span>
+                    <div *ngIf="formMode.controls['branchId'].invalid && formMode.controls['branchId'].dirty" >
+                        <small  *ngIf="formMode.controls['branchId'].errors.required" id="branchId" class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div *ngIf="!isAdd" class="col-12 md:col-12">
+                    <p-checkbox binary=true label="Activo"  name="groupname" [formControl]="formMode.controls['active']"></p-checkbox>
+                </div>
+            </div>
+            <br><br><br><br><br> <br><br>   <br><br> <br><br> <br><br>
+        </form>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formMode.invalid || loading" (click)="add()" label="Agregar" ></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formMode.invalid || loading" (click)="edit()" label="Editar" ></button>
+        </ng-template>
+    </ng-template>
+</p-dialog>
+

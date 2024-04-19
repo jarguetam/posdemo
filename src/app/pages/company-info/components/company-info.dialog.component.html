@@ -1,0 +1,143 @@
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} Informacion de Empresa" [(visible)]="display" modal="true"
+    blockScroll="true" [style]="{width: '80%'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        Cargando...
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formMode" *ngIf="formMode" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="companyName" type="text" pInputText formControlName="companyName"
+                            [ngClass]="{ 'is-invalid': submitted && f.companyName.errors }">
+                        <label for="companyName">Nombre</label>
+                    </span>
+                    <div *ngIf="formMode.controls['companyName'].invalid && formMode.controls['companyName'].dirty">
+                        <small *ngIf="formMode.controls['companyName'].errors.required" id="companyName"
+                            class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="rtn" type="text" pInputText formControlName="rtn"
+                            [ngClass]="{ 'is-invalid': submitted && f.rtn.errors }">
+                        <label for="rtn">Rtn</label>
+                    </span>
+                    <div *ngIf="formMode.controls['rtn'].invalid && formMode.controls['rtn'].dirty">
+                        <small *ngIf="formMode.controls['rtn'].errors.required" id="rtn"
+                            class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="addressLine1" type="text" pInputText formControlName="addressLine1"
+                            [ngClass]="{ 'is-invalid': submitted && f.addressLine1.errors }">
+                        <label for="addressLine1">Direccion Linea 1</label>
+                    </span>
+                    <div *ngIf="formMode.controls['addressLine1'].invalid && formMode.controls['addressLine1'].dirty">
+                        <small *ngIf="formMode.controls['addressLine1'].errors.required" id="addressLine1"
+                            class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="addressLine2" type="text" pInputText formControlName="addressLine2"
+                            [ngClass]="{ 'is-invalid': submitted && f.addressLine2.errors }">
+                        <label for="addressLine2">Direccion Linea 2</label>
+                    </span>
+                    <div *ngIf="formMode.controls['addressLine2'].invalid && formMode.controls['addressLine2'].dirty">
+                        <small *ngIf="formMode.controls['addressLine2'].errors.required" id="addressLine2"
+                            class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="phone1" type="text" pInputText formControlName="phone1"
+                            [ngClass]="{ 'is-invalid': submitted && f.phone1.errors }">
+                        <label for="phone1">Telefono 1</label>
+                    </span>
+                    <div *ngIf="formMode.controls['phone1'].invalid && formMode.controls['phone1'].dirty">
+                        <small *ngIf="formMode.controls['phone1'].errors.required" id="phone1"
+                            class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="phone2" type="text" pInputText formControlName="phone2"
+                            [ngClass]="{ 'is-invalid': submitted && f.phone2.errors }">
+                        <label for="phone2">Telefono 2</label>
+                    </span>
+                    <div *ngIf="formMode.controls['phone2'].invalid && formMode.controls['phone2'].dirty">
+                        <small *ngIf="formMode.controls['phone2'].errors.required" id="phone2"
+                            class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="email1" type="text" pInputText formControlName="email1"
+                            [ngClass]="{ 'is-invalid': submitted && f.email1.errors }">
+                        <label for="email1">Correo 1</label>
+                    </span>
+                    <div *ngIf="formMode.controls['email1'].invalid && formMode.controls['email1'].dirty">
+                        <small *ngIf="formMode.controls['email1'].errors.required" id="email1"
+                            class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="email2" type="text" pInputText formControlName="email2"
+                            [ngClass]="{ 'is-invalid': submitted && f.email2.errors }">
+                        <label for="email2">Correo 2</label>
+                    </span>
+                    <div *ngIf="formMode.controls['email2'].invalid && formMode.controls['email2'].dirty">
+                        <small *ngIf="formMode.controls['email2'].errors.required" id="email2"
+                            class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-6">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <p-inputNumber formControlName="taxValue" inputId="taxValue" mode="decimal" [showButtons]="true"
+                            [min]="0" [max]="100" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        </p-inputNumber>
+                        <label for="taxValue">Valor ISV %</label>
+                    </span>
+                    <div *ngIf="formMode.controls['taxValue'].invalid && formMode.controls['taxValue'].dirty">
+                        <small *ngIf="formMode.controls['taxValue'].errors.required" id="taxValue"
+                            class="p-error block">Descripción es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-3">
+                    <br>
+                    <p-checkbox binary=true label="Permitir inventario en negativo" name="groupname"
+                        [formControl]="formMode.controls['negativeInventory']"></p-checkbox>
+                </div>
+                <div class="col-12 md:col-3">
+                    <br>
+                    <p-checkbox binary=true label="Impresion en Carta" name="groupname"
+                        [formControl]="formMode.controls['printLetter']"></p-checkbox>
+                </div>
+            </div>
+            <file-picker-propio-component accept=".png, .jpg, .pdf" [files]="files??[]"
+                (OnFileSelect)="OnFileSelect($event)">
+            </file-picker-propio-component>
+        </form>
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formMode.invalid || loading" (click)="add()"
+                label="Agregar"></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formMode.invalid || loading" (click)="edit()"
+                label="Editar"></button>
+        </ng-template>
+    </ng-template>
+</p-dialog>

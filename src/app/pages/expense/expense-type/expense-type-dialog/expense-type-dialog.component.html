@@ -1,0 +1,35 @@
+<p-dialog  header="{{isAdd ? 'Agregar': 'Editar'}} tipo de gasto" [(visible)]="display"
+modal="true" blockScroll="true" [style]="{width: '80%'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="data">
+        Cargando...
+    </ng-template>
+    <ng-template #data>
+        <form [formGroup]="formExpense" *ngIf="formExpense" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-12">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <input id="expenseName" type="text" pInputText  formControlName="expenseName" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                        <label for="expenseName">Nombre tipo de gasto</label>
+                    </span>
+                    <div *ngIf="formExpense.controls['expenseName'].invalid && formExpense.controls['expenseName'].dirty" >
+                        <small  *ngIf="formExpense.controls['expenseName'].errors.required" id="expenseName" class="p-error block">Nombre es requerido</small>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <br><br><br><br>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
+            <button pButton type="button" [disabled]="formExpense.invalid || loading" (click)="add()" label="Agregar" ></button>
+        </ng-template>
+        <ng-template #addButton>
+            <button pButton type="button" [disabled]="formExpense.invalid || loading" (click)="edit()" label="Editar" ></button>
+        </ng-template>
+    </ng-template>
+</p-dialog>
+
+
+

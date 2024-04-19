@@ -1,0 +1,54 @@
+<div class="grid">
+	<div class="col-12 xl:col-12">
+		<div class="card">
+			<ng-template [ngIf]="loading" [ngIfElse]="showTable">
+				<skeleton-table-component [title]="title"></skeleton-table-component>
+			</ng-template>
+
+			<ng-template #showTable>
+					<p-table #dt [value]="wareHouseList" [paginator]="true"  [rows]="5"
+					responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['whsCode','whsName', 'createByName', 'email']">
+						<ng-template pTemplate="header">
+							<tr>
+								<th pSortableColumn="whsCode">Codigo <p-sortIcon field="whsCode"></p-sortIcon> <p-columnFilter type="text" field="whsCode" display="menu" class="ml-auto" ></p-columnFilter></th>
+								<th pSortableColumn="whsName">Nombre <p-sortIcon field="whsName"></p-sortIcon> <p-columnFilter type="text" field="whsName" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="createByName">Creado por <p-sortIcon field="createByName"></p-sortIcon><p-columnFilter type="text" field="createByName" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="active">Estado <p-sortIcon field="active"></p-sortIcon></th>
+								<th>Acción</th>
+							</tr>
+						</ng-template>
+							<ng-template pTemplate="caption">
+                                <h4 class="mt-2">{{title}}</h4>
+								<div class="flex">
+									<button pButton  class="ml-2" pRipple type="button" (click)="addWareHouse()" pTooltip="Agregar nuevo usuario" tooltipPosition="bottom" label="Agregar" ></button>
+									<span class="p-input-icon-left ml-auto">
+										<i class="pi pi-search"></i>
+										<input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+									</span>
+								</div>
+							</ng-template>
+						<ng-template pTemplate="body" let-sellerRegion>
+							<tr>
+								<td style="width: 10%; min-width: 2rem;">{{sellerRegion.whsCode }}</td>
+								<td style="width: 35%; min-width: 7rem;">{{sellerRegion.whsName}}</td>
+								<td style="width: 25%; min-width: 4rem;">{{sellerRegion.createByName}}</td>
+								<td style="width: 15%; min-width: 4rem;">
+									<ng-template [ngIf]="sellerRegion.active" [ngIfElse]="inactive">
+										<p-chip label="Activo" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+									</ng-template>
+									<ng-template #inactive>
+										<p-chip label="Inactivo" icon="pi pi-check"></p-chip>
+									</ng-template>
+								</td>
+								<td style="width: 20%;">
+									<button (click)="editWareHouse(sellerRegion)" pButton pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
+								</td>
+							</tr>
+						</ng-template>
+					</p-table>
+
+			</ng-template>
+		</div>
+	</div>
+	 <app-ware-house-dialog (WareHouseModify)="wareHouseModify($event)"></app-ware-house-dialog>
+</div>

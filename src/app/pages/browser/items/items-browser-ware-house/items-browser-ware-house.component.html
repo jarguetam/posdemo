@@ -1,0 +1,62 @@
+<p-dialog header="Articulos de inventario" [(visible)]="display" modal="true" blockScroll="true"
+    [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '850px', height: '800px'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+        <skeleton-table-component [title]="title"></skeleton-table-component>
+    </ng-template>
+
+    <ng-template #showTable>
+        <p-table #dt [value]="items" [rowHover]="true" [paginator]="true" [rows]="10" responsiveLayout="stack"
+            styleClass="p-datatable-sm p-datatable-gridlines"
+            [globalFilterFields]="['itemCode','itemName', 'itemCategoryName', 'stock','whsName', 'barCode']">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="itemCode">Codigo <p-sortIcon field="itemCode"></p-sortIcon>
+                        <p-columnFilter type="text" field="itemCode" display="menu" class="ml-auto">
+                        </p-columnFilter>
+                    </th>
+                    <th pSortableColumn="itemName">Nombre <p-sortIcon field="itemName"></p-sortIcon>
+                        <p-columnFilter type="text" field="itemName" display="menu" class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="itemCategoryName">Categoria <p-sortIcon field="itemCategoryName"></p-sortIcon>
+                        <p-columnFilter type="text" field="itemCategoryName" display="menu"
+                            class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="stock">Stock <p-sortIcon field="stock"></p-sortIcon>
+                        <p-columnFilter type="text" field="stock" display="menu" class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="whsName">Almacen <p-sortIcon field="whsName"></p-sortIcon>
+                        <p-columnFilter type="text" field="whsName" display="menu" class="ml-auto"></p-columnFilter>
+                    </th>
+                    <th pSortableColumn="dueDate">Vencimiento <p-sortIcon field="dueDate"></p-sortIcon>
+                        <p-columnFilter type="text" field="dueDate" display="menu" class="ml-auto"></p-columnFilter>
+                    </th>
+
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="caption">
+                <div class="flex">
+                    <span class="p-input-icon-left ml-auto">
+                        <i class="pi pi-search"></i>
+                        <input pInputText [appAutofocus]="open" #search id="search" type="text" (input)="dt.filterGlobal($event.target.value, 'contains')"
+                            placeholder="Buscar una palabra" />
+                    </span>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-item>
+                <tr (click)="selectItem(item)" [pSelectableRow]="rowData">
+                    <td style="width: 15%; min-width: 2rem;">
+                        <span class="p-column-title">Codigo:</span>{{item.itemCode}}
+                    </td>
+                    <td style="width: 35%; min-width: 7rem;"><span
+                            class="p-column-title">Descripcion:</span>{{item.itemName}}</td>
+                    <td style="width: 25%; min-width: 7rem;"><span class="p-column-title">Categoria:</span>{{item.itemCategoryName}}</td>
+                    <td style="width: 15%; min-width: 7rem;"><span class="p-column-title">Stock:</span>{{item.stock}}</td>
+                    <td style="width: 15%; min-width: 7rem;"><span class="p-column-title">Almacen:</span>{{item.whsName}}</td>
+                    <td style="width: 15%; min-width: 7rem;"><span class="p-column-title">Vencimiento:</span>{{item.dueDate |date:'dd/MM/yyyy'}}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+    </ng-template>
+</p-dialog>

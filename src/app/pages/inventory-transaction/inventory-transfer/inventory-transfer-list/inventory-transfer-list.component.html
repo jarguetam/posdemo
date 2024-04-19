@@ -1,0 +1,89 @@
+<div class="grid">
+	<div class="col-12 xl:col-12">
+		<div class="card">
+			<ng-template [ngIf]="loading" [ngIfElse]="showTable">
+				<skeleton-table-component [title]="title"></skeleton-table-component>
+			</ng-template>
+			<ng-template #showTable>
+                <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+					<div class="grid p-fluid">
+						<div class="col-12 md:col-4">
+							<span class="mt-4 p-float-label p-input-icon-left">
+								<i class="pi pi-calendar"></i>
+								<input id="from" type="date"  pInputText  formControlName="from">
+								<label for="from">Desde</label>
+							</span>
+							<div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty" >
+								<small  *ngIf="formFilter.controls['from'].errors.required" id="from" class="p-error block">Desde es requerido</small>
+							</div>
+						</div>
+						<div class="col-12 md:col-4">
+							<span class="mt-4 p-float-label p-input-icon-left">
+								<i class="pi pi-calendar"></i>
+								<input id="to" type="date"  pInputText  formControlName="to">
+								<label for="to">Hasta</label>
+							</span>
+							<div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty" >
+								<small  *ngIf="formFilter.controls['to'].errors.required" id="to" class="p-error block">Hasta es requerido</small>
+							</div>
+						</div>
+						<div class="col-12 md:col-2">
+							<button class="mt-4" pButton type="button"  [disabled]="formFilter.invalid || loading"  (click)="search()" label="Buscar" ></button>
+						</div>
+					</div>
+
+
+				</form>
+					<p-table #dt [value]="transferList" [paginator]="true"  [rows]="7"
+					responsiveLayout="scroll"  styleClass="p-datatable-sm p-datatable-gridlines" [globalFilterFields]="['transferId','docTotal','transfer','comment','fromWhsName','toWhsName']">
+						<ng-template pTemplate="header">
+							<tr>
+								<th pSortableColumn="transferId">Id <p-sortIcon field="transferId"></p-sortIcon> <p-columnFilter type="text" field="transferId" display="menu" class="ml-auto" ></p-columnFilter></th>
+                                <th pSortableColumn="fromWhsName">Almacen origen <p-sortIcon field="fromWhsName"></p-sortIcon> <p-columnFilter type="text" field="whsName" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th pSortableColumn="toWhsName">Almacen destino <p-sortIcon field="toWhsName"></p-sortIcon> <p-columnFilter type="text" field="whsName" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th pSortableColumn="comment">Comentario<p-sortIcon field="comment"></p-sortIcon> <p-columnFilter type="text" field="comment" display="menu" class="ml-auto"></p-columnFilter></th>
+								<th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon> <p-columnFilter type="text" field="docTotal" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th pSortableColumn="transfer">Fecha de creacion<p-sortIcon field="transfer"></p-sortIcon> <p-columnFilter type="text" field="transfer" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th pSortableColumn="transfer">Creado por<p-sortIcon field="transfer"></p-sortIcon> <p-columnFilter type="text" field="transfer" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th>Acción</th>
+							</tr>
+						</ng-template>
+                        <ng-template pTemplate="caption">
+                            <div class="header-container">
+                                <h4>{{title}}</h4>
+                                <div class="button-container">
+                                    <button pButton class="p-button-text" type="button" class="ml-2" (click)="addTransfer()" pTooltip="Agregar nueva transferencia de mercaderia" tooltipPosition="bottom" label="Agregar"></button>
+                                    <button pButton class="p-button-text" type="button" class="p-button-secondary" (click)="copyToRequest()" pTooltip="Copiar de solicitud" tooltipPosition="bottom" label="Copiar solicitud"></button>
+                                </div>
+                                <div class="search-container">
+                                    <span class="p-input-icon-left">
+                                        <i class="pi pi-search"></i>
+                                        <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Buscar una palabra" />
+                                    </span>
+                                </div>
+                            </div>
+                        </ng-template>
+
+						<ng-template pTemplate="body" let-transfer>
+							<tr>
+								<td style="width: 10%; min-width: 2rem;">{{transfer.transferId}}</td>
+                                <td style="width: 15%; min-width: 5rem;">{{transfer.fromWhsName}}</td>
+                                <td style="width: 15%; min-width: 5rem;">{{transfer.toWhsName}}</td>
+                                <td style="width: 15%; min-width: 4rem;">{{transfer.comment}}</td>
+								<td style="width: 10%; min-width: 5rem;">{{transfer.docTotal | currency:'L. '}}</td>
+                                <td style="width: 15%; min-width: 4rem;">{{transfer.transferDate |date:'dd/MM/yyyy H:mm a'}}</td>
+                                <td style="width: 10%; min-width: 4rem;">{{transfer.createByName}}</td>
+								<td style="width: 20%;">
+									<button (click)="viewTransfer(transfer)" pButton pTooltip="Detalle" pRipple type="button" icon="pi pi-eye" class="p-button p-component p-button-text p-button-icon-only"></button>
+                                    <button (click)="print(transfer)" pButton pRipple pTooltip="Imprimir"  type="button" icon="pi pi-print" class="p-button-help p-component p-button-text p-button-icon-only"></button>
+                                </td>
+							</tr>
+						</ng-template>
+					</p-table>
+			</ng-template>
+		</div>
+	</div>
+ <app-inventory-transfer-dialog (InventorytransferModify)="transferModify($event)" ></app-inventory-transfer-dialog>
+ <app-inventory-transfer-request-to-complete (RequestSelect)="orderSelected($event)" ></app-inventory-transfer-request-to-complete>
+</div>
+

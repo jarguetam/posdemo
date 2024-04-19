@@ -1,0 +1,13 @@
+.card {
+    margin: 20px; /* Ajusta el valor de padding según tus necesidades */
+}
+
+
+.progress-bar {
+    height: 10px; /* Altura de la barra de progreso */
+    background-color: #007bff; /* Color de la barra de progreso */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transition: width 0.5s ease; /* Agregar transición para suavizar el cambio de ancho */
+}
