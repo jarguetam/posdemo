@@ -1,0 +1,35 @@
+<div class="grid">
+    <div class="col-12 xl:col-12">
+        <div class="card">
+            <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+                <skeleton-table-component [title]="title"></skeleton-table-component>
+            </ng-template>
+            <ng-template #showTable>
+                <div class="card">
+                    <h4 class="my-2">{{title}}</h4>
+                </div>
+                <!-- <br> -->
+                <div class="card">
+                    <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+                        <div class="grid p-fluid">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <p-dropdown [options]="sellerList" formControlName="sellerId" optionValue="sellerId"
+                                    optionLabel="sellerName"></p-dropdown>
+                                <label for="sellerId">Vendedor</label>
+                            </span>
+                            <div *ngIf="formFilter.controls['sellerId'].invalid && formFilter.controls['sellerId'].dirty">
+                                <small *ngIf="formFilter.controls['sellerId'].errors.required" id="sellerId"
+                                    class="p-error block">Vendedor es requerido</small>
+                            </div>
+                            <div class="col-12 md:col-4">
+                                <button class="mt-4" pButton type="button" [disabled]="formFilter.invalid || loading"
+                                    (click)="getReport()" label="Generar reporte"></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
+

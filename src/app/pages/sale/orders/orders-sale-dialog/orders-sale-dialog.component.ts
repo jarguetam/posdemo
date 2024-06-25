@@ -72,6 +72,7 @@ export class OrdersSaleDialogComponent implements OnInit {
     currentState!: ConnectionState;
     status: boolean;
     isMobile: boolean;
+    displayDialog: boolean = false;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -260,6 +261,7 @@ export class OrdersSaleDialogComponent implements OnInit {
                 isDelete: false,
                 isTax: false,
                 taxValue: 0,
+                weight:0
             })
         );
         this.showDialogItem(this.order.detail.length - 1);
@@ -321,6 +323,7 @@ export class OrdersSaleDialogComponent implements OnInit {
                 isDelete: false,
                 isTax: false,
                 taxValue: 0,
+                weight: 0,
             })
         );
         this.ItemsBrowser.index = this.order.detail.length - 1;
@@ -349,6 +352,7 @@ export class OrdersSaleDialogComponent implements OnInit {
                 isDelete: false,
                 isTax: false,
                 taxValue: 0,
+                weight: 0,
             })
         );
         this.ItemsBrowser.index = this.order.detail.length - 1;
@@ -586,5 +590,14 @@ export class OrdersSaleDialogComponent implements OnInit {
         this.order.docReference = this.order.docId;
         this.order.detail.forEach((doc) => (doc.docDetailId = 0));
         this.InvoiceSaleDialog.showDialog(this.order, true);
+        this.openDialog();
     }
+
+    openDialog(): void {
+        this.displayDialog = true;
+      }
+
+      closeDialog(): void {
+        this.displayDialog = false;
+      }
 }

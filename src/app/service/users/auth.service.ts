@@ -1,3 +1,4 @@
+import { SyncService } from './../sync.service';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import {
@@ -30,9 +31,9 @@ export class AuthService {
         private http: HttpClient,
         private router: Router,
         public configService: ConfigService,
-        private commonService: CommonService,
         private db: DbLocalService,
-        private connectionService: ConnectionService
+        private connectionService: ConnectionService,
+       // private syncService: SyncService,
     ) {
         const storedUser = sessionStorage.getItem('currentUser');
         const initialUser = storedUser ? JSON.parse(storedUser) : null;
@@ -83,6 +84,7 @@ export class AuthService {
             })
             .pipe(
                 map((user) => {
+
                     if (user && user.token) {
                         let isDark = user.theme.toLowerCase().includes('dark');
                         this.changeTheme(user.theme, isDark);
@@ -98,9 +100,12 @@ export class AuthService {
                     return user;
                 }),
                 catchError(async (error) => {
+                    const errorMessage = error.error?.message || '';
                     if (
                         error.status === 0 ||
-                        error.statusText === 'Unknown Error'
+                        error.statusText === 'Unknown Error' ||
+                        error.statusText === 'Gateway Timeout' ||
+                        errorMessage.includes('SQL Server')
                     ) {
                         const userNameLower = userName.toLowerCase();
                         let useroffline = await this.db.user
@@ -120,13 +125,18 @@ export class AuthService {
                             return useroffline[0];
                         }
                     } else {
-                        throw new Error(error.error.message);
+                        if (error.error) {
+                            throw new Error(error.error.message);
+                        } else {
+                            throw new Error(error.message);
+                        }
                     }
                 })
             );
     }
 
     async getCompanyInfoAsync() {
+       // await this.syncService.syncData();
         let company: CompanyInfo[] = await firstValueFrom(
             this.http.get<CompanyInfo[]>(
                 `${environment.uriLogistic}/api/Common/GetCompanyInfo`
@@ -170,7 +180,7 @@ export class AuthService {
 
     async logout() {
         sessionStorage.removeItem('currentUser');
-        await this.db.clearAllTables();
+        //await this.db.clearAllTables();
         this.currentUserSubject.next(null);
         this.router.navigate(['/login']);
         //this.changeTheme('lara-light-indigo', false);
@@ -187,4 +197,6 @@ export class AuthService {
             ...{ theme, dark },
         });
     }
+
+
 }

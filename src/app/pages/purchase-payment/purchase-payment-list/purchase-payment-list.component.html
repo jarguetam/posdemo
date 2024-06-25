@@ -69,17 +69,27 @@
                                 <td style="width: 10%; min-width: 4rem;">{{payment.payConditionName}}</td>
                                 <td style="width: 10%; min-width: 4rem;">{{payment.createByName}}</td>
                                 <td style="width: 10%; min-width: 4rem;">
-									<ng-template [ngIf]="payment.complete" [ngIfElse]="inactive">
-										<p-chip label="Pagada" styleClass="custom-chip" icon="pi pi-check"></p-chip>
-									</ng-template>
-									<ng-template #inactive>
-										<p-chip label="Pendiente pago" icon="pi pi-check"></p-chip>
-									</ng-template>
+                                    <ng-template [ngIf]="payment.canceled">
+                                        <p-chip label="Anulado" styleClass="custom-chip-canceled"
+                                            icon="pi pi-times"></p-chip>
+                                    </ng-template>
+                                    <ng-template [ngIf]="!payment.canceled" [ngIfElse]="inactive">
+                                        <ng-template [ngIf]="payment.complete" [ngIfElse]="pending">
+                                            <p-chip label="Aplicado" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+                                        </ng-template>
+                                        <ng-template #pending>
+                                            <p-chip label="Pendiente" styleClass="custom-chip-pending"
+                                                icon="pi pi-check"></p-chip>
+                                        </ng-template>
+                                    </ng-template>
 								</td>
 
 								<td style="width: 20%; min-width: 4rem;">
-									<button [disabled]="payment.complete" (click)="editPayment(payment)" pButton pTooltip="Editar" pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
+									<button [disabled]="payment.canceled" (click)="editPayment(payment)" pButton pTooltip="Editar" pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
                                     <button (click)="print(payment)" pButton pRipple pTooltip="Imprimir"  type="button" icon="pi pi-print" class="p-button-help p-component p-button-text p-button-icon-only"></button>
+                                    <!-- <button (click)="syncPayment(payment)" pButton pTooltip="Sincronizar" type="button"
+                                    icon="pi pi-sync"
+                                    class="p-button-warning p-button-text p-button-icon-only"></button> -->
                                 </td>
 							</tr>
 						</ng-template>

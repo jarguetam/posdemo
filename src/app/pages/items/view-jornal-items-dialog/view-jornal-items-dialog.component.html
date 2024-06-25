@@ -4,6 +4,44 @@
         <skeleton-table-component [title]="title"></skeleton-table-component>
     </ng-template>
     <ng-template #showTable>
+        <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-3">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-calendar"></i>
+                        <input id="from" type="date"  pInputText  formControlName="from">
+                        <label for="from">Desde</label>
+                    </span>
+                    <div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty" >
+                        <small  *ngIf="formFilter.controls['from'].errors.required" id="from" class="p-error block">Desde es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-3">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-calendar"></i>
+                        <input id="to" type="date"  pInputText  formControlName="to">
+                        <label for="to">Hasta</label>
+                    </span>
+                    <div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty" >
+                        <small  *ngIf="formFilter.controls['to'].errors.required" id="to" class="p-error block">Hasta es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-4">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <p-dropdown [disabled]="disabled" [options]="wareHouseList" formControlName="whsCode"
+                            optionValue="whsCode" optionLabel="whsName"></p-dropdown>
+                        <label for="whsCode">Almacen</label>
+                    </span>
+                    <div *ngIf="formFilter.controls['whsCode'].invalid && formFilter.controls['whsCode'].dirty">
+                        <small *ngIf="formFilter.controls['whsCode'].errors.required" id="whsCode"
+                            class="p-error block">Almacen es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-2">
+                    <button class="mt-4" pButton type="button"  [disabled]="formFilter.invalid || loading"  (click)="_getData()" label="Buscar" ></button>
+                </div>
+            </div>
+        </form>
             <p-table #dt [value]="jornalList" [rowHover]="true" [paginator]="true" [rows]="10" responsiveLayout="stack"
                 styleClass="p-datatable-sm p-datatable-gridlines"
                 [globalFilterFields]="['itemCode','itemName', 'documents', 'createByName','documentReferent']">

@@ -7,30 +7,23 @@
     <ng-template #showTable>
         <p-table #dt [value]="customers" [rowHover]="true" [paginator]="true" [rows]="10" responsiveLayout="stack"
             styleClass="p-datatable-sm p-datatable-gridlines"
-            [globalFilterFields]="['customerCode','customerName', 'categoryName', 'payConditionName','creditLine']">
+            [globalFilterFields]="['customerCode','customerName', 'categoryName', 'payConditionName','creditLine', 'address']">
             <ng-template pTemplate="header">
                 <tr>
                     <th>Codigo
                     </th>
-                    <th>Nombre <p-sortIcon field="customerName"></p-sortIcon>
-                        <p-columnFilter type="text" field="customerName" display="menu"
-                            class="ml-auto"></p-columnFilter>
+                    <th>Nombre
                     </th>
-                    <th>Categoria <p-sortIcon field="categoryName"></p-sortIcon>
-                        <p-columnFilter type="text" field="categoryName" display="menu"
-                            class="ml-auto"></p-columnFilter>
+                    <th>Categoria
                     </th>
-                    <th>Saldo <p-sortIcon field="balance"></p-sortIcon>
-                        <p-columnFilter type="text" field="balance" display="menu" class="ml-auto"></p-columnFilter>
+                    <th>Direccion
                     </th>
-                    <th>Limite de credito <p-sortIcon field="creditLine"></p-sortIcon>
-                        <p-columnFilter type="text" field="creditLine" display="menu" class="ml-auto"></p-columnFilter>
+                    <th>Saldo
                     </th>
-                    <th>Condicion de pago <p-sortIcon field="payConditionName"></p-sortIcon>
-                        <p-columnFilter type="text" field="payConditionName" display="menu"
-                            class="ml-auto"></p-columnFilter>
+                    <th>Limite de credito
                     </th>
-
+                    <th>Condicion de pago
+                    </th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="caption">
@@ -62,6 +55,8 @@
                             class="p-column-title">Nombre:</span>{{item.customerName}}</td>
                     <td style="width: 25%; min-width: 7rem;"><span
                             class="p-column-title">Categoria:</span>{{item.categoryName}}</td>
+                    <td style="width: 25%; min-width: 7rem;"><span
+                            class="p-column-title">Direccion:</span>{{item.address}}</td>
                     <td style="width: 15%; min-width: 7rem;"><span class="p-column-title">Saldo:</span>{{item.balance |
                         currency:'L'}}</td>
                     <td style="width: 15%; min-width: 7rem;"><span

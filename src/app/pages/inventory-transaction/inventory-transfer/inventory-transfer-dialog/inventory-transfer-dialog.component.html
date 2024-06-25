@@ -7,7 +7,19 @@
         <ng-template #data readonly="disable">
             <form [formGroup]="formTransfer" *ngIf="formTransfer" class="mb-5">
                 <div class="grid p-fluid">
-                    <div class="col-12 md:col-6">
+                    <div class="col-12 md:col-4">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-comments"></i>
+                            <input id="transferDate" [disabled]="disabled" type="date" pInputText #transferDate
+                                formControlName="transferDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <label for="transferDate">Fecha Documento</label>
+                        </span>
+                        <div *ngIf="formTransfer.controls['transferDate'].invalid && formTransfer.controls['transferDate'].dirty">
+                            <small *ngIf="formTransfer.controls['transferDate'].errors.required" id="transferDate"
+                                class="p-error block">Fecha Documento es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
                             <p-dropdown [disabled]="disabled" [options]="wareHouseList" formControlName="fromWhsCode"
                                 optionValue="whsCode" optionLabel="whsName"></p-dropdown>
@@ -19,7 +31,7 @@
                                 class="p-error block">Almacen es requerido</small>
                         </div>
                     </div>
-                    <div class="col-12 md:col-6">
+                    <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
                             <p-dropdown [disabled]="disabled" [options]="wareHouseList" formControlName="toWhsCode"
                                 optionValue="whsCode" optionLabel="whsName"></p-dropdown>

@@ -146,18 +146,27 @@ export class CustomersService {
                     timeout(5000) // Espera máximo 5 segundos para la respuesta de la API
                 )
             );
+
             const customers = await Promise.race([
                 apiDataPromise,
-                new Promise(resolve => setTimeout(resolve, 3000))
+                new Promise(resolve => setTimeout(() => resolve([]), 3000)) // Devuelve un array vacío si la API no responde en 3 segundos
             ]) as CustomerModel[];
-            this.db.customers.clear();
-            customers.map(customer => this.db.customers.add(customer));
+
+            // Si customers está vacío, significa que se resolvió el timeout
+            if (customers.length === 0) {
+                throw new Error('API request timed out');
+            }
+
+            await this.db.customers.clear();
+            await Promise.all(customers.map(customer => this.db.customers.add(customer)));
+
             return customers;
         } catch (error) {
             const customersOffline = await this.db.customers.toArray();
             return customersOffline;
         }
     }
+
 
     async addCustomer(request: CustomerModel) {
         return await firstValueFrom(

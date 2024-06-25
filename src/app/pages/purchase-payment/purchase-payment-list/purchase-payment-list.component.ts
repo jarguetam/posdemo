@@ -36,13 +36,15 @@ export class PurchasePaymentListComponent implements OnInit {
     }
 
     _createFormBuild() {
+        const currentDate = new Date();
+        const localDateString = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10);
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                localDateString,
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                localDateString,
                 Validators.required,
             ],
         });
@@ -86,7 +88,7 @@ export class PurchasePaymentListComponent implements OnInit {
             );
             return;
         }
-        //this.PurchasePaymentDialog.showDialog(payment, false);
+        this.PurchasePaymentDialog.showDialog(payment, false);
     }
 
     viewPayment(payment: PaymentModel) {

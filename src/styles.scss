@@ -24,9 +24,9 @@ body.swal2-toast-shown .swal2-container.swal2-top-end, body.swal2-toast-shown .s
     color: var(--primary-color-text) !important;
 }
 
-*{
-    touch-action: pan-y !important;
-  }
+.body{
+    overscroll-behavior: contain;
+}
 
 
 .status-1{

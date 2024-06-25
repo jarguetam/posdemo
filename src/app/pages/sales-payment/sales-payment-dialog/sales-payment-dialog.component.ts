@@ -28,6 +28,8 @@ import { ConnectionService, ConnectionState } from 'ng-connection-service';
 import { tap } from 'rxjs';
 import { DbLocalService } from 'src/app/service/db-local.service';
 import { PrintEscPaymentService } from '../service/print-esc-payment.service';
+import { v4 as uuidv4 } from 'uuid';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-sales-payment-dialog',
@@ -57,6 +59,8 @@ export class SalesPaymentDialogComponent implements OnInit {
     sellerList: SellerModel[];
     status: boolean;
     currentState!: ConnectionState;
+    isOffline: boolean = false;
+    offlineId: number = 0;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -67,30 +71,35 @@ export class SalesPaymentDialogComponent implements OnInit {
         private connectionService: ConnectionService,
         private db_local: DbLocalService,
         private printService: PrintEscPaymentService,
+        private router: Router
     ) {
         this.usuario = this.authService.UserValue;
     }
     ngOnInit(): void {
         this.connectionService
-        .monitor()
-        .pipe(
-            tap((newState: ConnectionState) => {
-                this.currentState = newState;
-                if (this.currentState.hasNetworkConnection) {
-                    this.status = true;
-                } else {
-                    this.status = false;
-                }
-            })
-        )
-        .subscribe();
+            .monitor()
+            .pipe(
+                tap((newState: ConnectionState) => {
+                    this.currentState = newState;
+                    if (this.currentState.hasNetworkConnection) {
+                        this.status = true;
+                    } else {
+                        this.status = false;
+                    }
+                })
+            )
+            .subscribe();
     }
 
     showDialog(paymentNew: PaymentSaleModel, isAdd: boolean) {
+        if (paymentNew.id != null && paymentNew.id !== 0) {
+            this.isOffline = true;
+            this.offlineId = paymentNew.id;
+        }
         this.display = true;
         this.new();
         this.isAdd = isAdd;
-        this.disabled = isAdd?false:true;
+        this.disabled = isAdd ? false : true;
         this.payment = paymentNew;
         this.doctotal = paymentNew.docTotal;
         this.detail = paymentNew.detail;
@@ -113,6 +122,12 @@ export class SalesPaymentDialogComponent implements OnInit {
         }
     }
     _createFormBuild() {
+        const currentDate = new Date();
+        const localDateString = new Date(
+            currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
+        )
+            .toISOString()
+            .substring(0, 10);
         this.formSales = this.formBuilder.group({
             docId: [this.payment.docId ?? 0],
             customerId: [this.payment.customerId ?? 0],
@@ -140,9 +155,11 @@ export class SalesPaymentDialogComponent implements OnInit {
             docTotal: [this.payment.docTotal ?? 0],
             createBy: [this.payment.createBy ?? this.usuario.userId],
             detail: [[]],
-            docDate: [this.payment.docDate],
-            sellerId: [this.payment.sellerId ?? this.usuario.sellerId,
-                Validators.required,],
+            docDate: [this.payment.docDate ?? localDateString],
+            sellerId: [
+                this.payment.sellerId ?? this.usuario.sellerId,
+                Validators.required,
+            ],
         });
         this.formSales.controls['payConditionId'].disable({ onlySelf: false });
         this.formSales.controls['customerCode'].disable({ onlySelf: false });
@@ -188,6 +205,7 @@ export class SalesPaymentDialogComponent implements OnInit {
                 isDelete: false,
                 sumApplied: document.balance,
                 balance: document.balance,
+                reference: document.reference,
             })
         );
         this.detail = paymentDetails;
@@ -242,10 +260,11 @@ export class SalesPaymentDialogComponent implements OnInit {
                     docId: 0,
                     detail: this.detail,
                     docTotal: this.doctotal,
-                    docDate: new Date(Date.now()),
+
                     customerCode: this.formSales.controls['customerCode'].value,
                     customerName: this.formSales.controls['customerName'].value,
-                    payConditionId: this.formSales.controls['payConditionId'].value,
+                    payConditionId:
+                        this.formSales.controls['payConditionId'].value,
                     cashSum: Number(this.doctotal),
                     chekSum: this.payment.chekSum,
                     transferSum: this.payment.transferSum,
@@ -253,9 +272,17 @@ export class SalesPaymentDialogComponent implements OnInit {
                 };
                 this.detail = [];
                 this.doctotal = 0;
-                Messages.loading('Agregando', 'Agregando pago de factura de venta');
+                const MIN_DATE = new Date('0001-01-01T00:00:00Z'); // 01/01/0001
+                newEntry.docDate = MIN_DATE;
+                newEntry.uuid = uuidv4();
+                Messages.loading(
+                    'Agregando',
+                    'Agregando pago de factura de venta'
+                );
                 if (this.status) {
-                    let payment = await this.paymentService.addPaymentSales(newEntry);
+                    let payment = await this.paymentService.addPaymentSales(
+                        newEntry
+                    );
                     await this.deleteOrUpdate(newEntry);
                     this.PaymentSalesModify.emit(payment);
                     this.formSales.controls['reference'].setValue('');
@@ -293,6 +320,12 @@ export class SalesPaymentDialogComponent implements OnInit {
                 } else {
                     await this.db_local.invoiceSeller.update(inv[0].id, inv[0]);
                 }
+                
+                await this.db_local.customers.where('customerId')
+                    .equals(newEntry.customerId)
+                    .modify((x) => {
+                        x.balance = x.balance - invoice.sumApplied;
+                    });
             } catch (ex) {
                 Messages.Toas('Advertencia: ' + ex);
             }
@@ -310,7 +343,7 @@ export class SalesPaymentDialogComponent implements OnInit {
     async edit() {
         if (this.formSales.valid) {
             try {
-                Messages.loading('Agregando', 'Editando factura de compra');
+                Messages.loading('Agregando', 'Editando pago de cliente');
                 let newEntry = this.formSales.value as PaymentSaleModel;
                 let newLine = this.payment.detail.filter(
                     (x) => x.docDetailId == 0
@@ -340,12 +373,25 @@ export class SalesPaymentDialogComponent implements OnInit {
             'Cancelar esta pago es irreversible. ¿Seguro desea continuar?'
         );
         if (cancel) {
+            debugger
             try {
-                let newEntry = this.formSales.value as PaymentSaleModel;
-                let payment = await this.paymentService.cancelPaymentSales(
-                    newEntry.docId
-                );
-                this.PaymentSalesModify.emit(payment);
+                if (this.isOffline) {
+                    await this.db_local.payment.delete(this.offlineId);
+                    let result =
+                        await this.paymentService.getPaymentSalesByDate(
+                            this.formSales.value.docDate,
+                            this.formSales.value.docDate
+                        );
+                    await this.router.navigate(['/listado-cobros-clientes'], {
+                        state: {},
+                    });
+                } else {
+                    let newEntry = this.formSales.value as PaymentSaleModel;
+                    let payment = await this.paymentService.cancelPaymentSales(
+                        newEntry.docId
+                    );
+                    this.PaymentSalesModify.emit(payment);
+                }
                 this.display = false;
                 Messages.closeLoading();
                 Messages.Toas('Cancelado Correctamente');

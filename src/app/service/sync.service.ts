@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DbLocalService } from './db-local.service';
 import { ConnectionService, ConnectionState } from 'ng-connection-service';
-import { firstValueFrom, tap } from 'rxjs';
+import { catchError, firstValueFrom, tap, throwError, timeout } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ItemWareHouse } from '../pages/items/models/item-warehouse';
 import { environment } from 'src/environments/environment';
@@ -48,18 +48,19 @@ export class SyncService {
                     this.currentState = newState;
                     if (this.currentState.hasNetworkConnection) {
                         this.status = true;
-                        // Verifica si la sincronización ya está en curso
-                        if (!this.syncInvoicesInProgress) {
-                            // Marca la sincronización como en curso
-                            this.syncInvoicesInProgress = true;
-                            try {
-                                await this.syncInvoices();
-                                await this.syncPayments();
-                            } finally {
-                                // Marca la sincronización como completa, independientemente del resultado
-                                this.syncInvoicesInProgress = false;
-                            }
-                        }
+
+                        // // Verifica si la sincronización ya está en curso
+                        // if (!this.syncInvoicesInProgress) {
+                        //     // Marca la sincronización como en curso
+                        //     this.syncInvoicesInProgress = true;
+                        //     try {
+                        //         await this.syncInvoices();
+                        //         await this.syncPayments();
+                        //     } finally {
+                        //         // Marca la sincronización como completa, independientemente del resultado
+                        //         this.syncInvoicesInProgress = false;
+                        //     }
+                        // }
                     } else {
                         this.status = false;
                     }
@@ -67,32 +68,48 @@ export class SyncService {
             )
             .subscribe();
         this.initService();
-        this.syncData();
+      //  this.syncData();
     }
 
     async getAllItemsWareHousePrice(whsCode: number) {
         try {
-            let inventory = await firstValueFrom(
+            const apiDataPromise = firstValueFrom(
                 this.http.get<ItemWareHouse[]>(
                     `${environment.uriLogistic}/api/Item/AlltemStockWareHousePrice${whsCode}`
+                ).pipe(
+                    catchError((error) => throwError(() => error)),
+                    timeout(5000) // Espera máximo 5 segundos para la respuesta de la API
                 )
             );
-            this.db.inventory.clear();
-            inventory.map((x) => this.db.inventory.add(x));
+
+            const inventory = await Promise.race([
+                apiDataPromise,
+                new Promise(resolve => setTimeout(() => resolve([]), 3000)) // Devuelve un array vacío si la API no responde en 3 segundos
+            ]) as ItemWareHouse[];
+
+            // Si inventory está vacío, significa que se resolvió el timeout
+            if (inventory.length === 0) {
+                throw new Error('API request timed out');
+            }
+
+            await this.db.inventory.clear();
+            await Promise.all(inventory.map(x => this.db.inventory.add(x)));
+
             return inventory;
         } catch {
-            let data = await this.db.inventory.toArray();
+            const data = await this.db.inventory.toArray();
             return data;
         }
     }
 
+
     async syncInvoices() {
         try {
+            Messages.Toas('Sincronizando datos');
             this.invoiceService.setIsSync(true);
             let invoicesOffline = await this.db.invoice.toArray();
             let ordersOffline = await this.db.orderSales.toArray();
             if (invoicesOffline.length > 0) {
-                Messages.Toas('Sincronizando datos');
                 invoicesOffline.map(
                     (invoice) => (invoice.detailDto = invoice.detail)
                 );
@@ -103,6 +120,9 @@ export class SyncService {
                         // Si la factura se agrega correctamente, elimina el registro localmente.
                         await this.db.invoice.delete(invoice.id);
                     } catch (ex) {
+                        if(ex.error.message=="Error: Esta factura ya existe en la base de datos. UUID"){
+                            await this.db.invoice.delete(invoice.id);
+                        }
                         await Messages.warning('Advertencia: ' + ex.error.message);
                     }
                 }
@@ -115,13 +135,13 @@ export class SyncService {
                         // Si la factura se agrega correctamente, elimina el registro localmente.
                         await this.db.orderSales.delete(orders.id);
                     } catch (ex) {
+
                         Messages.Toas('Advertencia: ' + ex);
                     }
                 }
             }
             await this._getNumeration();
             Messages.closeLoading();
-            Messages.Toas('Facturas, pagos y pedidos sincronizados.');
             this.invoiceService.setIsSync(false);
         } catch (ex) {
             this.invoiceService.setIsSync(false);
@@ -142,11 +162,18 @@ export class SyncService {
                         // Si la factura se agrega correctamente, elimina el registro localmente.
                         await this.db.payment.delete(payment.id);
                     } catch (ex) {
-                        Messages.Toas('Advertencia: ' + ex);
+                        debugger
+                        if(ex.error.message=="Error: Esta pago ya existe en la base de datos. UUID"){
+                            await this.db.payment.delete(payment.id);
+                        }
+                        await Messages.warning('Advertencia: Error al sincronizar un pago: ' + ex.error.message);
                     }
                 }
-                Messages.closeLoading();
+
             }
+            Messages.Toas('Facturas, pagos y pedidos sincronizados.');
+            //Messages.closeLoading();
+
         } catch (ex) {
             Messages.closeLoading();
             Messages.Toas('Advertencia: ' + ex);

@@ -3,6 +3,7 @@ import { PaymentSaleModel } from '../models/payment-sale-model';
 import { CommonService } from 'src/app/service/common.service';
 import { Messages } from 'src/app/helpers/messages';
 import EscPosEncoder from 'esc-pos-encoder-ionic';
+import { PrinterConectionService } from 'src/app/service/printer-conection.service';
 
 @Injectable({
     providedIn: 'root',
@@ -11,30 +12,36 @@ export class PrintEscPaymentService {
     printerCharacteristic;
     documentModel: PaymentSaleModel;
 
-    constructor(private commonService: CommonService) {}
+    constructor(
+        private commonService: CommonService,
+        private conectPrinter: PrinterConectionService
+    ) {}
 
     async printInvoice(document: PaymentSaleModel) {
-        debugger
-        Messages.loading('Impresion', 'Imprimiendo documento...');
-        await this.connectPrinter(document);
-        Messages.closeLoading();
+        let print = await Messages.question(
+            'Impresion',
+            '¿Desea imprimir la factura?'
+        );
+        if (print) {
+            Messages.loading('Impresion', 'Imprimiendo documento...');
+            await this.connectPrinter(document);
+            Messages.closeLoading();
+        }
     }
 
     async sendToPrint(document: PaymentSaleModel) {
-        await this.await100ms();
         await this.generateHeader(document);
-        await this.await100ms();
+
         await this.generateDetail(document);
-        await this.await100ms();
+
         await this.generateFooter(document);
-        await this.await100ms();
     }
 
     async generateHeader(document: PaymentSaleModel) {
         const companyInfo = await this.commonService.companyInfo();
         const companyEncoder = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .line(companyInfo.companyName)
             .newline()
             .line('RTN: ' + companyInfo.rtn)
@@ -42,13 +49,12 @@ export class PrintEscPaymentService {
             .line(companyInfo.addressLine2)
             .line(companyInfo.email1)
             .encode();
-        await this.await100ms();
 
         await this.printToPrinter(companyEncoder);
 
         const invoiceEncoder = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .newline()
             .line('Pago N°: ' + document.docId.toString())
             .line(
@@ -65,38 +71,40 @@ export class PrintEscPaymentService {
             .line('Referencia: ' + document.reference)
             .newline()
             .encode();
-        await this.await100ms();
 
         await this.printToPrinter(invoiceEncoder);
 
         const detailHeader = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .bold()
             .line('------------------------------------------------') // Línea horizontal
-            .line('Factura          Vencimiento     Total      Pago')
+            .line('Factura          Vencimiento     Pago      Saldo')
             .line('------------------------------------------------') // Línea horizontal
             .encode();
-        await this.await100ms();
+
         await this.printToPrinter(detailHeader);
     }
     async generateDetail(document: PaymentSaleModel) {
         const detail = document.detail ? [...document.detail] : [];
-        await this.await100ms();
         for (const item of detail) {
-            await this.await100ms();
             const invoiceNum = item.invoiceId.toString().padEnd(20);
-            const dueDate =new Date(item.dueDate).toLocaleDateString('es-HN').padStart(8);
+            const dueDate = new Date(item.dueDate)
+                .toLocaleDateString('es-HN')
+                .padStart(8);
             const lineTotal = item.lineTotal.toFixed(2).toString().padStart(8);
-            const sumApplied = item.sumApplied.toFixed(2).toString().padStart(11);
+            let result = (item.balance - item.sumApplied).toFixed(2).toString();
+            const saldo = result.padStart(8);
+            const sumApplied = item.sumApplied
+                .toFixed(2)
+                .toString()
+                .padStart(11);
             const detailItems = new EscPosEncoder()
                 .initialize()
-                .codepage('cp852')
-                .line(
-                    `${invoiceNum}${dueDate}${lineTotal}${sumApplied}`
-                )
+                .codepage('cp437')
+                .line(`${invoiceNum}${dueDate}${sumApplied}${saldo}`)
                 .encode();
-            await this.await100ms();
+
             await this.printToPrinter(detailItems);
         }
     }
@@ -105,30 +113,30 @@ export class PrintEscPaymentService {
         const total = document.docTotal.toFixed(2).toString().padStart(8);
         const footer = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .newline()
             .line('*****************ULTIMA LINEA******************')
             .align('right')
             .line('Total ' + total)
             .newline()
             .encode();
-        await this.await100ms();
+
         await this.printToPrinter(footer);
 
         const footer2 = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .newline()
             .align('left')
             .line('Comentario: ' + document.comment)
             .newline()
             .encode();
-        await this.await100ms();
+
         await this.printToPrinter(footer2);
 
         const footer3 = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .newline()
             .align('left')
             .line(document.createByName)
@@ -137,30 +145,23 @@ export class PrintEscPaymentService {
             .line('Elaborado Por')
             .newline()
             .encode();
-        await this.await100ms();
+
         await this.printToPrinter(footer3);
     }
 
     async await100ms(): Promise<void> {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     async connectPrinter(document: PaymentSaleModel) {
         try {
-            if (!this.printerCharacteristic) {
-                const mobileNavigatorObject: any = window.navigator;
-                if (mobileNavigatorObject && mobileNavigatorObject.bluetooth) {
-                    const device = await mobileNavigatorObject.bluetooth.requestDevice({
-                        filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }],
-                    });
-                    const server = await device.gatt.connect();
-                    const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
-                    this.printerCharacteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
-                    debugger
-                    this.sendToPrint(document); // Iniciar impresión después de la conexión
-                }
+            if (this.conectPrinter.isPrinterConect) {
+                await this.sendToPrint(document); // Iniciar impresión después de la conexión
             } else {
-                this.sendToPrint(document);
+                await this.conectPrinter.connectPrinter();
+                if (this.conectPrinter.isPrinterConect) {
+                    await this.sendToPrint(document);
+                }
             }
         } catch (error) {
             Messages.warning('Error durante la impresión:', error);
@@ -168,23 +169,24 @@ export class PrintEscPaymentService {
     }
 
     async printToPrinter(result) {
-        await this.await100ms();
-        if (this.printerCharacteristic != null) {
-            const MAX_CHUNK_SIZE = 128;
-            for (
-                let offset = 0;
-                offset < result.byteLength;
-                offset += MAX_CHUNK_SIZE
-            ) {
+        if (this.conectPrinter.printerCharacteristic != null) {
+            const MAX_CHUNK_SIZE = 32; // Tamaño del chunk reducido a 32 bytes
+            const DELAY_BETWEEN_CHUNKS = 50; // Retraso de 50 milisegundos entre chunks
+
+            for (let offset = 0; offset < result.byteLength; offset += MAX_CHUNK_SIZE) {
                 const chunk = result.slice(offset, offset + MAX_CHUNK_SIZE);
+
                 try {
-                    // await this.await100ms();
-                    await this.printerCharacteristic.writeValue(chunk);
+                    await this.conectPrinter.printerCharacteristic.writeValue(chunk);
+
+                    // Agregar un retraso entre cada chunk para permitir que el dispositivo procese
+                    await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_CHUNKS));
                 } catch (error) {
                     Messages.warning(
                         'Error al imprimir',
-                        'Ocurrio un error al imprimir, favor vuelva a conectar la impresora.'
+                        'Ocurrió un error al imprimir, por favor vuelva a conectar la impresora. ' + error
                     );
+                    // Opcionalmente podrías intentar reconectar la impresora aquí si es necesario
                 }
             }
         }

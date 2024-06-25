@@ -106,7 +106,7 @@
                     </div>
                     <div class="col-12 md:col-9">
                         <p-table #dt [value]="detailView" responsiveLayout="stack"
-                            styleClass="p-datatable-sm p-datatable-striped" [paginator]="true" [rows]="10"
+                            styleClass="p-datatable-sm p-datatable-striped" [paginator]="false"
                             responsiveLayout="scroll"
                             [globalFilterFields]="['liquidationDetailId','itemName', 'lineTotal', 'itemName']">
                             <ng-template pTemplate="header">
@@ -178,5 +178,7 @@
         </ng-template>
         <br><br><br><br><br>
     </ng-container>
-    <app-invoice-sale-dialog></app-invoice-sale-dialog>
+    <p-dialog [(visible)]="displayDialog" [modal]="true" [style]="{width: '50vw'}" (onHide)="closeDialog()">
+          <app-invoice-sale-dialog></app-invoice-sale-dialog>
+      </p-dialog>
 </p-dialog>

@@ -90,17 +90,20 @@ export class InvoiceSaleListComponent implements OnInit {
     }
 
     _createFormBuild() {
+        const currentDate = new Date();
+        const localDateString = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10);
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                localDateString,
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                localDateString,
                 Validators.required,
             ],
         });
     }
+
 
     async search() {
         try {
@@ -109,7 +112,7 @@ export class InvoiceSaleListComponent implements OnInit {
                 this.formFilter.value.from,
                 this.formFilter.value.to
             );
-            if (this.usuario.role != 'Administrador') {
+            if (this.usuario.roleId != 1) {
                 this.invoiceList = this.invoiceList.filter(
                     (x) => x.sellerId === this.usuario.sellerId
                 );
@@ -136,7 +139,10 @@ export class InvoiceSaleListComponent implements OnInit {
             return;
         }
         if (this.isMobile) {
-            this.InvoiceSaleDialog.showDialog(new DocumentSaleModel(), true);
+            //this.InvoiceSaleDialog.showDialog(new DocumentSaleModel(), true);
+            await this.router.navigate(['/listado-facturas-venta/factura-movil'], {
+                state: {},
+            });
         } else {
             await this.router.navigate(['/listado-facturas-venta/factura'], {
                 state: {},
@@ -144,7 +150,7 @@ export class InvoiceSaleListComponent implements OnInit {
         }
     }
 
-    editInvoice(invoice: DocumentSaleModel) {
+    async editInvoice(invoice: DocumentSaleModel) {
         if (!this.auth.hasPermission('btn_edit')) {
             Messages.warning(
                 'No tiene acceso',
@@ -152,10 +158,13 @@ export class InvoiceSaleListComponent implements OnInit {
             );
             return;
         }
-        this.InvoiceSaleDialog.showDialog(invoice, false);
+       // this.InvoiceSaleDialog.showDialog(invoice, false);
+       await this.router.navigate(['/listado-facturas-venta/factura-movil'], {
+        state: {invoice},
+    });
     }
 
-    viewInvoice(invoice: DocumentSaleModel) {
+    async viewInvoice(invoice: DocumentSaleModel) {
         if (!this.auth.hasPermission('btn_edit')) {
             Messages.warning(
                 'No tiene acceso',
@@ -163,7 +172,9 @@ export class InvoiceSaleListComponent implements OnInit {
             );
             return;
         }
-        this.InvoiceSaleDialog.showDialog(invoice, false);
+        await this.router.navigate(['/listado-facturas-venta/factura-movil'], {
+            state: {invoice},
+        });
     }
 
     async print(invoice: DocumentSaleModel) {
@@ -202,13 +213,27 @@ export class InvoiceSaleListComponent implements OnInit {
     }
 
     async syncInvoice(invoice: DocumentSaleModel) {
+        debugger
         try {
+            //const MIN_DATE = new Date('0001-01-01T00:00:00Z'); // 01/01/0001
+            //invoice.docDate = MIN_DATE;
+            const currentDate = new Date();
+            const localDateString = new Date(
+                currentDate.getTime() -
+                    currentDate.getTimezoneOffset() * 60000
+            );
+            invoice.docDate = localDateString;
             Messages.loading('Agregando', 'Agregando factura de venta');
             await this.invoiceService.addInvoice(invoice);
+
             await this.db.invoice.delete(invoice.id);
             await this.search();
             Messages.closeLoading();
         } catch (ex) {
+            if(ex.error.message=="Error: Esta factura ya existe en la base de datos. UUID"){
+                await this.db.invoice.delete(invoice.id);
+                this.search();
+            }
             Messages.closeLoading();
             Messages.warning('Advertencia', ex.error.message);
         }

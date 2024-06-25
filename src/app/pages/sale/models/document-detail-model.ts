@@ -17,6 +17,7 @@ export class DocumentSaleDetailModel{
     whsName:string;
     taxValue: number;
     unitOfMeasureName:string;
+    weight:number;
 
     constructor(data?: DocumentSaleDetailModel) {
         if (data != null) {

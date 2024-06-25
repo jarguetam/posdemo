@@ -32,6 +32,7 @@ import { ItemWareHouse } from 'src/app/pages/items/models/item-warehouse';
 import { Messages } from 'src/app/helpers/messages';
 import { Route, Router } from '@angular/router';
 import { PrintTicketService } from '../../services/print-ticket.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
     selector: 'app-invoice-sale',
@@ -52,6 +53,8 @@ export class InvoiceSaleComponent implements OnInit {
     PaymentMetodDialog: PaymentMetodDialogComponent;
     @ViewChild('quantityInput') quantityInput: ElementRef;
     @ViewChild('barcodeInput') barcodeInput: ElementRef;
+    @ViewChild('referenceInput') referenceInput: ElementRef;
+    @ViewChild('priceInput') priceInput: ElementRef;
     @ViewChild('docDate') docDate: ElementRef;
     invoice: DocumentSaleModel = new DocumentSaleModel();
     isAdd: boolean = true;
@@ -98,6 +101,7 @@ export class InvoiceSaleComponent implements OnInit {
             barcode: ['', Validators.required],
             description: ['', Validators.required],
             quantity: [0, [Validators.required, Validators.min(1)]],
+            price: [0],
         });
     }
 
@@ -109,6 +113,7 @@ export class InvoiceSaleComponent implements OnInit {
         this.isAdd = true;
         this.loading = false;
     }
+
     ngAfterViewInit(): void {
         this.docDate.nativeElement.focus();
     }
@@ -234,13 +239,20 @@ export class InvoiceSaleComponent implements OnInit {
     }
 
     _createFormBuild() {
+        const currentDate = new Date();
+        const localDateString = new Date(
+            currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
+        )
+            .toISOString()
+            .substring(0, 10);
+
         this.descuento = 0;
         this.formInvoice = this.formBuilder.group({
             docId: [this.invoice.docId ?? 0],
             docReference: [this.invoice.docReference ?? 0],
             docDate: [
                 this.invoice.docDate ??
-                    new Date().toISOString().substring(0, 10),
+                localDateString,
             ],
             customerId: [this.invoice.customerId ?? 0, Validators.required],
             customerCode: [
@@ -310,6 +322,7 @@ export class InvoiceSaleComponent implements OnInit {
                 isDelete: false,
                 isTax: false,
                 taxValue: 0,
+                weight: 0,
             })
         );
         this.showDialogItem(this.invoice.detail.length - 1);
@@ -408,6 +421,7 @@ export class InvoiceSaleComponent implements OnInit {
                 isDelete: false,
                 isTax: false,
                 taxValue: 0,
+                weight: 0,
             })
         );
         this.ItemsBrowser.index = this.invoice.detail.length - 1;
@@ -435,6 +449,7 @@ export class InvoiceSaleComponent implements OnInit {
                 isDelete: false,
                 isTax: false,
                 taxValue: 0,
+                weight: 0,
             })
         );
         this.ItemsBrowser.index = this.invoice.detail.length - 1;
@@ -457,6 +472,7 @@ export class InvoiceSaleComponent implements OnInit {
                 this.itemSelect = item;
                 this.formSearchItem.patchValue({ description: item.itemName });
                 this.formSearchItem.patchValue({ barcode: item.itemCode });
+                this.formSearchItem.patchValue({ price: item.priceSales });
                 this.quantityInput.nativeElement.focus();
             }
         }
@@ -475,11 +491,12 @@ export class InvoiceSaleComponent implements OnInit {
             this.itemSelect.unitOfMeasureName;
         this.invoice.detail[currentIndex].quantity =
             this.formSearchItem.get('quantity').value;
-        this.invoice.detail[currentIndex].price = this.itemSelect.priceSales;
+        this.invoice.detail[currentIndex].price = this.formSearchItem.get('price').value;
         this.invoice.detail[currentIndex].cost = this.itemSelect.avgPrice;
         this.invoice.detail[currentIndex].dueDate = this.itemSelect.dueDate;
         this.invoice.detail[currentIndex].stock = this.itemSelect.stock;
         this.invoice.detail[currentIndex].isTax = this.itemSelect.tax;
+        this.invoice.detail[currentIndex].weight = this.itemSelect.weight*this.formSearchItem.get('quantity').value;
         this.isTax = this.itemSelect.tax;
         this.formSearchItem.reset();
         this.barcodeInput.nativeElement.focus();
@@ -510,7 +527,8 @@ export class InvoiceSaleComponent implements OnInit {
         this.invoice.payConditionName = customer.payConditionName;
         this.invoice.payConditionDays = customer.payConditionDays;
         this.invoice.priceListId = customer.listPriceId;
-        let date = new Date(); // fecha actual
+        let docDate = this.formInvoice.get('docDate').value;
+        let date = new Date(docDate); // fecha actual
         date.setDate(date.getDate() + customer.payConditionDays);
         this.invoice.dueDate = date;
         this.isTax = customer.tax;
@@ -521,11 +539,18 @@ export class InvoiceSaleComponent implements OnInit {
                     x.payConditionId === customer.payConditionId
             )
             .sort((a, b) => b.payConditionId - a.payConditionId);
-        let docDate = this.formInvoice.get('docDate').value;
         this.invoice.docDate = docDate;
         this._createFormBuild();
         this.calculate();
+        this.referenceInput.nativeElement.focus();
+    }
+
+    goToBarCode(){
         this.barcodeInput.nativeElement.focus();
+    }
+
+    goToPrice(){
+        this.priceInput.nativeElement.focus();
     }
 
     calculate() {
@@ -572,6 +597,7 @@ export class InvoiceSaleComponent implements OnInit {
                 newEntry.docTotal = this.doctotal;
                 newEntry.dueDate = this.invoice.dueDate;
                 newEntry.createBy = this.usuario.userId;
+                newEntry.uuid = uuidv4();
                 let invoice = await this.invoiceService.addInvoice(newEntry);
                 let docDate = this.formInvoice.get('docDate').value;
                 this.invoice.docDate = docDate;
@@ -594,7 +620,11 @@ export class InvoiceSaleComponent implements OnInit {
                 Messages.Toas('Agregado Correctamente');
             } catch (ex) {
                 Messages.closeLoading();
-                Messages.warning('Advertencia', ex.error.message);
+                if (ex.error && ex.error.message) {
+                    Messages.warning('Advertencia', ex.error.message);
+                } else {
+                    Messages.warning('Advertencia', ex.message);
+                }
             }
         }
     }
@@ -628,7 +658,11 @@ export class InvoiceSaleComponent implements OnInit {
                 this.index = 0;
             } catch (ex) {
                 Messages.closeLoading();
-                Messages.warning('Advertencia', ex.error.message);
+                if (ex.error && ex.error.message) {
+                    Messages.warning('Advertencia', ex.error.message);
+                } else {
+                    Messages.warning('Advertencia', ex.message);
+                }
             }
         }
     }
@@ -651,7 +685,11 @@ export class InvoiceSaleComponent implements OnInit {
                 this.display = false;
             } catch (ex) {
                 Messages.closeLoading();
-                Messages.warning('Advertencia', ex.error.message);
+                if (ex.error && ex.error.message) {
+                    Messages.warning('Advertencia', ex.error.message);
+                } else {
+                    Messages.warning('Advertencia', ex.message);
+                }
             }
         }
     }

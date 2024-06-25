@@ -42,6 +42,14 @@ export class SalesInvoiceDialogComponent implements OnInit {
         }
     }
 
+    getTimeDifference(dueDate: Date): string {
+        const currentDate = new Date();
+        const timeDiff = new Date(dueDate).getTime() - currentDate.getTime();
+        const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+        return `${days}`;
+      }
+
+
     selectOrder() {
         if (this.selected.length === 0) {
             Messages.warning(

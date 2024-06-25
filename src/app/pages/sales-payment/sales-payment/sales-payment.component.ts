@@ -27,6 +27,7 @@ import { CustomerModel } from '../../customers/models/customer';
 import { DocumentSaleModel } from '../../sale/models/document-model';
 import { SalesService } from '../../sale/services/sales.service';
 import { Router } from '@angular/router';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
     selector: 'app-sales-payment',
@@ -45,6 +46,7 @@ export class SalesPaymentComponent implements OnInit {
     @ViewChild(PaymentMetodDialogComponent)
     PaymentMetodDialog: PaymentMetodDialogComponent;
     @ViewChild('sumApplied ') sumApplied: ElementRef;
+    @ViewChild('docDate') docDate: ElementRef;
     payment: PaymentSaleModel = new PaymentSaleModel();
     isAdd: boolean;
     isTax: boolean = false;
@@ -79,6 +81,10 @@ export class SalesPaymentComponent implements OnInit {
         this.loading = false;
     }
 
+    ngAfterViewInit(): void {
+        this.docDate.nativeElement.focus();
+    }
+
     showDialog(paymentNew: PaymentSaleModel, isAdd: boolean) {
         this.display = true;
         this.new();
@@ -106,6 +112,13 @@ export class SalesPaymentComponent implements OnInit {
         }
     }
     _createFormBuild() {
+        const currentDate = new Date();
+        const localDateString = new Date(
+            currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
+        )
+            .toISOString()
+            .substring(0, 10);
+
         this.formSales = this.formBuilder.group({
             docId: [this.payment.docId ?? 0],
             customerId: [this.payment.customerId ?? 0],
@@ -133,7 +146,8 @@ export class SalesPaymentComponent implements OnInit {
             docTotal: [this.payment.docTotal ?? 0],
             createBy: [this.payment.createBy ?? this.usuario.userId],
             detail: [[]],
-            docDate: [this.payment.docDate],
+            docDate: [this.payment.docDate ??
+                localDateString],
             sellerId: [
                 this.payment.sellerId ?? this.usuario.sellerId,
                 Validators.required,
@@ -165,6 +179,8 @@ export class SalesPaymentComponent implements OnInit {
         this.payment.customerName = customer.customerName;
         this.payment.payConditionId = customer.payConditionId;
         this.payment.payConditionName = customer.payConditionName;
+        this.payment.docDate =this.formSales.controls['docDate'].value;
+
         // await this.showSalesInvoice(customer.customerId);
         this.orderList = await this.orderServices.getInvoiceActiveCustomer(
             customer.customerId
@@ -200,6 +216,7 @@ export class SalesPaymentComponent implements OnInit {
                 isDelete: false,
                 sumApplied: document.balance,
                 balance: document.balance,
+                reference: document.reference
             })
         );
         this.detail = paymentDetails;
@@ -250,7 +267,6 @@ export class SalesPaymentComponent implements OnInit {
                 newEntry.docId = 0;
                 newEntry.detail = this.detail;
                 newEntry.docTotal = this.doctotal;
-                newEntry.docDate = new Date(Date.now());
                 newEntry.customerCode =
                     this.formSales.controls['customerCode'].value;
                 newEntry.customerName =
@@ -261,6 +277,7 @@ export class SalesPaymentComponent implements OnInit {
                 newEntry.chekSum = this.payment.chekSum;
                 newEntry.transferSum = this.payment.transferSum;
                 newEntry.cardSum = this.payment.cardSum;
+                newEntry.uuid = uuidv4();
                 this.detail = [];
                 this.doctotal = 0;
                 Messages.loading(
@@ -276,6 +293,8 @@ export class SalesPaymentComponent implements OnInit {
                 //this.PaymentSalesModify.emit(payment);
                 this.formSales.reset();
                 this.formSales.controls['reference'].setValue('');
+                this.formSales.controls['docDate'].setValue(this.payment.docDate);
+                this.docDate.nativeElement.focus();
                 this.display = false;
             } catch (ex) {
                 Messages.closeLoading();
@@ -373,4 +392,10 @@ export class SalesPaymentComponent implements OnInit {
             this.f10Pressed = false;
         }
     }
+
+    calculateDifference(row: PaymentDetailModel) {
+        const difference = row.balance - row.sumApplied;
+        return difference.toFixed(2);
+    }
+
 }

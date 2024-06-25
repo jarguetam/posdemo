@@ -87,6 +87,7 @@ import { TreeTableModule } from 'primeng/treetable';
 import { VirtualScrollerModule } from 'primeng/virtualscroller';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ReportSalesDateComponent } from './report-sales-date/report-sales-date.component';
+import { ReportCxcSellerComponent } from './report-cxc-seller/report-cxc-seller.component';
 
 @NgModule({
     declarations: [
@@ -94,6 +95,7 @@ import { ReportSalesDateComponent } from './report-sales-date/report-sales-date.
         ReportInventoryWarehouseComponent,
         ReportPurchaseComponent,
         ReportSalesDateComponent,
+        ReportCxcSellerComponent,
     ],
     imports: [
         CommonModule,

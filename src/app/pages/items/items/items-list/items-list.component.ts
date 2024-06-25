@@ -5,6 +5,7 @@ import { ItemsDialogComponent } from '../items-dialog/items-dialog.component';
 import { ItemService } from '../../service/items.service';
 import { Messages } from 'src/app/helpers/messages';
 import { BarcodeService } from '../../service/barcode-service.service';
+import { ViewJornalItemsDialogComponent } from '../../view-jornal-items-dialog/view-jornal-items-dialog.component';
 
 
 @Component({
@@ -14,6 +15,8 @@ import { BarcodeService } from '../../service/barcode-service.service';
 })
 export class ItemsListComponent implements OnInit {
     @ViewChild(ItemsDialogComponent) ItemsDialog: ItemsDialogComponent;
+    @ViewChild(ViewJornalItemsDialogComponent)
+    ViewJornalDialog: ViewJornalItemsDialogComponent;
     title: string = "Listado de articulos";
     itemsList: ItemModel[];
     loading: boolean = false;
@@ -64,6 +67,17 @@ export class ItemsListComponent implements OnInit {
       printBarcodes(item: ItemModel){
         const codesPerPage = 12;
         this.barCode.generateBarcode(item.barCode, codesPerPage);
+    }
+
+    viewHistory(item: ItemModel){
+        if (!this.auth.hasPermission('btn_history')) {
+            Messages.warning(
+                'No tiene acceso',
+                'No puede ver historial de transacciones, por favor solicite el acceso.'
+            );
+            return;
+        }
+        this.ViewJornalDialog.showDialog(item.itemId);
     }
 
 }

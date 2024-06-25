@@ -22,6 +22,7 @@ export class PaymentSaleModel{
     payConditionName: string;
     createByName:string;
     sellerId: number;
+    uuid: string;
 
 
 
@@ -45,6 +46,7 @@ export class PaymentSaleModel{
             this.complete = data.complete;
             this.detail = data.detail;
             this.sellerId = data.sellerId;
+            this.uuid = data.uuid;
             return;
         }
         this.docId = this.docId;
@@ -65,6 +67,7 @@ export class PaymentSaleModel{
         this.complete = this.complete;
         this.detail = [];
         this.sellerId = this.sellerId;
+        this.uuid = this.uuid;
         return;
     }
 }

@@ -1,5 +1,6 @@
 import {
     Component,
+    ElementRef,
     EventEmitter,
     HostListener,
     OnInit,
@@ -33,6 +34,7 @@ export class InvoicePurchaseDialogComponent implements OnInit {
     @ViewChild(ItemsBrowserComponent) ItemsBrowser: ItemsBrowserComponent;
     @ViewChild(SupplierBrowserComponent)
     SupplierBrowser: SupplierBrowserComponent;
+    @ViewChild('docDate') docDate: ElementRef;
     invoice: DocumentModel = new DocumentModel();
     isAdd: boolean;
     isTax: boolean = false;
@@ -112,10 +114,18 @@ export class InvoicePurchaseDialogComponent implements OnInit {
         this._getWareHouse();
     }
 
+    ngAfterViewInit(): void {
+        this.docDate.nativeElement.focus();
+    }
+
     _createFormBuild() {
         this.descuento = 0;
         this.formInvoice = this.formBuilder.group({
             docId: [this.invoice.docId ?? 0],
+            docDate: [
+                this.invoice.docDate ??
+                    new Date().toISOString().substring(0, 10),
+            ],
             docReference: [this.invoice.docReference ?? 0],
             supplierId: [this.invoice.supplierId ?? 0, Validators.required],
             supplierCode: [

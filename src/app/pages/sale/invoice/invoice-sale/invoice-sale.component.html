@@ -118,8 +118,10 @@
                     <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
                             <i class="pi pi-comments"></i>
-                            <input id="reference" [disabled]="disabled" type="text" pInputText
-                                formControlName="reference" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <input id="reference" [disabled]="disabled" type="text" pInputText #referenceInput
+                                formControlName="reference" [ngClass]="{ 'is-invalid': submitted && f.name.errors }"
+                                (keydown.enter)="goToBarCode()"
+                                >
                             <label for="reference">Referencia</label>
                         </span>
                         <div
@@ -137,8 +139,10 @@
                                         placeholder="Codigo producto">
                                     <input formControlName="description" id="description" type="text" pInputText
                                         placeholder="Descripcion" readonly>
-                                    <input (keydown.enter)="addLineProduct()" formControlName="quantity" id="quantity"
+                                    <input (keydown.enter)="goToPrice()" formControlName="quantity" id="quantity"
                                         type="number" pInputText placeholder="Cantidad" #quantityInput>
+                                    <input (keydown.enter)="addLineProduct()" formControlName="price" id="price"
+                                        type="number" pInputText placeholder="Precio" #priceInput>
                                     <button type="button" pButton pRipple icon="pi pi-plus" pTooltip="Agregar"
                                         tooltipPosition="bottom" (click)="addLineProduct()"
                                         [disabled]="formSearchItem.invalid">
@@ -216,11 +220,11 @@
                                             [minFractionDigits]="2" [min]="0" [max]="1000000"
                                             [ngModelOptions]="{standalone: true}" />
                                     </td>
-                                    <td>
+                                    <td pEditableColumn>
                                         <span class="p-column-title">Precio:</span>
                                         <p-cellEditor>
                                             <ng-template pTemplate="input">
-                                                <input [disabled]="disabled" pInputText type="text"
+                                                <input pInputText type="text"
                                                     (ngModelChange)="calculate()" [(ngModel)]="detail.price"
                                                     [ngModelOptions]="{standalone: true}">
                                             </ng-template>
@@ -333,8 +337,8 @@
                 </div>
                 <ng-template [ngIf]="isAdd" [ngIfElse]="addButton" >
                     <button pButton type="button" [disabled]="formInvoice.invalid || loading" (click)="addTypeInvoice()"
-                        pTooltip="Agregar nueva factura" tooltipPosition="bottom" icon="pi pi-plus"
-                        label="Agregar (F10)" class="p-button-primary">
+                        pTooltip="Guardar factura" tooltipPosition="bottom" icon="pi pi-plus"
+                        label="Guardar (F10)" class="p-button-primary">
                     </button>
                     &nbsp;
                     <button pButton type="button" pTooltip="Regresar" tooltipPosition="bottom" (click)="goBack()" icon="pi pi-plus"
@@ -357,7 +361,7 @@
                     <skeleton-table-component [title]="title"></skeleton-table-component>
                 </ng-template>
                 <ng-template #data readonly="disable">
-                    
+
                     <app-items-browser-price-sales (ItemSelect)="browserItems($event)"></app-items-browser-price-sales>
                     <app-customer-browser (CustomerSelect)="browserCustomer($event)"></app-customer-browser>
                     <app-payment-metod-dialog (PaymentMetod)="selectPaymentMetod($event)"></app-payment-metod-dialog>

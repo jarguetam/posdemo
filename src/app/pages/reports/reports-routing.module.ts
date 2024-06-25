@@ -1,3 +1,4 @@
+import { ReportCxcSellerComponent } from './report-cxc-seller/report-cxc-seller.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ReportInventoryComponent } from './report-inventory/report-inventory.component';
@@ -25,6 +26,10 @@ const routes: Routes = [
         {
           path: 'reporte-ventas',
           component: ReportSalesDateComponent
+        },
+        {
+          path: 'reporte-cxc-vendedores',
+          component: ReportCxcSellerComponent
         },
         {
           path: '',

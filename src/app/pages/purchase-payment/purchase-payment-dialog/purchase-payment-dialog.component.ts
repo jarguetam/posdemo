@@ -5,6 +5,7 @@ import {
     Output,
     ViewChild,
     EventEmitter,
+    ElementRef,
 } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Messages } from 'src/app/helpers/messages';
@@ -35,6 +36,7 @@ export class PurchasePaymentDialogComponent implements OnInit {
     @ViewChild(PaymentMetodDialogComponent)
     PaymentMetodDialog: PaymentMetodDialogComponent;
     payment: PaymentModel = new PaymentModel();
+    @ViewChild('docDate') docDate: ElementRef;
     isAdd: boolean;
     isTax: boolean = false;
     disabled: boolean = false;
@@ -54,7 +56,12 @@ export class PurchasePaymentDialogComponent implements OnInit {
     ) {
         this.usuario = this.authService.UserValue;
     }
+
     ngOnInit(): void {}
+
+    ngAfterViewInit(): void {
+        this.docDate.nativeElement.focus();
+    }
 
     showDialog(paymentNew: PaymentModel, isAdd: boolean) {
         this.display = true;
@@ -65,7 +72,7 @@ export class PurchasePaymentDialogComponent implements OnInit {
         this.doctotal = paymentNew.docTotal;
         this.detail = paymentNew.detail;
         this.doctotal = paymentNew.docTotal;
-
+        this._getData();
         this._createFormBuild();
     }
 
@@ -82,6 +89,8 @@ export class PurchasePaymentDialogComponent implements OnInit {
         }
     }
     _createFormBuild() {
+        const currentDate = new Date();
+        const localDateString = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10);
         this.formPurchase = this.formBuilder.group({
             docId: [this.payment.docId ?? 0],
             supplierId: [this.payment.supplierId ?? 0],
@@ -106,7 +115,7 @@ export class PurchasePaymentDialogComponent implements OnInit {
             docTotal: [this.payment.docTotal ?? 0],
             createBy: [this.payment.createBy ?? this.usuario.userId],
             detail: [[]],
-            docDate: [this.payment.docDate],
+            docDate: [this.payment.docDate ?? localDateString],
         });
         this.formPurchase.controls['payConditionId'].disable({
             onlySelf: false,
@@ -131,6 +140,7 @@ export class PurchasePaymentDialogComponent implements OnInit {
         this.payment.supplierName = supplier.supplierName;
         this.payment.payConditionId = supplier.payConditionId;
         this.payment.payConditionName = supplier.payConditionName;
+        this.payment.docDate =this.formPurchase.controls['docDate'].value;
         await this.showPurchaseInvoice(supplier.supplierId);
         this._createFormBuild();
     }
@@ -154,7 +164,8 @@ export class PurchasePaymentDialogComponent implements OnInit {
                 lineTotal: document.docTotal,
                 isDelete: false,
                 balance: document.balance,
-                sumApplied: document.balance
+                sumApplied: document.balance,
+                reference: document.reference
             })
         );
         this.detail = paymentDetails;
@@ -201,7 +212,7 @@ export class PurchasePaymentDialogComponent implements OnInit {
                 newEntry.docId = 0;
                 newEntry.detail = this.detail;
                 newEntry.docTotal = this.doctotal;
-                newEntry.docDate = new Date(Date.now());
+                newEntry.docDate = this.formPurchase.controls['docDate'].value;
                 newEntry.supplierCode =
                     this.formPurchase.controls['supplierCode'].value;
                 newEntry.supplierName =

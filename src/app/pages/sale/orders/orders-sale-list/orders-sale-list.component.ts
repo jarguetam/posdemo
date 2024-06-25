@@ -55,12 +55,12 @@ export class OrdersSaleListComponent implements OnInit {
                 this.formFilter.value.to
             );
 
-            if (this.usuario.role != 'Administrador') {
+            if (this.usuario.roleId != 1) {
                 this.orderList = this.orderList.filter(
                     (x) => x.sellerId === this.usuario.sellerId
                 );
             }
-            
+
             Messages.closeLoading();
             this.loading = false;
         } catch (ex) {

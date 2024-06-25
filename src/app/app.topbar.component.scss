@@ -46,3 +46,17 @@
     font-size: 14px;
     margin-left: 5px;
 }
+
+.status-button {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+    outline: inherit;
+    text-decoration: underline; /* Opcional: para dar la apariencia de enlace */
+}
+
+/* Agregar otros estilos según sea necesario */
+

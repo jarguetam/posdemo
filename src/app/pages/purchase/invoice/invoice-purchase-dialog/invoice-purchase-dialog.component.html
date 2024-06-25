@@ -7,7 +7,7 @@
         <ng-template #data readonly="disable">
             <form [formGroup]="formInvoice" *ngIf="formInvoice" class="mb-5">
                 <div class="grid p-fluid">
-                    <div class="col-12 md:col-12">
+                    <div class="col-12 md:col-8">
                         <span class="mt-4 p-float-label p-input-icon-left">
                             <div class="p-inputgroup">
                                 <button [disabled]="disabled" type="button" pButton pRipple icon="pi pi-search"
@@ -24,6 +24,18 @@
                             *ngIf="formInvoice.controls['supplierName'].invalid && formInvoice.controls['supplierName'].dirty">
                             <small *ngIf="formInvoice.controls['supplierName'].errors.required" id="supplierName"
                                 class="p-error block">Proveedor es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-4">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-comments"></i>
+                            <input id="docDate" [disabled]="disabled" type="date" pInputText #docDate
+                                formControlName="docDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <label for="docDate">Fecha Documento</label>
+                        </span>
+                        <div *ngIf="formInvoice.controls['docDate'].invalid && formInvoice.controls['docDate'].dirty">
+                            <small *ngIf="formInvoice.controls['docDate'].errors.required" id="docDate"
+                                class="p-error block">Fecha Documento es requerido</small>
                         </div>
                     </div>
                     <div class="col-12 md:col-6">
@@ -89,7 +101,7 @@
                                     <th pSortableColumn="quantity">Cantidad</th>
                                     <th pSortableColumn="price">Precio</th>
                                     <th pSortableColumn="stock">Stock Actual</th>
-                                    <th pSortableColumn="dueDate">Vencimiento</th>
+                                    <!-- <th pSortableColumn="dueDate">Vencimiento</th> -->
                                     <th pSortableColumn="Unidad">Unidad</th>
                                     <th pSortableColumn="lineTotal">Total</th>
                                     <th>Accion</th>
@@ -168,7 +180,7 @@
                                         <span class="p-column-title">Stock Actual</span>
                                         {{detail.stock}}
                                     </td>
-                                    <td pEditableColumn>
+                                    <!-- <td pEditableColumn>
                                         <span class="p-column-title">Vencimiento</span>
                                         <p-cellEditor>
                                             <ng-template pTemplate="input">
@@ -179,7 +191,7 @@
                                                 {{detail.dueDate |date:'dd/MM/yyyy'}}
                                             </ng-template>
                                         </p-cellEditor>
-                                    </td>
+                                    </td> -->
                                     <td>
                                         <span class="p-column-title">Medida</span>
                                         <p-cellEditor>
@@ -219,7 +231,7 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <td></td>
+                                    <!-- <td></td> -->
                                     <td></td>
                                     <td>Sub total</td>
                                     <td>{{subdoctotal | currency: 'L. '}}</td>
@@ -228,7 +240,7 @@
                                 <tr>
                                     <td></td>
                                     <td></td>
-                                    <td></td>
+                                    <!-- <td></td> -->
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -245,7 +257,7 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    <td></td>
+                                    <!-- <td></td> -->
                                     <td></td>
                                     <td>Impuesto</td>
                                     <td>{{tax | currency: 'L. '}}</td>
@@ -255,7 +267,7 @@
                                     <td>Total:</td>
                                     <td></td>
                                     <td>{{docQuantity}}</td>
-                                    <td></td>
+                                    <!-- <td></td> -->
                                     <td></td>
                                     <td></td>
                                     <td>Total</td>

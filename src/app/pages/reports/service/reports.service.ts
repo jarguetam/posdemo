@@ -39,4 +39,9 @@ export class ReportsService {
         const url = `${environment.uriLogistic}/api/Reports/GetSalesReport${from}/${to}`;
         return this.http.get(url, { responseType: 'blob' });
       }
+
+    getReportCxCPdf(sellerId: number): Observable<Blob> {
+        const url = `${environment.uriLogistic}/api/Reports/GetCXCReport${sellerId}`;
+        return this.http.get(url, { responseType: 'blob' });
+      }
 }

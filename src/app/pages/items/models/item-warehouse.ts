@@ -17,4 +17,5 @@ export class ItemWareHouse {
     createDate: Date;
     dueDate: Date;
     listPriceId: number;
+    weight: number;
 }

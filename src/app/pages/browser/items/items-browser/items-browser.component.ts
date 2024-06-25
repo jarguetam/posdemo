@@ -1,5 +1,5 @@
 import { ItemModel } from './../../../items/models/items';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, Renderer2 } from '@angular/core';
 import { ItemService } from 'src/app/pages/items/service/items.service';
 import { Messages } from 'src/app/helpers/messages';
 
@@ -14,7 +14,7 @@ export class ItemsBrowserComponent implements OnInit {
     display: boolean = false;
     index: number = -1;
 
-    constructor(private itemServices: ItemService) {}
+    constructor(private itemServices: ItemService, private renderer: Renderer2) {}
     items: ItemModel[];
     item: ItemModel = new ItemModel();
 
@@ -37,6 +37,11 @@ export class ItemsBrowserComponent implements OnInit {
     showDialog(type: String) {
         this._get(type);
         this.display = true;
+            setTimeout(
+                () => this.renderer.selectRootElement('#searchItem').focus(),
+                500
+            );
+
     }
 
     selectItem(c: ItemModel) {

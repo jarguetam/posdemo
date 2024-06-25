@@ -18,7 +18,8 @@ export class PrintTicketService {
     constructor(private commonService: CommonService) {}
 
     async printInvoice(document: DocumentSaleModel) {
-        let detail = [...document.detailDto];
+        debugger
+        let detail = [...(document.detailDto && document.detailDto.length > 0 ? document.detailDto : document.detail)];
         let height = this.calculateLastHeight(detail, 90);
         const doc = new jsPDF({
             orientation: 'p',
@@ -55,11 +56,11 @@ export class PrintTicketService {
         }
 
         let base64data = await blobToBase64(doc.output('blob'));
-        // printJS({
-        //     printable: base64data,
-        //     type: 'pdf',
-        //     base64: true,
-        // });
+        printJS({
+            printable: base64data,
+            type: 'pdf',
+            base64: true,
+        });
 
         const blob = doc.output('blob');
         const buffer = await blob.arrayBuffer();

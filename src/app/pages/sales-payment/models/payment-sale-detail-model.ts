@@ -12,6 +12,7 @@ export class PaymentSaleDetailModel {
     isDelete: boolean;
     sumApplied: number;
     balance: number;
+    reference: string;
 
     constructor(data?: PaymentSaleDetailModel) {
         if (data != null) {
@@ -25,6 +26,7 @@ export class PaymentSaleDetailModel {
             this.taxTotal = data.taxTotal;
             this.discountTotal = data.discountTotal;
             this.lineTotal = data.lineTotal;
+            this.reference = data.reference;
             return;
         }
         this.docDetailId = this.docDetailId;
@@ -36,5 +38,6 @@ export class PaymentSaleDetailModel {
         this.taxTotal = this.taxTotal;
         this.discountTotal = this.discountTotal;
         this.lineTotal = this.lineTotal;
+        this.reference = this.reference;
     }
 }

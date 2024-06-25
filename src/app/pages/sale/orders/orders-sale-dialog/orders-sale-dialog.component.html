@@ -310,4 +310,6 @@
         <br><br><br><br><br>
     </ng-container>
 </p-dialog>
-<app-invoice-sale-dialog (InvoiceSaleModify)="invoiceModify($event)"></app-invoice-sale-dialog>
+<p-dialog [(visible)]="displayDialog" [modal]="true" [style]="{width: '50vw'}" (onHide)="closeDialog()">
+    <app-invoice-sale-dialog></app-invoice-sale-dialog>
+</p-dialog>

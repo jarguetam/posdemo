@@ -37,6 +37,8 @@ import { tap } from 'rxjs';
 import { Table } from 'primeng/table';
 import { PrintEscPosService } from '../../services/print-esc-pos.service';
 import { ListModel } from '../../models/list-model';
+import { Router } from '@angular/router';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
     selector: 'app-invoice-sale-dialog',
@@ -72,7 +74,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
     descuento: number = 0;
     wareHouseList: WareHouseModel[];
     detail: DocumentSaleDetailModel[] = [];
-    list: ListModel[]=[];
+    list: ListModel[] = [];
     sellerList: SellerModel[];
     sarList: Correlative[] = [];
     index = 0;
@@ -86,7 +88,9 @@ export class InvoiceSaleDialogComponent implements OnInit {
     status: boolean;
     currentState!: ConnectionState;
     disabledwsh: boolean = false;
-
+    isOffline: boolean = false;
+    offlineId: number = 0;
+    title: string = 'Agregar factura';
 
     constructor(
         private formBuilder: FormBuilder,
@@ -97,7 +101,8 @@ export class InvoiceSaleDialogComponent implements OnInit {
         private sellerService: SellerService,
         private commonService: CommonService,
         private db_local: DbLocalService,
-        private connectionService: ConnectionService
+        private connectionService: ConnectionService,
+        private router: Router
     ) {
         this.usuario = this.auth.UserValue;
         this.company = this.auth.CompanyValue;
@@ -118,6 +123,13 @@ export class InvoiceSaleDialogComponent implements OnInit {
                 })
             )
             .subscribe();
+        if (history.state.invoice) {
+            this.isAdd = false;
+            this.title = 'Editar factura';
+            this.showDialog(history.state.invoice, false);
+        } else {
+            this.showDialog(new DocumentSaleModel(), true);
+        }
     }
 
     async _getWareHouse() {
@@ -205,9 +217,16 @@ export class InvoiceSaleDialogComponent implements OnInit {
     }
 
     async showDialog(invoiceNew: DocumentSaleModel, isAdd: boolean) {
+        if (invoiceNew.id != null && invoiceNew.id !== 0) {
+            this.isOffline = true;
+            this.offlineId = invoiceNew.id;
+        }
         this.display = true;
         this.new();
         this.isAdd = isAdd;
+        if (!this.isAdd) {
+            this.title = 'Factura de venta';
+        }
         this.disabled = isAdd ? false : true;
         this.invoice = invoiceNew;
         if (isAdd) {
@@ -233,6 +252,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
         await this._getNumeration();
         this.disabledwsh = this.usuario.role == 'Vendedor' ? true : false;
         this._createFormBuild();
+        console.log(this.isAdd);
     }
 
     _createFormBuild() {
@@ -310,6 +330,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
                 isDelete: false,
                 isTax: false,
                 taxValue: 0,
+                weight: 0,
             })
         );
         this.showDialogItem(this.invoice.detail.length - 1);
@@ -371,6 +392,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
                 isDelete: false,
                 isTax: false,
                 taxValue: 0,
+                weight: 0,
             })
         );
         this.ItemsBrowser.index = this.invoice.detail.length - 1;
@@ -399,11 +421,13 @@ export class InvoiceSaleDialogComponent implements OnInit {
                 isDelete: false,
                 isTax: false,
                 taxValue: 0,
+                weight: 0,
             })
         );
         this.ItemsBrowser.index = this.invoice.detail.length - 1;
         this.showDialogItem(this.invoice.detail.length - 1);
     }
+
     browserItems(item: ItemWareHouse) {
         if (this.ItemsBrowser.index != -1) {
             let currentIndex = this.ItemsBrowser.index;
@@ -415,7 +439,13 @@ export class InvoiceSaleDialogComponent implements OnInit {
                     .quantity++;
                 this.calculate();
             } else {
-                this.list.push(new ListModel(item.itemName,this.invoice.detail[currentIndex].quantity.toString() ,item.priceSales.toString(),));
+                this.list.push(
+                    new ListModel(
+                        item.itemName,
+                        this.invoice.detail[currentIndex].quantity.toString(),
+                        item.priceSales.toString()
+                    )
+                );
                 this.invoice.detail[currentIndex].itemId = item.itemId;
                 this.invoice.detail[currentIndex].itemCode = item.itemCode;
                 this.invoice.detail[currentIndex].itemName = item.itemName;
@@ -467,8 +497,14 @@ export class InvoiceSaleDialogComponent implements OnInit {
         this.invoice.payConditionName = customer.payConditionName;
         this.invoice.payConditionDays = customer.payConditionDays;
         this.invoice.priceListId = customer.listPriceId;
+        const currentDate = new Date();
+
         let date = new Date(); // fecha actual
+        date = new Date(
+            currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
+        );
         date.setDate(date.getDate() + customer.payConditionDays);
+
         this.invoice.dueDate = date;
         this.isTax = customer.tax;
         this._createFormBuild();
@@ -524,6 +560,9 @@ export class InvoiceSaleDialogComponent implements OnInit {
             newEntry.disccounts = this.descuento;
             newEntry.discountsTotal = this.descuentoTotal;
             newEntry.subTotal = this.subdoctotal;
+            newEntry.payConditionName = this.payConditionList.find(
+                (x) => x.payConditionId == newEntry.payConditionId
+            ).payConditionName;
             newEntry.tax = this.tax;
             newEntry.docTotal = this.doctotal;
             newEntry.dueDate = this.invoice.dueDate;
@@ -532,28 +571,42 @@ export class InvoiceSaleDialogComponent implements OnInit {
                 (x) => x.sellerId === newEntry.sellerId
             ).sellerName;
             newEntry.createByName = this.usuario.name;
-            newEntry.docDate = new Date(Date.now());
+            const MIN_DATE = new Date('0001-01-01T00:00:00Z'); // 01/01/0001
+            newEntry.docDate = MIN_DATE;
+            newEntry.uuid = uuidv4();
 
             if (this.status) {
                 let invoice = await this.invoiceService.addInvoice(newEntry);
                 await this.printService.printInvoice(invoice[0]);
                 let correlative = await this.db_local.correlative.toArray();
                 this.updateCorrelative(correlative[0].correlativeId);
-                this.InvoiceSaleModify.emit(invoice);
+                await this.db_local.customers
+                    .where('customerId')
+                    .equals(newEntry.customerId)
+                    .modify((x) => {
+                        x.balance = x.balance + newEntry.docTotal;
+                    });
+                await this.router.navigate(['/listado-facturas-venta'], {
+                    state: {},
+                });
+                await this.router.navigate(['/listado-facturas-venta'], {
+                    state: {},
+                });
+                Messages.closeLoading();
+                Messages.Toas('Agregado Correctamente');
+                this.display = false;
+                this.index = 0;
             } else {
                 await this.addOffline(newEntry);
             }
-            Messages.closeLoading();
-            Messages.Toas('Agregado Correctamente');
-            this.display = false;
-            this.index = 0;
         } catch (ex) {
             debugger;
             let message: string;
             if (ex.error && ex.error.message) {
                 message = ex.error.message.toString();
             } else if (ex.message) {
-                message = "La solicitud tardó demasiado en enviarse y se guardará localmente para su procesamiento posterior.";
+                message =
+                    'La solicitud tardó demasiado en enviarse y se guardará localmente para su procesamiento posterior.';
             } else {
                 message = 'Error desconocido';
             }
@@ -567,6 +620,16 @@ export class InvoiceSaleDialogComponent implements OnInit {
 
     async addOffline(newEntry: DocumentSaleModel) {
         try {
+            const hasPriceZero = newEntry.detail.some(
+                (item) => item.price === 0
+            );
+            if (hasPriceZero) {
+                Messages.Toas(
+                    'Advertencia',
+                    'No puede agregar un articulo con precio 0'
+                );
+                return;
+            }
             let correlative = await this.db_local.correlative.toArray();
             newEntry.authorizedRangeFrom = this.formatNumberTo8Digits(
                 correlative[0].authorizeRangeFrom
@@ -581,40 +644,96 @@ export class InvoiceSaleDialogComponent implements OnInit {
             let number = correlative[0].currentCorrelative + 1;
             newEntry.invoiceFiscalNo = this.formatNumberTo8Digits(number);
             newEntry.deiNumber = this.formatNumberTo8Digits(number);
-            await this.db_local
-                .table('invoice')
-                .add(newEntry)
-                .then(
-                    async (data) =>
-                        await this.updateCorrelative(
-                            correlative[0].correlativeId
-                        )
-                )
-                .catch((err) =>
-                    console.error('Error storing data locally:', err.message)
-                );
-
-            let invoiceOffline = await this.db_local.invoice.toArray();
-            newEntry.detail.map(
-                async (x) =>
-                    await this.loadInventoryOffline(x.itemId, x.quantity)
+            const currentDate = new Date();
+            const hondurasOffset = -6 * 60; // Honduras tiene una diferencia horaria de -6 horas respecto a UTC
+            const localDate = new Date(
+                currentDate.getTime() +
+                    (currentDate.getTimezoneOffset() + hondurasOffset) * 60000
             );
-            newEntry.detailDto = newEntry.detail;
-            await this.printService.printInvoice(newEntry);
-            this.InvoiceSaleModify.emit(invoiceOffline);
-            this.display =false;
-            Messages.closeLoading();
+            newEntry.docDate = localDate;
+
+            if (newEntry.payConditionId != 1) {
+                const data = await this.db_local.customers
+                    .where('customerId')
+                    .equals(newEntry.customerId)
+                    .toArray();
+                const facturasOffline = await this.db_local.invoice
+                    .where('customerId')
+                    .equals(newEntry.customerId)
+                    .toArray();
+                let disponible = data[0].creditLine - data[0].balance;
+                let limiteFacturas = data[0].limitInvoiceCredit;
+                let facturasCliente = await this.db_local.invoiceSeller
+                    .where('customerId')
+                    .equals(newEntry.customerId)
+                    .toArray();
+                let facturasCreditoOffline = facturasOffline.filter(
+                    (x) => x.payConditionId != 1
+                ).length;
+                let faturasDisponibles =
+                    limiteFacturas -
+                    (facturasCliente.length + facturasCreditoOffline);
+                if (newEntry.docTotal > disponible) {
+                    await Messages.warning(
+                        'Advertencia',
+                        'No puede agregar esta factura, se supera el limite disponible de: L.' +
+                            disponible
+                    );
+                    return;
+                } else if (faturasDisponibles <= 0) {
+                    await Messages.warning(
+                        'Advertencia',
+                        'No puede agregar esta factura, no tiene facturas de credito disponibles: ' +
+                            faturasDisponibles
+                    );
+                } else {
+                    await this.addInvoiceToLocal(correlative, newEntry);
+                }
+            } else {
+                await this.addInvoiceToLocal(correlative, newEntry);
+            }
         } catch (error) {
+            Messages.warning(error);
             Messages.closeLoading();
-            console.error('Error en addOffline:', error);
-            // Manejar el error aquí según sea necesario
         }
     }
 
-    action(e){
-        console.log('Action:' + e);
-    }
+    async addInvoiceToLocal(
+        correlative: Correlative[],
+        newEntry: DocumentSaleModel
+    ) {
+        await this.db_local
+            .table('invoice')
+            .add(newEntry)
+            .then(async (data) => {
+                await this.updateCorrelative(correlative[0].correlativeId);
+                await this.db_local.customers
+                    .where('customerId')
+                    .equals(newEntry.customerId)
+                    .modify((x) => {
+                        x.balance = x.balance + newEntry.docTotal;
+                    });
 
+                newEntry.detail.map(
+                    async (x) =>
+                        await this.loadInventoryOffline(x.itemId, x.quantity)
+                );
+            })
+            .catch((err) =>
+                console.error('Error storing data locally:', err.message)
+            );
+        let invoiceOffline = await this.db_local.invoice.toArray();
+
+        newEntry.detailDto = newEntry.detail;
+        await this.printService.printInvoice(newEntry);
+        await this.router.navigate(['/listado-facturas-venta'], {
+            state: {},
+        });
+        this.display = false;
+        Messages.Toas('Agregado Correctamente');
+        this.index = 0;
+        Messages.closeLoading();
+    }
 
     formatNumberTo8Digits(num: number): string {
         return num.toString().padStart(8, '0');
@@ -644,7 +763,9 @@ export class InvoiceSaleDialogComponent implements OnInit {
                 this.printService.printInvoice(invoice[0]);
                 Messages.closeLoading();
                 Messages.Toas('Editado Correctamente');
-                this.InvoiceSaleModify.emit(invoice);
+                await this.router.navigate(['/listado-facturas-venta'], {
+                    state: {},
+                });
                 this.display = false;
                 this.index = 0;
             } catch (ex) {
@@ -659,9 +780,14 @@ export class InvoiceSaleDialogComponent implements OnInit {
                         this.payment.sellerId = newEntry.sellerId;
                     }
                     newEntry.id = this.invoice.id;
-                    this.db_local.invoice.update(this.invoice.id, newEntry);
+                    await this.db_local.invoice.update(
+                        this.invoice.id,
+                        newEntry
+                    );
                     let invoiceOffline = await this.db_local.invoice.toArray();
-                    this.InvoiceSaleModify.emit(invoiceOffline);
+                    await this.router.navigate(['/listado-facturas-venta'], {
+                        state: {},
+                    });
                     this.display = false;
                     this.index = 0;
                 } else {
@@ -680,10 +806,23 @@ export class InvoiceSaleDialogComponent implements OnInit {
         if (cancel) {
             try {
                 let newEntry = this.formInvoice.value as DocumentSaleModel;
-                let invoice = await this.invoiceService.cancelInvoice(
-                    newEntry.docId
-                );
-                this.InvoiceSaleModify.emit(invoice);
+                if (this.isOffline) {
+                    await this.db_local.invoice.delete(this.offlineId);
+                    let result = await this.invoiceService.getInvoiceByDate(
+                        this.formInvoice.value.docDate,
+                        this.formInvoice.value.docDate
+                    );
+                    await this.router.navigate(['/listado-facturas-venta'], {
+                        state: {},
+                    });
+                } else {
+                    let invoice = await this.invoiceService.cancelInvoice(
+                        newEntry.docId
+                    );
+                    await this.router.navigate(['/listado-facturas-venta'], {
+                        state: {},
+                    });
+                }
                 this.display = false;
                 Messages.closeLoading();
                 Messages.Toas('Cancelado Correctamente');
@@ -699,10 +838,12 @@ export class InvoiceSaleDialogComponent implements OnInit {
         this.printService.printInvoice(this.invoice);
     }
 
-    invoiceModify(invoice: DocumentSaleModel[]) {
+    async invoiceModify(invoice: DocumentSaleModel[]) {
         // this.invoiceList = invoice;
         invoice[0].complete = true;
-        this.InvoiceSaleModify.emit(invoice);
+        await this.router.navigate(['/listado-facturas-venta'], {
+            state: {},
+        });
         this.display = false;
     }
 
@@ -750,8 +891,8 @@ export class InvoiceSaleDialogComponent implements OnInit {
         this.add(newEntry);
     }
 
-    loadInventoryOffline(itemId: number, saleQuantity: number) {
-        this.db_local.inventory
+    async loadInventoryOffline(itemId: number, saleQuantity: number) {
+        await this.db_local.inventory
             .where('itemId')
             .equals(itemId)
             .modify((x) => {
@@ -766,5 +907,11 @@ export class InvoiceSaleDialogComponent implements OnInit {
             .modify((x) => {
                 x.currentCorrelative = x.currentCorrelative + 1;
             });
+    }
+
+    async exit() {
+        await this.router.navigate(['/listado-facturas-venta'], {
+            state: {},
+        });
     }
 }

@@ -11,11 +11,12 @@ import { PrintPaymentSaleService } from '../service/print-payment-sale.service';
 import { Router } from '@angular/router';
 import { User } from 'src/app/models/user';
 import { PrintEscPaymentService } from '../service/print-esc-payment.service';
+import { DbLocalService } from 'src/app/service/db-local.service';
 
 @Component({
-  selector: 'app-sales-payment-list',
-  templateUrl: './sales-payment-list.component.html',
-  styleUrls: ['./sales-payment-list.component.scss']
+    selector: 'app-sales-payment-list',
+    templateUrl: './sales-payment-list.component.html',
+    styleUrls: ['./sales-payment-list.component.scss'],
 })
 export class SalesPaymentListComponent implements OnInit {
     @ViewChild(SalesPaymentDialogComponent)
@@ -29,13 +30,17 @@ export class SalesPaymentListComponent implements OnInit {
     f10Pressed: boolean;
     isMobile: boolean;
     usuario: User;
+    devices: any[] = [];
+    selectedDevice: any;
 
     constructor(
         private paymentService: PaymentSalesService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
         private printService: PrintEscPaymentService,
-        private router: Router
+        private router: Router,
+        private db: DbLocalService,
+
     ) {
         this._createFormBuild();
         this.search();
@@ -45,9 +50,11 @@ export class SalesPaymentListComponent implements OnInit {
 
     ngOnInit() {
         this._createFormBuild();
+        this.search();
     }
 
-    private detectMobile(): boolean {
+
+       private detectMobile(): boolean {
         const userAgent = window.navigator.userAgent.toLowerCase();
         return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
             userAgent
@@ -55,15 +62,15 @@ export class SalesPaymentListComponent implements OnInit {
     }
 
     _createFormBuild() {
+        const currentDate = new Date();
+        const localDateString = new Date(
+            currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
+        )
+            .toISOString()
+            .substring(0, 10);
         this.formFilter = this.formBuilder.group({
-            from: [
-                new Date().toISOString().substring(0, 10),
-                Validators.required,
-            ],
-            to: [
-                new Date().toISOString().substring(0, 10),
-                Validators.required,
-            ],
+            from: [localDateString, Validators.required],
+            to: [localDateString, Validators.required],
         });
     }
 
@@ -74,9 +81,14 @@ export class SalesPaymentListComponent implements OnInit {
                 this.formFilter.value.from,
                 this.formFilter.value.to
             );
-            if (this.usuario.role != 'Administrador') {
+            if (this.usuario.roleId != 1) {
                 this.paymentList = this.paymentList.filter(
                     (x) => x.sellerId === this.usuario.sellerId
+                );
+            }
+            if (this.isMobile) {
+                this.paymentList = this.paymentList.filter(
+                    (x) => x.payConditionId != 1
                 );
             }
             Messages.closeLoading();
@@ -128,21 +140,20 @@ export class SalesPaymentListComponent implements OnInit {
             );
             return;
         }
-       this.SalesPaymentDialog.showDialog(payment, false);
+        this.SalesPaymentDialog.showDialog(payment, false);
     }
 
     async print(payment: PaymentSaleModel) {
-        debugger
         await this.printService.printInvoice(payment);
     }
 
     showInvoiceSales() {
-      //  this.SalesPaymentDialog.showDialog();
+        //  this.SalesPaymentDialog.showDialog();
     }
 
     invoiceSelected(order: DocumentModel[]) {
-      //  order.docReference = order.docId;
-      //  this.SalesPaymentDialog.showDialog(order, true);
+        //  order.docReference = order.docId;
+        //  this.SalesPaymentDialog.showDialog(order, true);
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -161,4 +172,29 @@ export class SalesPaymentListComponent implements OnInit {
         }
     }
 
+    async syncPayment(payment: PaymentSaleModel) {
+        try {
+            Messages.loading('Agregando', 'Agregando pago de venta');
+            const currentDate = new Date();
+            const localDateString = new Date(
+                currentDate.getTime() -
+                    currentDate.getTimezoneOffset() * 60000
+            );
+            payment.docDate = localDateString;
+            await this.paymentService.addPaymentSales(payment);
+            await this.db.payment.delete(payment.id);
+            await this.search();
+            Messages.closeLoading();
+        } catch (ex) {
+            if (
+                ex.error.message ==
+                'Error: Este pago ya existe en la base de datos. UUID'
+            ) {
+                await this.db.payment.delete(payment.id);
+                this.search();
+            }
+            Messages.closeLoading();
+            Messages.warning('Advertencia', ex.error.message);
+        }
+    }
 }

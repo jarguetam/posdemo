@@ -115,8 +115,11 @@ export class InventoryOutPutDialogComponent implements OnInit {
     }
 
     _createFormBuild() {
+        const currentTimeStamp = Date.now();
+        const currentDate = new Date(currentTimeStamp);
         this.formOutPut = this.formBuilder.group({
             outPutId: [this.outPut.outputId ?? 0],
+            outputDate: [this.outPut.outputDate ?? currentDate.toISOString().substring(0, 10)],
             comment: [this.outPut.comment ?? 'Salida de mercancia', Validators.required],
             docTotal: [this.outPut.docTotal ?? 0],
             whsCode: [

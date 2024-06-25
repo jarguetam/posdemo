@@ -22,4 +22,5 @@ export class User {
     sarCorrelativeId: number;
     correlativeName: string;
     sellerName: string;
+    editPrice: boolean;
 }

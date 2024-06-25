@@ -55,18 +55,18 @@ export class CustomersDialogComponent implements OnInit {
         this.usuario = this.authService.UserValue;
     }
 
-    ngOnInit(): void {
-
-    }
+    ngOnInit(): void {}
 
     showDialog(customer: CustomerModel, isAdd: boolean) {
         this.new();
         this.isAdd = isAdd;
         this.customer = customer;
-        this.customer.rtn ='0101199999999'
-        this.customer.email = 'default@pos.com'
-        this.customer.phone ='99889988'
-        this.customer.address ='Principal'
+        if (this.isAdd) {
+            this.customer.rtn = '0101199999999';
+            this.customer.email = 'default@pos.com';
+            this.customer.phone = '99889988';
+            this.customer.address = 'Principal';
+        }
         this._createFormBuild();
         this.display = true;
         this._getData();
@@ -173,7 +173,7 @@ export class CustomersDialogComponent implements OnInit {
             this.zoneList = await this.customerService.getZone();
             this.zoneList.unshift({
                 id: 0,
-                zoneName: 'Seleccione la Zona'
+                zoneName: 'Seleccione la Zona',
             });
             Messages.closeLoading();
             this.loading = false;
@@ -186,7 +186,7 @@ export class CustomersDialogComponent implements OnInit {
             this.frequencyList = await this.customerService.getFrequency();
             this.frequencyList.unshift({
                 id: 0,
-                frequencyName: 'Seleccione la frecuencia'
+                frequencyName: 'Seleccione la frecuencia',
             });
             Messages.closeLoading();
             this.loading = false;
@@ -205,7 +205,7 @@ export class CustomersDialogComponent implements OnInit {
                 createDate: undefined,
                 updateBy: 0,
                 updateDate: undefined,
-                active: false
+                active: false,
             });
             Messages.closeLoading();
             this.loading = false;
@@ -257,12 +257,15 @@ export class CustomersDialogComponent implements OnInit {
             tax: [this.customer.tax ?? true],
             createBy: [this.customer.createBy ?? this.usuario.userId],
             active: [this.customer.active ?? false],
-            limitInvoiceCredit: [this.customer.limitInvoiceCredit ?? 0 ],
-            contactPerson: [this.customer.contactPerson ?? '', Validators.required],
+            limitInvoiceCredit: [this.customer.limitInvoiceCredit ?? 0],
+            contactPerson: [
+                this.customer.contactPerson ?? '',
+                Validators.required,
+            ],
             purchase: [this.customer.purchase ?? 0],
             frequencyId: [this.customer.frequencyId ?? 0],
-            zoneId: [this.customer.zoneId ?? 0 ],
-            regionId: [this.customer.regionId ?? 0 ],
+            zoneId: [this.customer.zoneId ?? 0],
+            regionId: [this.customer.regionId ?? 0],
         });
         this.formCustomer.controls['balance'].disable({ onlySelf: false });
     }

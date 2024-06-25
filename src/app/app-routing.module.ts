@@ -298,6 +298,16 @@ import { AuthGuard } from './guard/auth.guard';
                               }
                             ]
                         },
+                        {
+                            path: 'devoluciones',
+                            children: [
+                              {
+                                path: '',
+                                loadChildren: () => import('./pages/inventory-transaction/inventory-return/inventory-return.module').then(m => m.InventoryReturnModule),
+                                canActivate: [AuthGuard]
+                              }
+                            ]
+                        },
                     ],
                 },
                 {

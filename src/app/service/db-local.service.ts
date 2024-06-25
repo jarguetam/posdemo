@@ -11,6 +11,7 @@ import { SellerModel } from '../pages/seller/models/seller';
 import { WizardModel } from '../components/wizard-configuration/model/wizard-model';
 import { PaymentSaleModel } from '../pages/sales-payment/models/payment-sale-model';
 import { Messages } from '../helpers/messages';
+import { InventoryReturnModel } from '../pages/inventory-transaction/inventory-return/models/inventory-return-model';
 
 @Injectable({
     providedIn: 'root',
@@ -28,13 +29,14 @@ export class DbLocalService extends Dexie {
     invoiceSeller!: Table<DocumentSaleModel, number>;
     payment!: Table<PaymentSaleModel, number>;
     orderSales!: Table<DocumentSaleModel, number>;
+    inventoryReturn!: Table<InventoryReturnModel, number>;
 
     constructor() {
         super('dbposweb');
-        this.version(17).stores({
-            invoice: '++id',
+        this.version(25).stores({
+            invoice: '++id, uuid, customerId',
             inventory: '++id, listPriceId, itemId',
-            customers: '++id',
+            customers: '++id, customerId',
             user: '++id, userName',
             payCondition: '++id',
             wareHouse: '++id',
@@ -42,8 +44,9 @@ export class DbLocalService extends Dexie {
             seller: '++id',
             wizard: '++id, complete',
             invoiceSeller: '++id, customerId, docId',
-            payment:'++id',
+            payment:'++id, uuid',
             orderSales: '++id',
+            inventoryReturn: '++idOffline'
         });
         this.open()
             .then((data) => console.log('DB Opened'))
@@ -54,7 +57,7 @@ export class DbLocalService extends Dexie {
         try {
             await this.inventory.clear();
             await this.customers.clear();
-            await this.user.clear();
+          //  await this.user.clear();
             await this.payCondition.clear();
             await this.wareHouse.clear();
             await this.correlative.clear();

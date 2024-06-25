@@ -40,6 +40,12 @@ export class AppTopBarComponent {
         ];
     }
 
+    async sync() {
+        await this.syncService.syncPayments();
+        await this.syncService.syncInvoices();
+        await this.syncService.syncData();
+    }
+
     ngOnInit(): void {
         this.connectionService
             .monitor()
@@ -48,8 +54,8 @@ export class AppTopBarComponent {
                     this.currentState = newState;
                     if (this.currentState.hasNetworkConnection) {
                         this.status = true;
-                       
-                      //  await this.syncService.syncData();
+
+                        //  await this.syncService.syncData();
                         //this.getInvoice();
                     } else {
                         this.status = false;
@@ -60,14 +66,16 @@ export class AppTopBarComponent {
     }
 
     getStyle() {
-        return this.status ? 'pi pi-check-circle connected' : 'pi pi-times-circle disconnected';
-      }
+        return this.status
+            ? 'pi pi-check-circle connected'
+            : 'pi pi-times-circle disconnected';
+    }
 
-      isMobileDevice() {
+    isMobileDevice() {
         return window.innerWidth < 1024;
-      }
+    }
 
-    logout(){
+    logout() {
         this.auth.logout();
     }
 }

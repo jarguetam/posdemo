@@ -92,6 +92,10 @@ export class InventoryTransferDialogComponent implements OnInit {
     _createFormBuild() {
         this.formTransfer = this.formBuilder.group({
             transferId: [this.transfer.transferId ?? 0],
+            transferDate:  [
+                this.transfer.transferDate ??
+                    new Date().toISOString().substring(0, 10),
+            ],
             comment: [this.transfer.comment ?? '--', Validators.required],
             docTotal: [this.transfer.docTotal ??0],
             qtyTotal: [this.transfer.qtyTotal ?? 0],

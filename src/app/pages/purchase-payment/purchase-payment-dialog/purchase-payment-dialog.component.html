@@ -7,7 +7,19 @@
         <ng-template #data readonly="disable">
             <form [formGroup]="formPurchase" *ngIf="formPurchase" class="mb-5">
                 <div class="grid p-fluid">
-                    <div class="col-12 md:col-12">
+                    <div class="col-12 md:col-4">
+                        <span class="mt-4 p-float-label p-input-icon-left">
+                            <i class="pi pi-comments"></i>
+                            <input id="docDate" [disabled]="disabled" type="date" pInputText #docDate
+                                formControlName="docDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <label for="docDate">Fecha Documento</label>
+                        </span>
+                        <div *ngIf="formPurchase.controls['docDate'].invalid && formPurchase.controls['docDate'].dirty">
+                            <small *ngIf="formPurchase.controls['docDate'].errors.required" id="docDate"
+                                class="p-error block">Fecha Documento es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-8">
                         <span class="mt-4 p-float-label p-input-icon-left">
                             <div class="p-inputgroup">
                                 <button [disabled]="disabled" type="button" pButton pRipple icon="pi pi-search"
@@ -142,7 +154,8 @@
                     label="Agregar"></button>
             </ng-template>
             <ng-template #addButton>
-
+                <!-- <button pButton type="button" (click)="edit()" class="p-button-secundary" label="Editar"></button> -->
+                <button pButton type="button" (click)="cancelInvoice()" class="p-button-danger" label="Anular"></button>
             </ng-template>
         </ng-template>
     </ng-container>

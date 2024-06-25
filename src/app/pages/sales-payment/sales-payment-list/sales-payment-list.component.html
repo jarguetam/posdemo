@@ -1,10 +1,13 @@
+
 <div class="grid">
     <div class="col-12 xl:col-12">
         <div class="card">
+
             <ng-template [ngIf]="loading" [ngIfElse]="showTable">
                 <skeleton-table-component [title]="title"></skeleton-table-component>
             </ng-template>
             <ng-template #showTable>
+
                 <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
                     <div class="grid p-fluid">
                         <div class="col-12 md:col-4">
@@ -37,6 +40,7 @@
 
 
                 </form>
+
                 <p-table #dt [value]="paymentList" [paginator]="true" [rows]="7" responsiveLayout="scroll"
                     styleClass="p-datatable-sm p-datatable-gridlines"
                     [globalFilterFields]="['docId','docTotal','invoice','customerName','customerCode']">
@@ -50,6 +54,11 @@
                             </th>
                             <th pSortableColumn="customerName">Nombre<p-sortIcon field="customerName"></p-sortIcon>
                                 <p-columnFilter type="text" field="customerName" display="menu"
+                                    class="ml-auto"></p-columnFilter>
+                            </th>
+                            <th pSortableColumn="payConditionName">Condicion<p-sortIcon
+                                    field="payConditionName"></p-sortIcon>
+                                <p-columnFilter type="text" field="payConditionName" display="menu"
                                     class="ml-auto"></p-columnFilter>
                             </th>
                             <th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon>
@@ -94,6 +103,7 @@
                             </td>
                             <td style="width: 15%; min-width: 5rem;">{{payment.customerCode}}</td>
                             <td style="width: 15%; min-width: 4rem;">{{payment.customerName}}</td>
+                            <td style="width: 15%; min-width: 4rem;">{{payment.payConditionName}}</td>
                             <td style="width: 10%; min-width: 5rem;">{{payment.docTotal | currency:'L. '}}</td>
                             <td style="width: 15%; min-width: 4rem;">{{payment.docDate |date:'dd/MM/yyyy H:mm a'}}</td>
                             <td style="width: 15%; min-width: 4rem;">
@@ -116,6 +126,9 @@
                                 <button [disabled]="payment.canceled" (click)="editPayment(payment)" pButton
                                     pTooltip="Editar" pRipple type="button" icon="pi pi-pencil"
                                     class="p-button p-component p-button-text p-button-icon-only"></button>
+                                <button *ngIf="payment.docId === 0" (click)="syncPayment(payment)" pButton
+                                    pTooltip="Sincronizar" type="button" icon="pi pi-sync"
+                                    class="p-button-warning p-button-text p-button-icon-only"></button>
                                 <button (click)="print(payment)" pButton pRipple pTooltip="Imprimir" type="button"
                                     icon="pi pi-print"
                                     class="p-button-help p-component p-button-text p-button-icon-only"></button>

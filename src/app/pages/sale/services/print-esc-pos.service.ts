@@ -3,6 +3,7 @@ import { CommonService } from 'src/app/service/common.service';
 import { DocumentSaleModel } from '../models/document-model';
 import EscPosEncoder from 'esc-pos-encoder-ionic';
 import { Messages } from 'src/app/helpers/messages';
+import { PrinterConectionService } from 'src/app/service/printer-conection.service';
 
 @Injectable({
     providedIn: 'root',
@@ -11,29 +12,38 @@ export class PrintEscPosService {
     printerCharacteristic;
     documentModel: DocumentSaleModel;
 
-    constructor(private commonService: CommonService) {}
+    constructor(
+        private commonService: CommonService,
+        private conectPrinter: PrinterConectionService
+    ) {}
 
     async printInvoice(document: DocumentSaleModel) {
-        Messages.loading('Facturando', 'Imprimiendo documento...');
-        await this.connectPrinter(document);
-        Messages.closeLoading();
+        let print = await Messages.question(
+            'Impresion',
+            '¿Desea imprimir la factura?'
+        );
+        if (print) {
+            Messages.loading('Facturando', 'Imprimiendo documento...');
+            await this.connectPrinter(document);
+            Messages.closeLoading();
+        }
     }
 
     async sendToPrint(document: DocumentSaleModel) {
-        await this.await100ms();
+
         await this.generateHeader(document);
-        await this.await100ms();
+
         await this.generateDetail(document);
-        await this.await100ms();
+
         await this.generateFooter(document);
-        await this.await100ms();
+
     }
 
     async generateHeader(document: DocumentSaleModel) {
         const companyInfo = await this.commonService.companyInfo();
         const companyEncoder = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .line(companyInfo.companyName)
             .newline()
             .line('RTN: ' + companyInfo.rtn)
@@ -41,13 +51,13 @@ export class PrintEscPosService {
             .line(companyInfo.addressLine2)
             .line(companyInfo.email1)
             .encode();
-        await this.await100ms();
+        //await this.await100ms();
 
         await this.printToPrinter(companyEncoder);
 
         const invoiceEncoder = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .newline()
             .line('Factura: ' + document.deiNumber.toString())
             .line(
@@ -65,57 +75,76 @@ export class PrintEscPosService {
                     document.customerName
             )
             .line('R.T.N: ' + document.customerRTN.toString())
-            .line('Direccion: ' + document.customerAddress)
+            //.line('Direccion: ' + document.customerAddress)
             .line('Termino de pago: ' + document.payConditionName)
             .line('Referencia: ' + document.reference)
             .newline()
             .encode();
-        await this.await100ms();
 
         await this.printToPrinter(invoiceEncoder);
 
         const detailHeader = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
-            .line('------------------------------------------------') // Línea horizontal
-            .line('Descripcion               Cant.   Precio  Total')
-            .line('------------------------------------------------') // Línea horizontal
+            .codepage('cp437')
+            .bold()
+            .line('='.repeat(48)) // Línea horizontal
+            .line('Descripcion               Cant.   Precio  Total ')
+            .line('='.repeat(48)) // Línea horizontal
             .encode();
-        await this.await100ms();
+
         await this.printToPrinter(detailHeader);
     }
+
     async generateDetail(document: DocumentSaleModel) {
-        const detail = document.detailDto ? [...document.detailDto] : [];
-        await this.await100ms();
+        const detail = [
+            ...(document.detailDto && document.detailDto.length > 0
+                ? document.detailDto
+                : document.detail),
+        ];
         for (const item of detail) {
-            await this.await100ms();
-            const itemNameColumn = item.itemName.padEnd(20);
-            const quantityColumn = item.quantity.toString().padStart(8);
-            const priceColumn = parseFloat(item.price.toString()).toFixed(2).toString().padStart(8);
-            const lineTotalColumn = parseFloat(item.lineTotal.toString()).toFixed(2).toString().padStart(11);
+            const itemNameColumn = item.itemName.padEnd(40);
+            const quantityColumn = item.quantity.toString().padStart(30);
+            const priceColumn = parseFloat(item.price.toString())
+                .toFixed(2)
+                .toString()
+                .padStart(8);
+            const lineTotalColumn = parseFloat(item.lineTotal.toString())
+                .toFixed(2)
+                .toString()
+                .padStart(10);
 
             const detailItems = new EscPosEncoder()
                 .initialize()
-                .codepage('cp852')
-                .line(
-                    `${itemNameColumn}${quantityColumn}${priceColumn}${lineTotalColumn}`
-                )
+                .codepage('cp437')
+                .bold()
+                .line(itemNameColumn)
+                .line(`${quantityColumn}${priceColumn}${lineTotalColumn}`)
                 .encode();
-            await this.await100ms();
             await this.printToPrinter(detailItems);
-            await this.await100ms();
         }
     }
 
     async generateFooter(document: DocumentSaleModel) {
-        const subTotal = parseFloat(document.subTotal.toString()).toFixed(2).toString().padEnd(8);
-        const descuento = parseFloat(document.discountsTotal.toString()).toFixed(2).toString().padStart(8);
-        const impuesto = parseFloat(document.tax.toString()).toFixed(2).toString().padStart(8);
-        const total = parseFloat(document.docTotal.toString()).toFixed(2).toString().padStart(8);
+        const subTotal = parseFloat(document.subTotal.toString())
+            .toFixed(2)
+            .toString()
+            .padEnd(8);
+        const descuento = parseFloat(document.discountsTotal.toString())
+            .toFixed(2)
+            .toString()
+            .padStart(8);
+        const impuesto = parseFloat(document.tax.toString())
+            .toFixed(2)
+            .toString()
+            .padStart(8);
+        const total = parseFloat(document.docTotal.toString())
+            .toFixed(2)
+            .toString()
+            .padStart(8);
 
         const footer = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .newline()
             .line('*****************ULTIMA LINEA******************')
             .align('right')
@@ -125,12 +154,11 @@ export class PrintEscPosService {
             .line('Total ' + total)
             .newline()
             .encode();
-        await this.await100ms();
         await this.printToPrinter(footer);
 
         const footer2 = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .newline()
             .align('left')
             .line('Comentario: ' + document.comment)
@@ -147,12 +175,11 @@ export class PrintEscPosService {
             )
             .newline()
             .encode();
-        await this.await100ms();
         await this.printToPrinter(footer2);
 
         const footer3 = new EscPosEncoder()
             .initialize()
-            .codepage('cp852')
+            .codepage('cp437')
             .newline()
             .align('left')
             .line(document.sellerName)
@@ -161,29 +188,23 @@ export class PrintEscPosService {
             .line('Elaborado Por')
             .newline()
             .encode();
-        await this.await100ms();
+
         await this.printToPrinter(footer3);
     }
 
     async await100ms(): Promise<void> {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     async connectPrinter(document: DocumentSaleModel) {
         try {
-            if (!this.printerCharacteristic) {
-                const mobileNavigatorObject: any = window.navigator;
-                if (mobileNavigatorObject && mobileNavigatorObject.bluetooth) {
-                    const device = await mobileNavigatorObject.bluetooth.requestDevice({
-                        filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }],
-                    });
-                    const server = await device.gatt.connect();
-                    const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
-                    this.printerCharacteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
-                    this.sendToPrint(document); // Iniciar impresión después de la conexión
-                }
+            if (this.conectPrinter.isPrinterConect) {
+               await this.sendToPrint(document); // Iniciar impresión después de la conexión
             } else {
-                this.sendToPrint(document);
+                await this.conectPrinter.connectPrinter();
+                if (this.conectPrinter.isPrinterConect) {
+                    await this.sendToPrint(document);
+                }
             }
         } catch (error) {
             Messages.warning('Error durante la impresión:', error);
@@ -191,25 +212,28 @@ export class PrintEscPosService {
     }
 
     async printToPrinter(result) {
-        await this.await100ms();
-        if (this.printerCharacteristic != null) {
-            const MAX_CHUNK_SIZE = 128;
-            for (
-                let offset = 0;
-                offset < result.byteLength;
-                offset += MAX_CHUNK_SIZE
-            ) {
+        if (this.conectPrinter.printerCharacteristic != null) {
+            const MAX_CHUNK_SIZE = 32; // Tamaño del chunk reducido a 32 bytes
+            const DELAY_BETWEEN_CHUNKS = 50; // Retraso de 50 milisegundos entre chunks
+
+            for (let offset = 0; offset < result.byteLength; offset += MAX_CHUNK_SIZE) {
                 const chunk = result.slice(offset, offset + MAX_CHUNK_SIZE);
+
                 try {
-                    // await this.await100ms();
-                    await this.printerCharacteristic.writeValue(chunk);
+                    await this.conectPrinter.printerCharacteristic.writeValue(chunk);
+
+                    // Agregar un retraso entre cada chunk para permitir que el dispositivo procese
+                    await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_CHUNKS));
                 } catch (error) {
                     Messages.warning(
                         'Error al imprimir',
-                        'Ocurrio un error al imprimir, favor vuelva a conectar la impresora.'
+                        'Ocurrió un error al imprimir, por favor vuelva a conectar la impresora. ' + error
                     );
+                    // Opcionalmente podrías intentar reconectar la impresora aquí si es necesario
                 }
             }
         }
     }
+
+
 }

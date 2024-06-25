@@ -49,6 +49,7 @@ export class LiquidationDialogComponent implements OnInit {
     totalIncome: number = 0;
     totalDeposit: number = 0;
     totalDifference: number = 0;
+    displayDialog: boolean = false;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -201,19 +202,17 @@ export class LiquidationDialogComponent implements OnInit {
     }
 
     _createFormBuild() {
+        const currentDate = new Date();
+        const localDateString = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10);
         this.formLiquidation = this.formBuilder.group({
             idLiquidation: [this.liquidation.idLiquidation ?? 0],
             sellerId: [this.liquidation.sellerId ?? 0],
             from: [
-                new Date(this.liquidation.from)
-                    .toISOString()
-                    .substring(0, 10) ??
-                    new Date().toISOString().substring(0, 10),
+                localDateString,
                 Validators.required,
             ],
             to: [
-                new Date(this.liquidation.to).toISOString().substring(0, 10) ??
-                    new Date().toISOString().substring(0, 10),
+                localDateString,
                 Validators.required,
             ],
             saleCredit: [this.liquidation.saleCredit ?? 0],
@@ -357,7 +356,16 @@ export class LiquidationDialogComponent implements OnInit {
             Messages.loading('Factura','Cargando');
             let invoice = await this.salesServices.getInvoiceById(docNum);
             Messages.closeLoading();
-            this.InvoiceSaleDialog.showDialog(invoice[0], false)
+            this.InvoiceSaleDialog.showDialog(invoice[0], false);
+            this.openDialog();
         }
     }
+
+    openDialog(): void {
+        this.displayDialog = true;
+      }
+
+      closeDialog(): void {
+        this.displayDialog = false;
+      }
 }

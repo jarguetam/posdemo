@@ -1,17 +1,26 @@
 {
+
   "$schema": "./node_modules/@angular/service-worker/config/schema.json",
   "index": "/index.html",
+  "appData": {
+    "version": "1.1.0",
+    "changelog": "Added better resource caching"
+  },
   "assetGroups": [
     {
       "name": "app",
       "installMode": "prefetch",
       "resources": {
         "files": [
-          "/favicon.ico",
-          "/index.html",
-          "/manifest.json",
-          "/*.css",
-          "/*.js"
+            "/favicon.ico",
+            "/index.html",
+            "/*.css",
+            "/vendor.*.js",
+            "/main.*.js",
+            "/polyfills.*.js",
+            "/runtime.*.js",
+            "/*.js",
+            "!/*-sw.js"
         ]
       }
     },
@@ -30,21 +39,22 @@
   "dataGroups": [
     {
         "name": "api",
+        "version": 1,
         "urls": [
-            "https://www.dpos.somee.com/auth",
-            "https://www.dpos.somee.com/api",
-            "https://dpos.somee.com/pos/assets",
-            "https://www.dpos.somee.com/api/WareHouse/WareHouseActive",
-            "https://www.dpos.somee.com/api/Common/PayConditionActive",
-            "https://www.dpos.somee.com/api/Sellers/Seller",
-            "https://www.dpos.somee.com/api/Customers/CustomerActive",
-            "https://www.dpos.somee.com/api/Sales/GetOrderSaleActive",
-            "https://www.dpos.somee.com/api/Sales/GetInvoiceSaleByDate/2023-12-29/2023-12-29",
-            "https://www.dpos.somee.com/api/Common/DownloadFile?Path=LB4rJ9rzwc2Sr5EX3KSAUA=="
+            "https://diproal-app.onrender.com/auth",
+            "https://diproal-app.onrender.com/api",
+            "https://diproal-app.onrender.com/pos/assets",
+            "https://diproal-app.onrender.com/api/WareHouse/WareHouseActive",
+            "https://diproal-app.onrender.com/api/Common/PayConditionActive",
+            "https://diproal-app.onrender.com/api/Sellers/Seller",
+            "https://diproal-app.onrender.com/api/Customers/CustomerActive",
+            "https://diproal-app.onrender.com/api/Sales/GetOrderSaleActive",
+            "https://diproal-app.onrender.com/api/Sales/GetInvoiceSaleByDate/2023-12-29/2023-12-29",
+            "https://diproal-app.onrender.com/api/Common/DownloadFile?Path=LB4rJ9rzwc2Sr5EX3KSAUA=="
         ],
         "cacheConfig": {
             "strategy": "freshness",
-            "maxSize": 5,
+            "maxSize": 15,
             "maxAge": "50m",
             "timeout": "3s"
         }

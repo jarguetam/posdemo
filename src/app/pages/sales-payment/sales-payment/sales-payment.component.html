@@ -21,8 +21,19 @@
                             <div class="col-12 md:col-3">
 
                             </div>
-
-                            <div class="col-12 md:col-12">
+                            <div class="col-12 md:col-4">
+                                <span class="mt-4 p-float-label p-input-icon-left">
+                                    <i class="pi pi-comments"></i>
+                                    <input id="docDate" [disabled]="disabled" type="date" pInputText #docDate
+                                        formControlName="docDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                                    <label for="docDate">Fecha Documento</label>
+                                </span>
+                                <div *ngIf="formSales.controls['docDate'].invalid && formSales.controls['docDate'].dirty">
+                                    <small *ngIf="formSales.controls['docDate'].errors.required" id="docDate"
+                                        class="p-error block">Fecha Documento es requerido</small>
+                                </div>
+                            </div>
+                            <div class="col-12 md:col-8">
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <div class="p-inputgroup">
                                         <button [disabled]="disabled" type="button" pButton pRipple icon="pi pi-search"
@@ -42,7 +53,8 @@
                                         class="p-error block">Cliente es requerido</small>
                                 </div>
                             </div>
-                            <div class="col-12 md:col-6">
+
+                            <div class="col-12 md:col-3">
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <p-dropdown [options]="payConditionList" formControlName="payConditionId"  [disabled]="disabled"
                                         optionValue="payConditionId" optionLabel="payConditionName"></p-dropdown>
@@ -54,7 +66,7 @@
                                         class="p-error block">Condicion de pago es requerido</small>
                                 </div>
                             </div>
-                            <div class="col-12 md:col-6">
+                            <div class="col-12 md:col-3">
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <p-dropdown [options]="sellerList" formControlName="sellerId"  [disabled]="disabled"
                                         optionValue="sellerId" optionLabel="sellerName"></p-dropdown>
@@ -67,7 +79,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 md:col-6">
+                            <div class="col-12 md:col-3">
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <i class="pi pi-comments"></i>
                                     <input id="comment" [disabled]="disabled" type="text" pInputText formControlName="comment"
@@ -79,7 +91,7 @@
                                         class="p-error block">Comentario es requerido</small>
                                 </div>
                             </div>
-                            <div class="col-12 md:col-6">
+                            <div class="col-12 md:col-3">
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <i class="pi pi-comments"></i>
                                     <input id="reference" [disabled]="disabled" type="text" pInputText
@@ -102,10 +114,11 @@
                                             <th pSortableColumn="customerName">Vencimiento </th>
                                             <!-- <th pSortableColumn="subTotal">Subtotal </th> -->
                                             <!-- <th pSortableColumn="discountTotal">Descuentos </th> -->
-                                            <!-- <th pSortableColumn="TaxTotal">ISV </th> -->
+                                            <th pSortableColumn="TaxTotal">Referencia </th>
                                             <th pSortableColumn="docTotal">Total </th>
                                             <th pSortableColumn="balance">Pendiente </th>
                                             <th pSortableColumn="sumApplied">Pago </th>
+                                            <th pSortableColumn="sumApplied">Saldo </th>
                                             <th>Accion</th>
                                         </tr>
                                     </ng-template>
@@ -118,16 +131,17 @@
                                             <td style="width: 15%; min-width: 4rem;">{{order.dueDate |date:'dd/MM/yyyy'}}
                                             </td>
                                             <!-- <td style="width: 10%; min-width: 5rem;">{{order.subTotal | currency:'L. '}}</td>
-                                            <td style="width: 10%; min-width: 5rem;">{{order.discountTotal | currency:'L. '}}</td>
-                                            <td style="width: 10%; min-width: 5rem;">{{order.taxTotal | currency:'L. '}}</td> -->
+                                            <td style="width: 10%; min-width: 5rem;">{{order.discountTotal | currency:'L. '}}</td>-->
+                                            <td style="width: 10%; min-width: 5rem;">{{order.reference}}</td>
                                             <td style="width: 10%; min-width: 5rem;">{{order.lineTotal | currency:'L. '}}</td>
                                             <td style="width: 10%; min-width: 5rem;">{{order.balance | currency:'L. '}}</td>
-                                            <td style="width: 25%; min-width: 5rem;">
+                                            <td style="width: 15%; min-width: 5rem;">
                                                 <input #sumApplied id="sumApplied"  [disabled]="disabled"  pInputText type="number"
                                                 (ngModelChange)="calculateTotal()" [(ngModel)]="order.sumApplied" mode="decimal"
                                                 [minFractionDigits]="2" [min]="0" [max]="1000000"
                                                 [ngModelOptions]="{standalone: true}" />
                                             </td>
+                                            <td style="width: 10%; min-width: 5rem;"> {{calculateDifference(order)| currency:'L. '}}</td>
                                             <td style="width: 10%;"><span class="p-column-title">Acción</span>
                                                 <button [disabled]="disabled" (click)="deleteLine(order.invoiceId)" pButton
                                                     pRipple type="button" icon="pi pi-trash"
@@ -138,6 +152,7 @@
                                     <ng-template pTemplate="footer">
                                         <tr>
                                             <td>Total pago:</td>
+                                            <td></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>

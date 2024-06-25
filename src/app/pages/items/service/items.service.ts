@@ -213,10 +213,10 @@ export class ItemService {
         );
     }
 
-    async getItemsJornal(itemId: number) {
+    async getItemsJornal(itemId: number, from: Date, to: Date, whsCode: number) {
         return await firstValueFrom(
             this.http.get<ItemJornalModel[]>(
-                `${environment.uriLogistic}/api/ItemJournal/GetItemJornal${itemId}`
+                `${environment.uriLogistic}/api/ItemJournal/GetItemJornal${itemId}/${from}/${to}/${whsCode}`
             )
         );
     }

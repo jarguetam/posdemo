@@ -14,8 +14,10 @@
     </a>
     <div class="layout-topbar-status">
         <i [ngClass]="getStyle()"></i>
-        <span>{{ status ? 'Conectado' : 'Desconectado' }}</span>
+        <button pButton type="button" (click)="sync()" label="{{ status ? 'Online' : 'Offline' }}" class="p-button font-bold"></button>
     </div>
+
+
     <div class="app-bar">
         <p-chip styleClass="seller-chip" label="{{ this.auth.UserValue.sellerName }}"></p-chip>
       </div>

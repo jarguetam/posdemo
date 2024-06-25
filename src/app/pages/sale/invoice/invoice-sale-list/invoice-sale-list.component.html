@@ -42,7 +42,7 @@
 
                 <p-table #dt [value]="invoiceList" [paginator]="true" [rows]="7" responsiveLayout="scroll"
                     styleClass="p-datatable-sm p-datatable-gridlines"
-                    [globalFilterFields]="['docId','docTotal','invoice','customerName','customerCode','sellerName']">
+                    [globalFilterFields]="['docId','docTotal','invoice','customerName','customerCode','sellerName', 'reference']">
                     <ng-template pTemplate="header">
                         <tr>
                             <th pSortableColumn="docId">Id <p-sortIcon field="docId"></p-sortIcon> <p-columnFilter
@@ -55,8 +55,12 @@
                                 <p-columnFilter type="text" field="customerName" display="menu"
                                     class="ml-auto"></p-columnFilter>
                             </th>
-                            <th pSortableColumn="sellerName">Nombre<p-sortIcon field="sellerName"></p-sortIcon>
+                            <th pSortableColumn="sellerName">Vendedor<p-sortIcon field="sellerName"></p-sortIcon>
                                 <p-columnFilter type="text" field="sellerName" display="menu"
+                                    class="ml-auto"></p-columnFilter>
+                            </th>
+                            <th pSortableColumn="reference">Referencia<p-sortIcon field="reference"></p-sortIcon>
+                                <p-columnFilter type="text" field="reference" display="menu"
                                     class="ml-auto"></p-columnFilter>
                             </th>
                             <th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon>
@@ -87,7 +91,8 @@
 
                             <div class="button-container">
                                 <button pButton class="p-button-text" class="ml-2" type="button" (click)="addInvoice()"
-                                    pTooltip="Agregar nueva factura" tooltipPosition="bottom" label="+ Agregar (F10)"></button>
+                                    pTooltip="Agregar nueva factura" tooltipPosition="bottom"
+                                    label="+ Agregar (F10)"></button>
                                 <button pButton class="p-button-text p-button-secondary" class="p-button-secondary"
                                     type="button" (click)="showOrders()" pTooltip="Copiar de pedido de compra"
                                     tooltipPosition="bottom" label="Copiar Pedido"></button>
@@ -118,6 +123,7 @@
                             <td style="width: 5%; min-width: 5rem;">{{invoice.customerCode}}</td>
                             <td style="width: 15%; min-width: 4rem;">{{invoice.customerName}}</td>
                             <td style="width: 10%; min-width: 4rem;">{{invoice.sellerName}}</td>
+                            <td style="width: 10%; min-width: 4rem;">{{invoice.reference}}</td>
                             <td style="width: 10%; min-width: 5rem;">{{invoice.docTotal | currency:'L. '}}</td>
                             <td style="width: 15%; min-width: 4rem;">{{invoice.docDate |date:'dd/MM/yyyy H:mm a'}}</td>
                             <td style="width: 10%; min-width: 4rem;">{{invoice.payConditionName}}</td>
@@ -152,11 +158,17 @@
                                     <button [disabled]="invoice.complete" (click)="editInvoice(invoice)" pButton
                                         pTooltip="Editar" pRipple type="button" icon="pi pi-pencil"
                                         class="p-button p-component p-button-text p-button-icon-only"></button>
+                                    <button (click)="print(invoice)" pButton pRipple pTooltip="Imprimir" type="button"
+                                        icon="pi pi-print"
+                                        class="p-button-help p-component p-button-text p-button-icon-only"></button>
                                 </ng-container>
                                 <ng-template #showButtons>
                                     <!-- Botones de edición e impresión -->
                                     <button [disabled]="invoice.complete" (click)="editInvoice(invoice)" pButton
                                         pTooltip="Editar" pRipple type="button" icon="pi pi-pencil"
+                                        class="p-button p-component p-button-text p-button-icon-only"></button>
+                                    <button [disabled]="!invoice.complete" (click)="viewInvoice(invoice)" pButton
+                                        pTooltip="Vizualizar" pRipple type="button" icon="pi pi-eye"
                                         class="p-button p-component p-button-text p-button-icon-only"></button>
                                     <button (click)="print(invoice)" pButton pRipple pTooltip="Imprimir" type="button"
                                         icon="pi pi-print"
@@ -170,6 +182,6 @@
             </ng-template>
         </div>
     </div>
-    <app-invoice-sale-dialog (InvoiceSaleModify)="invoiceModify($event)"></app-invoice-sale-dialog>
+    <!-- <app-invoice-sale-dialog (InvoiceSaleModify)="invoiceModify($event)"></app-invoice-sale-dialog> -->
     <app-copy-order-sales-list (OrderSelect)="orderSelected($event)"></app-copy-order-sales-list>
 </div>

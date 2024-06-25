@@ -12,15 +12,13 @@
                     <th>
                         <p-tableHeaderCheckbox (click)="calculateTotal()"></p-tableHeaderCheckbox>
                     </th>
-                    <th pSortableColumn="docId">N° Factura <p-sortIcon field="docId"></p-sortIcon> <p-columnFilter type="text" field="docId" display="menu" class="ml-auto" ></p-columnFilter></th>
-                    <th pSortableColumn="customerCode">Cliente <p-sortIcon field="customerCode"></p-sortIcon> <p-columnFilter type="text" field="customerCode" display="menu" class="ml-auto"></p-columnFilter></th>
-                    <th pSortableColumn="customerName">Nombre<p-sortIcon field="customerName"></p-sortIcon> <p-columnFilter type="text" field="customerName" display="menu" class="ml-auto"></p-columnFilter></th>
-                    <th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon> <p-columnFilter type="text" field="docTotal" display="menu" class="ml-auto"></p-columnFilter></th>
-                    <th pSortableColumn="balance">Saldo Pendiente<p-sortIcon field="balance"></p-sortIcon> <p-columnFilter type="text" field="docTotal" display="menu" class="ml-auto"></p-columnFilter></th>
-                    <th pSortableColumn="order">Fecha de creacion<p-sortIcon field="order"></p-sortIcon> <p-columnFilter type="text" field="order" display="menu" class="ml-auto"></p-columnFilter></th>
-                    <th pSortableColumn="dueDate">Fecha de vencimiento<p-sortIcon field="dueDate"></p-sortIcon> <p-columnFilter type="text" field="order" display="menu" class="ml-auto"></p-columnFilter></th>
-                    <th pSortableColumn="order">Creado por<p-sortIcon field="order"></p-sortIcon> <p-columnFilter type="text" field="order" display="menu" class="ml-auto"></p-columnFilter></th>
-                    <th pSortableColumn="complete">Estatus<p-sortIcon field="complete"></p-sortIcon> <p-columnFilter type="text" field="order" display="menu" class="ml-auto"></p-columnFilter></th>
+                    <th>N° Factura</th>
+                    <th>Referencia </th>
+                    <th>Total</th>
+                    <th>Saldo Pendiente</th>
+                    <th>Dias Vencidos</th>
+                    <th>Creado por</th>
+                    <th>Estatus</th>
                 </tr>
             </ng-template>
                 <ng-template pTemplate="caption">
@@ -37,12 +35,10 @@
                         <p-tableCheckbox [value]="order" (click)="calculateTotal()"></p-tableCheckbox>
                     </td>
                     <td style="width: 10%; min-width: 2rem;">{{order.docId}}</td>
-                    <td style="width: 15%; min-width: 5rem;">{{order.customerCode}}</td>
-                    <td style="width: 15%; min-width: 4rem;">{{order.customerName}}</td>
+                    <td style="width: 15%; min-width: 5rem;">{{order.reference}}</td>
                     <td style="width: 15%; min-width: 5rem;">{{order.docTotal | currency:'L. '}}</td>
                     <td style="width: 15%; min-width: 5rem;">{{order.balance | currency:'L. '}}</td>
-                    <td style="width: 15%; min-width: 4rem;">{{order.docDate |date:'dd/MM/yyyy H:mm a'}}</td>
-                    <td style="width: 15%; min-width: 4rem;">{{order.dueDate |date:'dd/MM/yyyy H:mm a'}}</td>
+                    <td style="width: 15%; min-width: 4rem;">  {{ getTimeDifference(order.dueDate) | number }}</td>
                     <td style="width: 10%; min-width: 4rem;">{{order.createByName}}</td>
                     <td style="width: 10%; min-width: 4rem;">
                         <ng-template [ngIf]="order.complete" [ngIfElse]="inactive">
@@ -57,9 +53,7 @@
             <ng-template pTemplate="footer">
                 <tr>
                     <td></td>
-                    <td></td>
                     <td>Total a pagar</td>
-                    <td></td>
                     <td></td>
                     <td>{{selectTotal | currency:'L. '}}</td>
                     <td></td>

@@ -42,7 +42,7 @@
                                 <th pSortableColumn="supplierCode">Proveedor <p-sortIcon field="supplierCode"></p-sortIcon> <p-columnFilter type="text" field="supplierCode" display="menu" class="ml-auto"></p-columnFilter></th>
                                 <th pSortableColumn="supplierName">Nombre<p-sortIcon field="supplierName"></p-sortIcon> <p-columnFilter type="text" field="supplierName" display="menu" class="ml-auto"></p-columnFilter></th>
 								<th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon> <p-columnFilter type="text" field="docTotal" display="menu" class="ml-auto"></p-columnFilter></th>
-                                <th pSortableColumn="invoice">Fecha de creacion<p-sortIcon field="invoice"></p-sortIcon> <p-columnFilter type="text" field="invoice" display="menu" class="ml-auto"></p-columnFilter></th>
+                                <th pSortableColumn="invoice">Fecha de documento<p-sortIcon field="invoice"></p-sortIcon> <p-columnFilter type="text" field="invoice" display="menu" class="ml-auto"></p-columnFilter></th>
                                 <th pSortableColumn="payConditionName">Condicion de pago<p-sortIcon field="payConditionName"></p-sortIcon> <p-columnFilter type="text" field="invoice" display="menu" class="ml-auto"></p-columnFilter></th>
                                 <th pSortableColumn="invoice">Creado por<p-sortIcon field="invoice"></p-sortIcon> <p-columnFilter type="text" field="invoice" display="menu" class="ml-auto"></p-columnFilter></th>
                                 <th pSortableColumn="complete">Estatus<p-sortIcon field="complete"></p-sortIcon> <p-columnFilter type="text" field="invoice" display="menu" class="ml-auto"></p-columnFilter></th>
@@ -75,12 +75,19 @@
                                 <td style="width: 10%; min-width: 4rem;">{{invoice.payConditionName}}</td>
                                 <td style="width: 10%; min-width: 4rem;">{{invoice.createByName}}</td>
                                 <td style="width: 15%; min-width: 4rem;">
-									<ng-template [ngIf]="invoice.complete" [ngIfElse]="inactive">
-										<p-chip label="Pagada" styleClass="custom-chip" icon="pi pi-check"></p-chip>
-									</ng-template>
-									<ng-template #inactive>
-										<p-chip label="Pendiente pago" icon="pi pi-check"></p-chip>
-									</ng-template>
+									<ng-template [ngIf]="invoice.canceled" [ngIfElse]="notCanceled">
+                                        <p-chip label="Anulada" styleClass="custom-chip-canceled" icon="pi pi-times"></p-chip>
+                                      </ng-template>
+
+                                      <ng-template #notCanceled>
+                                        <ng-template [ngIf]="invoice.complete" [ngIfElse]="pending">
+                                          <p-chip label="Pagada" styleClass="custom-chip" icon="pi pi-check"></p-chip>
+                                        </ng-template>
+                                        <ng-template #pending>
+                                          <p-chip label="Pendiente pago" styleClass="custom-chip-pending" icon="pi pi-check"></p-chip>
+                                        </ng-template>
+                                      </ng-template>
+
 								</td>
 
 								<td style="width: 20%;">

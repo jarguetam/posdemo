@@ -43,7 +43,7 @@ export class CustomerAccountListComponent implements OnInit {
         try {
             this.loading = true;
             this.accountList = await this.accountService.getAccountCustomer();
-            if (this.usuario.role != 'Administrador') {
+            if (this.usuario.roleId != 1) {
                 this.accountList = this.accountList.filter(
                     (x) => x.sellerId === this.usuario.sellerId
                 );

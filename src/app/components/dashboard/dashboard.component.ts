@@ -9,6 +9,7 @@ import { Messages } from 'src/app/helpers/messages';
 import { DashobarDataModel } from './models/dashboar-data-model';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/service/users/auth.service';
+import { SyncService } from 'src/app/service/sync.service';
 
 @Component({
     templateUrl: './dashboard.component.html',
@@ -178,7 +179,8 @@ export class DashboardComponent implements OnInit {
     constructor(
         public configService: ConfigService,
         public dashboardService: DashboardService,
-        private auth: AuthService
+        private auth: AuthService,
+        private syncService: SyncService
     ) {
         this.user = this.auth.UserValue;
     }
@@ -192,6 +194,7 @@ export class DashboardComponent implements OnInit {
         const surfaceBorder =
             documentStyle.getPropertyValue('--surface-border');
         this._getData();
+
         this.getPermision();
         this.config = this.configService.config;
         this.subscription = this.configService.configUpdate$.subscribe(
@@ -329,6 +332,7 @@ export class DashboardComponent implements OnInit {
 
     async _getData() {
         try {
+            await this.syncService.syncData();
             this.loading = true;
            // Messages.loading('Cargando datos', 'Espere un momento....');
             var backgroundColor = [

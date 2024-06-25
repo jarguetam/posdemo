@@ -1,8 +1,10 @@
 import { Component, EventEmitter, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
 import { InputText } from 'primeng/inputtext';
 import { Messages } from 'src/app/helpers/messages';
+import { CompanyInfo } from 'src/app/models/company-info';
 import { ItemWareHouse } from 'src/app/pages/items/models/item-warehouse';
 import { ItemService } from 'src/app/pages/items/service/items.service';
+import { AuthService } from 'src/app/service/users/auth.service';
 
 @Component({
   selector: 'app-items-browser-price-sales',
@@ -16,9 +18,11 @@ export class ItemsBrowserPriceSalesComponent implements OnInit {
     index: number = -1;
     firstMatchingItem: any;
     isMobile: boolean;
+    company: CompanyInfo;
 
-    constructor(private itemServices: ItemService, private renderer: Renderer2) {
+    constructor(private itemServices: ItemService,  private auth: AuthService,private renderer: Renderer2) {
         this.isMobile = this.detectMobile();
+        this.company = this.auth.CompanyValue;
     }
     items: ItemWareHouse[];
     item: ItemWareHouse = new ItemWareHouse();
@@ -80,7 +84,7 @@ export class ItemsBrowserPriceSalesComponent implements OnInit {
 
     selectItem(c: ItemWareHouse) {
         this.item = c;
-        if (c.stock === 0) {
+        if (c.stock === 0 && this.company.negativeInventory==false) {
             Messages.warning(
                 'Advertencia',
                 'Este articulo no tiene inventario.'

@@ -49,6 +49,7 @@ export class DocumentSaleModel {
     balance: number;
     payment: PaymentSaleModel
     paidToDate: number;
+    uuid: string;
 
     constructor(data?: DocumentSaleModel) {
         if (data != null) {
@@ -82,6 +83,7 @@ export class DocumentSaleModel {
             this.limitIssue = data.limitIssue;
             this.authorizedRangeFrom = data.authorizedRangeFrom;
             this.authorizedRangeTo = data.authorizedRangeTo;
+            this.uuid = data.uuid;
             return;
         }
         this.docId = this.docId;
@@ -114,6 +116,7 @@ export class DocumentSaleModel {
         this.limitIssue = this.limitIssue;
         this.authorizedRangeFrom = this.authorizedRangeFrom;
         this.authorizedRangeTo = this.authorizedRangeTo;
+        this.uuid = this.uuid;
         return;
     }
 }

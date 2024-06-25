@@ -2,6 +2,7 @@ import { InvoiceSaleListComponent } from './invoice-sale-list/invoice-sale-list.
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { InvoiceSaleComponent } from './invoice-sale/invoice-sale.component';
+import { InvoiceSaleDialogComponent } from './invoice-sale-dialog/invoice-sale-dialog.component';
 
 const routes: Routes = [
     {
@@ -14,6 +15,10 @@ const routes: Routes = [
             {
                 path: 'factura',
                 component: InvoiceSaleComponent,
+            },
+            {
+                path: 'factura-movil',
+                component: InvoiceSaleDialogComponent,
             },
             { path: '**', redirectTo: '' },
         ],

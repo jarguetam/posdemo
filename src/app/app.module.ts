@@ -120,9 +120,11 @@ import { ConnectionServiceModule } from 'ng-connection-service';
 import { InactivityModalComponent } from './components/inactivity-modal/inactivity-modal.component';
 import { WizardConfigurationComponent } from './components/wizard-configuration/wizard-configuration.component';
 import { BrowserModule, HammerModule } from '@angular/platform-browser';
-import 'hammerjs';
 import { LiquidationDialogComponent } from './pages/expense/liquidation/liquidation-dialog/liquidation-dialog.component';
 import { LiquidationListComponent } from './pages/expense/liquidation/liquidation-list/liquidation-list.component';
+import { InventoryReturnListComponent } from './pages/inventory-transaction/inventory-return/inventory-return-list/inventory-return-list.component';
+import { InventoryReturnDialogComponent } from './pages/inventory-transaction/inventory-return/inventory-return-dialog/inventory-return-dialog.component';
+
 
 
 @NgModule({
@@ -141,7 +143,7 @@ import { LiquidationListComponent } from './pages/expense/liquidation/liquidatio
           // Register the ServiceWorker as soon as the app is stable
           // or after 30 seconds (whichever comes first).
           registrationStrategy: 'registerWhenStable:30000'
-        })
+        }),
 
     ],
     declarations: [
@@ -251,6 +253,9 @@ import { LiquidationListComponent } from './pages/expense/liquidation/liquidatio
         WizardConfigurationComponent,
         LiquidationDialogComponent,
         LiquidationListComponent,
+        InventoryEntryListComponent,
+        InventoryReturnListComponent,
+        InventoryReturnDialogComponent
                // ReportInventoryComponent,
         // ReportInventoryWarehouseComponent
     ],

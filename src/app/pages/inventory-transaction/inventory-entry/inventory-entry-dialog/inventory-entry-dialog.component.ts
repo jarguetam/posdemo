@@ -111,8 +111,11 @@ export class InventoryEntryDialogComponent implements OnInit {
     }
 
     _createFormBuild() {
+        const currentTimeStamp = Date.now();
+        const currentDate = new Date(currentTimeStamp);
         this.formEntry = this.formBuilder.group({
             entryId: [this.entry.entryId ?? 0],
+            entryDate: [this.entry.entryDate ?? currentDate.toISOString().substring(0, 10)],
             comment: [this.entry.comment ?? 'Entrada de mercancia', Validators.required],
             docTotal: [this.entry.docTotal ?? 0],
             whsCode: [

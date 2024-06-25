@@ -142,6 +142,7 @@ export class UserDialogComponent implements OnInit {
             whsCode: [this.user.whsCode ?? 0, Validators.compose([Validators.required, Validators.min(1)])],
 
             salesPerson: [this.user.salesPerson ?? false],
+            editPrice: [this.user.editPrice ?? false],
             sarCorrelativeId: [this.user.sarCorrelativeId ?? false, Validators.compose([Validators.required, Validators.min(1)]),],
         });
     }
