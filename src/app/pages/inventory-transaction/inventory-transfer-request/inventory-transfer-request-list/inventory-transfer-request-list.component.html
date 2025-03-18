@@ -10,7 +10,7 @@
 						<div class="col-12 md:col-4">
 							<span class="mt-4 p-float-label p-input-icon-left">
 								<i class="pi pi-calendar"></i>
-								<input id="from" type="date"  pInputText  formControlName="from">
+								<p-calendar formControlName="from" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
 								<label for="from">Desde</label>
 							</span>
 							<div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty" >
@@ -20,7 +20,7 @@
 						<div class="col-12 md:col-4">
 							<span class="mt-4 p-float-label p-input-icon-left">
 								<i class="pi pi-calendar"></i>
-								<input id="to" type="date"  pInputText  formControlName="to">
+								<p-calendar formControlName="to" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
 								<label for="to">Hasta</label>
 							</span>
 							<div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty" >
@@ -77,7 +77,8 @@
 									</ng-template>
 								</td>
 								<td style="width: 20%;">
-									<button (click)="viewTransfer(transfer)" pButton pTooltip="Detalle" pRipple type="button" icon="pi pi-eye" class="p-button p-component p-button-text p-button-icon-only"></button>
+									<!-- <button (click)="viewTransfer(transfer)" pButton pTooltip="Detalle" pRipple type="button" icon="pi pi-eye" class="p-button p-component p-button-text p-button-icon-only"></button> -->
+									<button [disabled]="transfer.complete" (click)="editTransfer(transfer)" pButton pTooltip="Editar" pRipple type="button" icon="pi pi-pencil" class="p-button p-component p-button-text p-button-icon-only"></button>
                                     <button (click)="print(transfer)" pButton pRipple pTooltip="Imprimir"  type="button" icon="pi pi-print" class="p-button-help p-component p-button-text p-button-icon-only"></button>
                                 </td>
 							</tr>

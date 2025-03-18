@@ -1,0 +1,127 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card">
+            <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+                <skeleton-table-component [title]="title"></skeleton-table-component>
+            </ng-template>
+            <ng-template #showTable>
+                <h2 class="text-center">{{title}}</h2>
+                <form [formGroup]="billetesForm" (ngSubmit)="guardarBilletes()">
+                    <div class="grid p-fluid">
+                        <div class="col-12 md:col-4 mb-2">
+                            <span class="p-float-label p-input-icon-left">
+                                <i class="pi pi-calendar"></i>
+                                <input id="expenseDate" type="date" pInputText formControlName="expenseDate">
+                                <label for="expenseDate">Fecha</label>
+                            </span>
+                            <small
+                                *ngIf="billetesForm.controls['expenseDate'].invalid && billetesForm.controls['expenseDate'].dirty && billetesForm.controls['expenseDate'].errors?.['required']"
+                                class="p-error block">Fecha Gasto es requerido</small>
+                        </div>
+                        <div class="col-12 md:col-4 mb-2">
+                            <span class="p-float-label">
+                                <p-dropdown [disabled]="disabled" [options]="sellerList" formControlName="sellerId"
+                                    optionValue="sellerId" optionLabel="sellerName"
+                                    [style]="{'width':'100%'}"></p-dropdown>
+                                <label for="sellerId">Vendedor</label>
+                            </span>
+                            <small
+                                *ngIf="billetesForm.controls['sellerId'].invalid && billetesForm.controls['sellerId'].dirty && billetesForm.controls['sellerId'].errors?.['required']"
+                                class="p-error block">Vendedor es requerido</small>
+                        </div>
+                        <div class="col-12 md:col-4 mb-2">
+                            <span class="p-float-label p-input-icon-left">
+                                <i class="pi pi-comments"></i>
+                                <input id="comment" [disabled]="disabled" type="text" pInputText
+                                    formControlName="comment">
+                                <label for="comment">Comentario</label>
+                            </span>
+                            <small
+                                *ngIf="billetesForm.controls['comment'].invalid && billetesForm.controls['comment'].dirty && billetesForm.controls['comment'].errors?.['required']"
+                                class="p-error block">Comentario es requerido</small>
+                        </div>
+                        <div class="col-12 md:col-12">
+
+
+                            <p-table [value]="billetes.controls" responsiveLayout="scroll"
+                                styleClass="p-datatable-sm p-datatable-striped">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th>Billetes</th>
+                                        <th>Cantidad</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-billete let-i="rowIndex">
+                                    <tr [formGroup]="billete">
+                                        <td style="width: 40%;">
+                                            <span class="p-column-title">Billetes</span>
+                                            <p-inputNumber formControlName="denominacion" [readonly]="true"
+                                                [useGrouping]="true" [style]="{'width':'100%'}"
+                                                styleClass="p-inputnumber-sm">
+                                            </p-inputNumber>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <span class="p-column-title">Cantidad</span>
+                                            <p-inputNumber formControlName="quantity" buttonLayout="stacked"
+                                                inputId="quantity" spinnerMode="horizontal" [step]="1"
+                                                decrementButtonClass="p-button-danger p-button-sm"
+                                                incrementButtonClass="p-button-success p-button-sm"
+                                                incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
+                                                [style]="{'width':'100%'}" styleClass="p-inputnumber-sm custom-spinner"
+                                                (onInput)="onQuantityChange(billete)">
+                                            </p-inputNumber>
+                                        </td>
+                                        <td style="width: 30%;">
+                                            <span class="p-column-title">Total</span>
+                                            {{ calcularTotal(billete) | currency: 'L. '}}
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="footer">
+                                    <tr>
+                                        <td colspan="2" class="text-right font-bold">Total Depositos:</td>
+                                        <td class="font-bold">
+                                            <p-inputNumber formControlName="deposit" mode="currency" currency="HNL"
+                                                inputId="deposit" locale="es-HN" [minFractionDigits]="2" [min]="0"
+                                                [max]="10000000" (onInput)="calcularTotalGeneral()"
+                                                (onFocus)="onFocusDeposit()">
+                                            </p-inputNumber>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="text-right font-bold">Total Efectivo:</td>
+                                        <td class="font-bold">{{ calcularTotalEfectivo() | currency: 'L. ' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="text-right font-bold">Total Deposito + Efectivo:</td>
+                                        <td class="font-bold">{{ calcularTotalGeneral() | currency: 'L. ' }}</td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </div>
+
+
+
+                    <!-- <div *ngIf="detectMobile()" class="mt-3 text-center">
+                        <div class="font-bold text-xl mb-2">
+                            Total General: {{ calcularTotalGeneral() | currency: 'L. ' }}
+                        </div>
+                    </div> -->
+
+                    <div class="flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <button pButton type="submit" [label]="isEdit ? 'Editar' : 'Guardar'" icon="pi pi-check"
+                                class="mr-2">
+                            </button>
+                            <button pButton type="button" label="Volver" icon="pi pi-arrow-left" (click)="goBack()"
+                                class="p-button-secondary">
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </ng-template>
+        </div>
+    </div>
+</div>

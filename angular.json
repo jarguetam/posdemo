@@ -29,7 +29,12 @@
                         "assets": [
                             "src/favicon.ico",
                             "src/assets",
-                            "src/manifest.json"
+                            "src/manifest.json",
+                            {
+                                "glob": "**/*",
+                                "input": "node_modules/ngx-extended-pdf-viewer/assets/",
+                                "output": "/assets/"
+                              }
                         ],
                         "styles": [
                             "src/styles.scss"
@@ -49,6 +54,7 @@
                     },
                     "configurations": {
                         "production": {
+
                             "budgets": [
                                 {
                                     "type": "initial",
@@ -61,7 +67,7 @@
                                     "maximumError": "10kb"
                                 }
                             ],
-                            "serviceWorker": true,
+                            "serviceWorker": false,
                             "fileReplacements": [
                                 {
                                     "replace": "src/environments/environment.ts",
@@ -111,7 +117,12 @@
                         "assets": [
                             "src/favicon.ico",
                             "src/assets",
-                            "src/manifest.json"
+                            "src/manifest.json",
+                            {
+                                "glob": "**/*",
+                                "input": "node_modules/ngx-extended-pdf-viewer/assets/",
+                                "output": "/assets/"
+                              }
                         ],
                         "styles": [
                             "src/styles.scss"

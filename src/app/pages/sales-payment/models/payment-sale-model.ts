@@ -1,6 +1,6 @@
-import { PaymentSaleDetailModel } from "./payment-sale-detail-model";
+import { PaymentSaleDetailModel } from './payment-sale-detail-model';
 
-export class PaymentSaleModel{
+export class PaymentSaleModel {
     id: number;
     docId: number;
     customerId: number;
@@ -8,7 +8,7 @@ export class PaymentSaleModel{
     customerName: string;
     payConditionId: number;
     docDate: Date;
-    canceled: true;
+    canceled: boolean;
     comment: string;
     reference: string;
     cashSum: number;
@@ -20,14 +20,13 @@ export class PaymentSaleModel{
     complete: boolean;
     detail: PaymentSaleDetailModel[];
     payConditionName: string;
-    createByName:string;
+    createByName: string;
     sellerId: number;
     uuid: string;
-
-
+    offline: boolean;
 
     constructor(data?: PaymentSaleModel) {
-        if(data!=null){
+        if (data != null) {
             this.docId = data.docId;
             this.customerId = data.customerId;
             this.customerCode = data.customerCode;
@@ -47,6 +46,7 @@ export class PaymentSaleModel{
             this.detail = data.detail;
             this.sellerId = data.sellerId;
             this.uuid = data.uuid;
+            this.offline = data.offline;
             return;
         }
         this.docId = this.docId;
@@ -68,6 +68,7 @@ export class PaymentSaleModel{
         this.detail = [];
         this.sellerId = this.sellerId;
         this.uuid = this.uuid;
+        this.offline = this.offline;
         return;
     }
 }

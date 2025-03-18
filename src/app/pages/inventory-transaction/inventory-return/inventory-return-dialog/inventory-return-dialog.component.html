@@ -1,5 +1,10 @@
-<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} devolucion de mercaderia" [(visible)]="display" modal="true"
-    blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '90%', height: '90%'}" (onHide)="onDialogHide()">
+<p-dialog header="{{isAdd ? 'Agregar': 'Editar'}} devolucion de mercaderia"
+    [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
+    [(visible)]="display" modal="true"
+    blockScroll="true"
+    [style]="{padding: 0}"
+    styleClass="full-screen-dialog" [closeOnEscape]="true"
+    [style]="{width: '90%', height: '90%'}" (onHide)="onDialogHide()">
     <ng-container>
         <ng-template [ngIf]="loading" [ngIfElse]="data">
             <skeleton-table-component [title]="title"></skeleton-table-component>
@@ -10,8 +15,10 @@
                     <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
                             <i class="pi pi-comments"></i>
-                            <input id="docDate" [disabled]="complete || !isAdd" type="date" pInputText #docDate
-                                formControlName="docDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <p-calendar formControlName="docDate" dateFormat="dd/mm/yy"
+                                [showSeconds]="false" [showIcon]="true"></p-calendar>
+                            <!-- <input id="docDate" [disabled]="complete || !isAdd" type="date" pInputText #docDate
+                                formControlName="docDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }"> -->
                             <label for="docDate">Fecha Documento</label>
                         </span>
                         <div *ngIf="formReturn.controls['docDate'].invalid && formReturn.controls['docDate'].dirty">
@@ -21,10 +28,9 @@
                     </div>
                     <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
-                            <p-dropdown [disabled]="complete || !isAdd" [options]="sellerList" formControlName="sellerId"
-                                optionValue="sellerId" optionLabel="sellerName"
-                                (ngModelChange)="setSellerData()"
-                                ></p-dropdown>
+                            <p-dropdown [disabled]="complete || !isAdd" [options]="sellerList"
+                                formControlName="sellerId" optionValue="sellerId" optionLabel="sellerName"
+                                (ngModelChange)="setSellerData()"></p-dropdown>
                             <label for="sellerId">Region</label>
                         </span>
                         <div *ngIf="formReturn.controls['sellerId'].invalid && formReturn.controls['sellerId'].dirty">
@@ -34,8 +40,8 @@
                     </div>
                     <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
-                            <p-dropdown [disabled]="complete || !isAdd" [options]="wareHouseList" formControlName="whsCode"
-                                optionValue="whsCode" optionLabel="whsName"></p-dropdown>
+                            <p-dropdown [disabled]="complete || !isAdd" [options]="wareHouseList"
+                                formControlName="whsCode" optionValue="whsCode" optionLabel="whsName"></p-dropdown>
                             <label for="whsCode">Almacen</label>
                         </span>
                         <div *ngIf="formReturn.controls['whsCode'].invalid && formReturn.controls['whsCode'].dirty">
@@ -45,27 +51,27 @@
                     </div>
                     <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
-                            <p-dropdown [disabled]="complete || !isAdd" [options]="regionList" formControlName="regionId"
-                            optionValue="regionId" optionLabel="nameRegion"></p-dropdown>
+                            <p-dropdown [disabled]="complete || !isAdd" [options]="regionList"
+                                formControlName="regionId" optionValue="regionId" optionLabel="nameRegion"></p-dropdown>
                             <label for="regionId">Vendedor</label>
                         </span>
                         <div *ngIf="formReturn.controls['regionId'].invalid && formReturn.controls['regionId'].dirty">
                             <small *ngIf="formReturn.controls['regionId'].errors.required" id="regionId"
-                            class="p-error block">Vendedor es requerido</small>
+                                class="p-error block">Vendedor es requerido</small>
                         </div>
                     </div>
                     <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
-                            <button [disabled]="complete" type="button" pButton pRipple icon="pi pi-search" pTooltip="Buscar Productos"
-                            tooltipPosition="bottom"
-                            (click)="searchData()"></button>
+                            <button [disabled]="complete" type="button" pButton pRipple icon="pi pi-search"
+                                pTooltip="Buscar Productos" tooltipPosition="bottom" (click)="searchData()"></button>
                         </span>
+
                     </div>
 
                     <div class="col-12 md:col-12">
                         <p-table #dt [value]="return.detail" responsiveLayout="stack"
                             styleClass="p-datatable-sm p-datatable-striped"
-                            [globalFilterFields]="['itemCode','itemName', 'quantity', 'itemName']">
+                            [globalFilterFields]="['itemCode','itemName', 'quantity', 'itemName','itemCategoryName']">
                             <ng-template pTemplate="header">
                                 <tr [pSelectableRow]="rowData">
                                     <th pSortableColumn="itemCode">Codigo</th>
@@ -78,6 +84,23 @@
                                     <th pSortableColumn="quantityDiference">Cantidad Diferencia</th>
                                     <th pSortableColumn="comment">Nota</th>
                                 </tr>
+                            </ng-template>
+                            <ng-template pTemplate="caption">
+                                <div class="flex align-items-center justify-content-between">
+                                    <div class="flex align-items-center gap-2">
+                                        <span class="p-input-icon-left">
+                                            <i class="pi pi-search"></i>
+                                            <input pInputText type="text" (input)="filterTable($event)"
+                                                placeholder="Buscar una palabra" />
+                                        </span>
+
+                                        <p-dropdown [options]="categories" [(ngModel)]="selectedCategory"
+                                            (onChange)="filterTable($event)" optionLabel="name"
+                                            (onClear)="filterTable($event)" placeholder="Seleccionar categoría"
+                                            [showClear]="true" [ngModelOptions]="{standalone: true}">
+                                        </p-dropdown>
+                                    </div>
+                                </div>
                             </ng-template>
                             <ng-template pTemplate="body" let-detail let-rowIndex="rowIndex">
                                 <tr>
@@ -112,42 +135,43 @@
 
                                     <td>
                                         <span class="p-column-title">Cantidad Inicial</span>
-                                            <p-cellEditor>
-                                                <ng-template pTemplate="output">
-                                                    {{detail.quantityInitial}}
-                                                </ng-template>
-                                            </p-cellEditor>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="output">
+                                                {{detail.quantityInitial}}
+                                            </ng-template>
+                                        </p-cellEditor>
                                     </td>
                                     <td>
                                         <span class="p-column-title">Cantidad Vendida</span>
-                                            <p-cellEditor>
-                                                <ng-template pTemplate="output">
-                                                    {{detail.quantitySeller}}
-                                                </ng-template>
-                                            </p-cellEditor>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="output">
+                                                {{detail.quantitySeller}}
+                                            </ng-template>
+                                        </p-cellEditor>
                                     </td>
                                     <td>
                                         <span class="p-column-title">Otros</span>
-                                            <p-cellEditor>
-                                                <ng-template pTemplate="output">
-                                                    {{detail.quantityOutPut}}
-                                                </ng-template>
-                                            </p-cellEditor>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="output">
+                                                {{detail.quantityOutPut}}
+                                            </ng-template>
+                                        </p-cellEditor>
                                     </td>
                                     <td>
                                         <span class="p-column-title">Cantidad Almacen</span>
-                                            <p-cellEditor>
-                                                <ng-template pTemplate="output">
-                                                    {{detail.quantityWareHouse}}
-                                                </ng-template>
-                                            </p-cellEditor>
+                                        <p-cellEditor>
+                                            <ng-template pTemplate="output">
+                                                {{detail.quantityWareHouse}}
+                                            </ng-template>
+                                        </p-cellEditor>
                                     </td>
                                     <td pEditableColumn>
                                         <span class="p-column-title">Devolucion</span>
-                                        <input #quantityReturn id="quantityReturn" [disabled]="complete" pInputText type="number"
-                                        (ngModelChange)="calculate(detail)" [(ngModel)]="detail.quantityReturn" mode="decimal"
-                                        [minFractionDigits]="2" [min]="0" [max]="1000000"
-                                        [ngModelOptions]="{standalone: true}" />
+                                        <input #quantityReturn id="quantityReturn" [disabled]="complete" pInputText
+                                            type="number" (ngModelChange)="calculate(detail)"
+                                            (focus)="onCantidadFocus(detail)" [(ngModel)]="detail.quantityReturn"
+                                            mode="decimal" [minFractionDigits]="2" [min]="0" [max]="1000000"
+                                            [ngModelOptions]="{standalone: true}" />
 
                                     </td>
                                     <td>
@@ -155,7 +179,8 @@
                                         <p-cellEditor>
                                             <ng-template pTemplate="input">
                                                 <input [disabled]="complete" pInputText type="date"
-                                                    [(ngModel)]="detail.quantityDiference" [ngModelOptions]="{standalone: true}">
+                                                    [(ngModel)]="detail.quantityDiference"
+                                                    [ngModelOptions]="{standalone: true}">
                                             </ng-template>
                                             <ng-template pTemplate="output">
                                                 {{detail.quantityDiference | number}}
@@ -171,8 +196,7 @@
                                         <p-cellEditor>
                                             <ng-template pTemplate="input">
                                                 <input [disabled]="complete" pInputText type="text"
-                                                    [(ngModel)]="detail.comment"
-                                                    [ngModelOptions]="{standalone: true}">
+                                                    [(ngModel)]="detail.comment" [ngModelOptions]="{standalone: true}">
                                             </ng-template>
                                             <ng-template pTemplate="output">
                                                 {{detail.comment }}
@@ -207,18 +231,16 @@
             <ng-template [ngIf]="isAdd || isOffline" [ngIfElse]="addButton">
                 <button pButton type="button" [disabled]="formReturn.invalid || loading" (click)="add()"
                     label="Agregar"></button>
-                <button pButton type="button" class="p-button-warning" [disabled]="formReturn.invalid || loading" (click)="saveLocal(return, false)"
-                    label="Guardar Local"></button>
+                <button pButton type="button" class="p-button-warning" [disabled]="formReturn.invalid || loading"
+                    (click)="saveLocal(return, false)" label="Guardar Local"></button>
             </ng-template>
             <ng-template #addButton>
-                <button [disabled]="complete" pButton type="button" [disabled]="formReturn.invalid || loading" (click)="edit()"
-                    label="Editar"></button>
-                <button pButton type="button" [disabled]="complete" [disabled]="formReturn.invalid || complete" (click)="completeReturn()"
-                    label="Completar"></button>
+                <button [disabled]="complete" pButton type="button" [disabled]="formReturn.invalid || loading"
+                    (click)="edit()" label="Editar"></button>
+                <button pButton type="button" [disabled]="complete" [disabled]="formReturn.invalid || complete"
+                    (click)="completeReturn()" label="Completar"></button>
             </ng-template>
         </ng-template>
         <br><br><br><br><br>
     </ng-container>
 </p-dialog>
-
-

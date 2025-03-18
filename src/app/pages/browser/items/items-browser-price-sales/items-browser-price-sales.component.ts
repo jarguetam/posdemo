@@ -1,5 +1,13 @@
-import { Component, EventEmitter, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
-import { InputText } from 'primeng/inputtext';
+import { DocumentSaleDetailModel } from './../../../sale/models/document-detail-model';
+import {
+    Component,
+    EventEmitter,
+    OnInit,
+    Output,
+    Renderer2,
+    ViewChild,
+} from '@angular/core';
+import { Table } from 'primeng/table';
 import { Messages } from 'src/app/helpers/messages';
 import { CompanyInfo } from 'src/app/models/company-info';
 import { ItemWareHouse } from 'src/app/pages/items/models/item-warehouse';
@@ -7,20 +15,29 @@ import { ItemService } from 'src/app/pages/items/service/items.service';
 import { AuthService } from 'src/app/service/users/auth.service';
 
 @Component({
-  selector: 'app-items-browser-price-sales',
-  templateUrl: './items-browser-price-sales.component.html',
-  styleUrls: ['./items-browser-price-sales.component.scss']
+    selector: 'app-items-browser-price-sales',
+    templateUrl: './items-browser-price-sales.component.html',
+    styleUrls: ['./items-browser-price-sales.component.scss'],
 })
 export class ItemsBrowserPriceSalesComponent implements OnInit {
     @Output() ItemSelect = new EventEmitter<ItemWareHouse>();
+    @ViewChild('dt') dt: Table;
     loading: boolean = false;
     display: boolean = false;
     index: number = -1;
     firstMatchingItem: any;
     isMobile: boolean;
     company: CompanyInfo;
+    categories: any[] = [];
+    selectedCategory: any = null;
+    filteredItems: any[] = [];
+    originalItems: any[] = [];
 
-    constructor(private itemServices: ItemService,  private auth: AuthService,private renderer: Renderer2) {
+    constructor(
+        private itemServices: ItemService,
+        private auth: AuthService,
+        private renderer: Renderer2
+    ) {
         this.isMobile = this.detectMobile();
         this.company = this.auth.CompanyValue;
     }
@@ -29,6 +46,24 @@ export class ItemsBrowserPriceSalesComponent implements OnInit {
 
     ngOnInit(): void {}
 
+    filterTable(event: any) {
+        let filterValue: string;
+
+        if (event.target) {
+            // Caso del input text
+            filterValue = (event.target as HTMLInputElement).value;
+        } else if (event.value) {
+            // Caso cuando se selecciona un item del dropdown
+            filterValue = event.value.name;
+        } else {
+            // Caso cuando se limpia la selección
+            filterValue = '';
+        }
+
+        console.log(filterValue);
+        this.dt.filterGlobal(filterValue, 'contains');
+    }
+
     private detectMobile(): boolean {
         const userAgent = window.navigator.userAgent.toLowerCase();
         return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
@@ -36,10 +71,49 @@ export class ItemsBrowserPriceSalesComponent implements OnInit {
         );
     }
 
-    async _get(whscode: number, customerId: number, priceListId: number) {
+    async _get(
+        whscode: number,
+        customerId: number,
+        priceListId: number,
+        itemlistUser: DocumentSaleDetailModel[]
+    ) {
         try {
             this.loading = true;
-            this.items = await this.itemServices.getItemsWareHousePrice(whscode, customerId, priceListId);
+
+            // Obtener los items del servicio
+            let items = await this.itemServices.getItemsWareHousePrice(
+                whscode,
+                customerId,
+                priceListId
+            )|| [];
+
+            // Crear un Set para almacenar los itemId únicos
+            const uniqueItemIds = new Set<number>();
+
+            // Filtrar los items para evitar duplicados
+            this.items = items.filter((item) => {
+                if (uniqueItemIds.has(item.itemId)) {
+                    return false; // Si el itemId ya está en el Set, no lo incluyas
+                }
+                uniqueItemIds.add(item.itemId); // Agrega el itemId al Set
+                return true;
+            }).map((item) => {
+                const result = itemlistUser.find(
+                    (x) => x.itemId == item.itemId
+                );
+                return {
+                    ...item,
+                    quantity:
+                        result !== undefined ? result.quantity : item.quantity,
+                };
+            });
+
+            this.itemServices.itemsListService = this.items;
+            this.originalItems = [...this.items];
+            this.categories = [
+                ...new Set(this.items.map((item) => item.itemCategoryName)),
+            ].map((cat) => ({ name: cat }));
+
             Messages.closeLoading();
             this.loading = false;
         } catch (ex) {
@@ -48,7 +122,27 @@ export class ItemsBrowserPriceSalesComponent implements OnInit {
         }
     }
 
-    showDialog(whsCode: number, customerId: number, priceListId: number) {
+    filterByCategory() {
+        // Mantener todos los items modificados en el servicio
+        this.items = !this.selectedCategory
+            ? [...this.originalItems]
+            : this.originalItems.filter(item => item.itemCategoryName === this.selectedCategory.name);
+
+        // Sincronizar cantidades con itemsListService
+        this.items.forEach(item => {
+            const serviceItem = this.itemServices.itemsListService.find(x => x.itemId === item.itemId);
+            if (serviceItem) {
+                item.quantity = serviceItem.quantity;
+            }
+        });
+    }
+
+    showDialog(
+        whsCode: number,
+        customerId: number,
+        priceListId: number,
+        itemlistUser: DocumentSaleDetailModel[]
+    ) {
         if (whsCode === 0) {
             Messages.warning(
                 'Advertencia',
@@ -72,9 +166,9 @@ export class ItemsBrowserPriceSalesComponent implements OnInit {
             return;
         }
 
-        this._get(whsCode, customerId, priceListId);
+        this._get(whsCode, customerId, priceListId, itemlistUser);
         this.display = true;
-        if(!this.isMobile){
+        if (!this.isMobile) {
             setTimeout(
                 () => this.renderer.selectRootElement('#searchItem').focus(),
                 500
@@ -82,9 +176,13 @@ export class ItemsBrowserPriceSalesComponent implements OnInit {
         }
     }
 
+    close() {
+        this.display = false;
+    }
+
     selectItem(c: ItemWareHouse) {
         this.item = c;
-        if (c.stock === 0 && this.company.negativeInventory==false) {
+        if (c.stock === 0 && this.company.negativeInventory == false) {
             Messages.warning(
                 'Advertencia',
                 'Este articulo no tiene inventario.'
@@ -103,12 +201,48 @@ export class ItemsBrowserPriceSalesComponent implements OnInit {
         this.item = new ItemWareHouse();
     }
 
-    async findByBardCode(whscode: number, customerId: number, priceListId: number,barcode: string){
+    onCantidadChange(item: ItemWareHouse) {
+        // Actualizar en el servicio
+        const serviceItem = this.itemServices.itemsListService.find(x => x.itemId === item.itemId);
+        if (serviceItem) {
+            serviceItem.quantity = item.quantity;
+        } else {
+            this.itemServices.itemsListService.push({...item});
+        }
+    }
+
+    save() {
+        const itemsToSave = this.items.filter(x => x.quantity != 0 && x.quantity != null);
+        this.itemServices.itemsListService = itemsToSave;
+        this.display = false;
+        itemsToSave.forEach(item => this.ItemSelect.emit(item));
+    }
+
+    onCantidadFocus(item: ItemWareHouse) {
+        if (item.quantity == 0) {
+            item.quantity = null;
+        }
+    }
+
+    async findByBardCode(
+        whscode: number,
+        customerId: number,
+        priceListId: number,
+        barcode: string
+    ) {
         try {
             this.loading = true;
-            this.items = await this.itemServices.getItemsWareHousePriceBarCode(whscode, customerId, priceListId, barcode);
-            if(this.items.length==0){
-                Messages.warning("Advertencia", "No se encontro ningun articulo...")
+            this.items = await this.itemServices.getItemsWareHousePriceBarCode(
+                whscode,
+                customerId,
+                priceListId,
+                barcode
+            );
+            if (this.items.length == 0) {
+                Messages.warning(
+                    'Advertencia',
+                    'No se encontro ningun articulo...'
+                );
                 return;
             }
             this.ItemSelect.emit(this.items[0]);
@@ -124,8 +258,6 @@ export class ItemsBrowserPriceSalesComponent implements OnInit {
     selectItemEnter(item: any) {
         if (this.firstMatchingItem) {
             this.selectItem(this.firstMatchingItem);
-          }
-
-      }
-
+        }
+    }
 }

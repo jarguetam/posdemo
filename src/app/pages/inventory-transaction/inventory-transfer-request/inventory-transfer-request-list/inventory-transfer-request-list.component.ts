@@ -6,6 +6,8 @@ import { InventoryRequestTransfer } from '../models/inventory-request-transfer';
 import { InventoryTransferRequestService } from '../service/inventory-transfer-request.service';
 import { Messages } from 'src/app/helpers/messages';
 import { User } from 'src/app/models/user';
+import { PrintInventoryRequestService } from '../service/print-request.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-inventory-transfer-request-list',
@@ -26,7 +28,8 @@ export class InventoryTransferRequestListComponent implements OnInit {
         private transferServices: InventoryTransferRequestService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
-        //private printService: PrintTransferService
+        private printService: PrintInventoryRequestService,
+        private datePipe: DatePipe,
     ) {
         this.usuario = this.auth.UserValue;
     }
@@ -38,11 +41,11 @@ export class InventoryTransferRequestListComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
         });
@@ -52,8 +55,8 @@ export class InventoryTransferRequestListComponent implements OnInit {
         try {
             this.loading = true;
             this.transferList = await this.transferServices.getByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to,
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd'),
                 this.usuario.userId
             );
             Messages.closeLoading();
@@ -84,8 +87,17 @@ export class InventoryTransferRequestListComponent implements OnInit {
         this.InventoryTransferDialog.showDialog(transfer, false);
     }
 
+    editTransfer(transfer: InventoryRequestTransfer) {
+        if(!this.auth.hasPermission("btn_edit_request_transfer")){
+             Messages.warning("No tiene acceso", "No puede agregar por favor solicite el acceso")
+             return;
+           }
+
+        this.InventoryTransferDialog.showDialog(transfer, false);
+    }
+
     print(transfer: InventoryRequestTransfer){
-       // this.printService.printRequestTransfer(transfer);
+       this.printService.printInventoryRequest(transfer);
     }
 
 }

@@ -1,0 +1,294 @@
+C:\Proyectos\PosWeb
+└── src
+   ├── app
+   |  ├── api
+   |  ├── cache
+   |  ├── components
+   |  |  ├── app-code
+   |  |  ├── camera-picker
+   |  |  ├── dashboard
+   |  |  |  └── models
+   |  |  ├── empty
+   |  |  ├── error
+   |  |  ├── file-picker
+   |  |  ├── inactivity-modal
+   |  |  ├── landing
+   |  |  ├── loading
+   |  |  ├── notfound
+   |  |  ├── skeleton-table
+   |  |  └── wizard-configuration
+   |  |     └── model
+   |  ├── config
+   |  ├── directive
+   |  |  └── autofocus
+   |  ├── guard
+   |  ├── helpers
+   |  ├── menu
+   |  ├── models
+   |  ├── pages
+   |  |  ├── bluetooth-device-selector
+   |  |  ├── browser
+   |  |  |  ├── customer
+   |  |  |  |  └── customer-browser
+   |  |  |  ├── items
+   |  |  |  |  ├── items-browser
+   |  |  |  |  ├── items-browser-price-sales
+   |  |  |  |  └── items-browser-ware-house
+   |  |  |  └── supplier
+   |  |  |     └── supplier-browser
+   |  |  ├── common
+   |  |  |  ├── models
+   |  |  |  ├── payment-metod-dialog
+   |  |  |  └── view-jornal-bp-dialog
+   |  |  ├── company-info
+   |  |  |  ├── components
+   |  |  |  └── list.company-info
+   |  |  ├── correlative
+   |  |  |  └── components
+   |  |  |     ├── correlative.dialog
+   |  |  |     ├── list.point-sale
+   |  |  |     └── point-sale.dialog
+   |  |  ├── customers
+   |  |  |  ├── category
+   |  |  |  |  ├── categorydialog
+   |  |  |  |  └── listcategory
+   |  |  |  ├── customers
+   |  |  |  |  ├── customer-balance
+   |  |  |  |  ├── customer-price-list-assignment
+   |  |  |  |  ├── customer-special-price-dialog
+   |  |  |  |  ├── customers-dialog
+   |  |  |  |  ├── customers-list
+   |  |  |  |  └── service
+   |  |  |  ├── models
+   |  |  |  ├── pricelist
+   |  |  |  |  ├── pricelist
+   |  |  |  |  ├── pricelist-detail
+   |  |  |  |  └── pricelistdialog
+   |  |  |  └── service
+   |  |  ├── expense
+   |  |  |  ├── expense
+   |  |  |  |  ├── expense-dialog
+   |  |  |  |  └── expense-list
+   |  |  |  ├── expense-type
+   |  |  |  |  ├── expense-type-dialog
+   |  |  |  |  └── expense-type-list
+   |  |  |  ├── liquidation
+   |  |  |  |  ├── liquidation-dialog
+   |  |  |  |  └── liquidation-list
+   |  |  |  ├── liquidation-money
+   |  |  |  |  ├── liquidation-money-list
+   |  |  |  |  └── service
+   |  |  |  ├── models
+   |  |  |  └── services
+   |  |  ├── inventory-transaction
+   |  |  |  ├── cost-revaluation
+   |  |  |  |  ├── cost-revaluation-dialog
+   |  |  |  |  ├── cost-revaluation-list
+   |  |  |  |  ├── models
+   |  |  |  |  └── services
+   |  |  |  ├── inventory-entry
+   |  |  |  |  ├── inventory-entry-dialog
+   |  |  |  |  ├── inventory-entry-list
+   |  |  |  |  ├── models
+   |  |  |  |  └── services
+   |  |  |  ├── inventory-output
+   |  |  |  |  ├── inventory-out-put-dialog
+   |  |  |  |  ├── inventory-out-put-list
+   |  |  |  |  ├── models
+   |  |  |  |  └── services
+   |  |  |  ├── inventory-return
+   |  |  |  |  ├── inventory-return-dialog
+   |  |  |  |  ├── inventory-return-list
+   |  |  |  |  ├── models
+   |  |  |  |  └── services
+   |  |  |  ├── inventory-transaction-type
+   |  |  |  |  ├── inventario-transaction-type-dialog
+   |  |  |  |  ├── inventario-transaction-type-list
+   |  |  |  |  ├── model
+   |  |  |  |  └── services
+   |  |  |  ├── inventory-transfer
+   |  |  |  |  ├── inventory-transfer-dialog
+   |  |  |  |  ├── inventory-transfer-list
+   |  |  |  |  ├── models
+   |  |  |  |  └── services
+   |  |  |  └── inventory-transfer-request
+   |  |  |     ├── inventory-transfer-request-dialog
+   |  |  |     ├── inventory-transfer-request-list
+   |  |  |     ├── inventory-transfer-request-to-complete
+   |  |  |     ├── item-browser-transfer
+   |  |  |     ├── models
+   |  |  |     └── service
+   |  |  ├── items
+   |  |  |  ├── category-items
+   |  |  |  |  ├── category-items-dialog
+   |  |  |  |  └── category-items-list
+   |  |  |  ├── items
+   |  |  |  |  ├── items-dialog
+   |  |  |  |  └── items-list
+   |  |  |  ├── models
+   |  |  |  ├── service
+   |  |  |  ├── sub-category-items
+   |  |  |  |  ├── sub-category-items-dialog
+   |  |  |  |  └── sub-category-items-list
+   |  |  |  ├── unitOfmeasure
+   |  |  |  |  ├── unit-of-measure-dialog
+   |  |  |  |  └── unit-of-measure-list
+   |  |  |  ├── view-jornal-items-dialog
+   |  |  |  └── warehouse
+   |  |  |     ├── list-ware-house
+   |  |  |     ├── models
+   |  |  |     ├── service
+   |  |  |     └── ware-house-dialog
+   |  |  ├── login
+   |  |  ├── payconditon
+   |  |  |  ├── payconditiondialog
+   |  |  |  └── payconditionlist
+   |  |  ├── permissions
+   |  |  |  └── components
+   |  |  ├── purchase
+   |  |  |  ├── invoice
+   |  |  |  |  ├── copy-order-list
+   |  |  |  |  ├── invoice-purchase-dialog
+   |  |  |  |  ├── invoice-purchase-list
+   |  |  |  |  └── service
+   |  |  |  ├── models
+   |  |  |  ├── orders
+   |  |  |  |  ├── orders-purchase-dialog
+   |  |  |  |  ├── orders-purchase-list
+   |  |  |  |  └── services
+   |  |  |  └── supplier-account
+   |  |  |     ├── models
+   |  |  |     ├── services
+   |  |  |     └── supplier-account-list
+   |  |  ├── purchase-payment
+   |  |  |  ├── models
+   |  |  |  ├── purchase-invoice-dialog
+   |  |  |  ├── purchase-payment-dialog
+   |  |  |  ├── purchase-payment-list
+   |  |  |  └── service
+   |  |  ├── reports
+   |  |  |  ├── models
+   |  |  |  ├── report-cxc-seller
+   |  |  |  ├── report-expense-resum
+   |  |  |  ├── report-inventory
+   |  |  |  ├── report-inventory-pdf
+   |  |  |  ├── report-inventory-warehouse
+   |  |  |  ├── report-purchase
+   |  |  |  ├── report-sales-date
+   |  |  |  ├── report-sales-margen
+   |  |  |  ├── report-view
+   |  |  |  └── service
+   |  |  ├── roles
+   |  |  |  └── components
+   |  |  ├── sale
+   |  |  |  ├── customer-account
+   |  |  |  |  ├── customer-account-list
+   |  |  |  |  ├── models
+   |  |  |  |  └── services
+   |  |  |  ├── customer-balance-sale
+   |  |  |  |  ├── model
+   |  |  |  |  └── service
+   |  |  |  ├── invoice
+   |  |  |  |  ├── copy-order-list
+   |  |  |  |  ├── invoice-sale
+   |  |  |  |  ├── invoice-sale-dialog
+   |  |  |  |  └── invoice-sale-list
+   |  |  |  ├── models
+   |  |  |  ├── orders
+   |  |  |  |  ├── orders-sale-dialog
+   |  |  |  |  └── orders-sale-list
+   |  |  |  └── services
+   |  |  ├── sales-payment
+   |  |  |  ├── models
+   |  |  |  ├── sales-invoice-dialog
+   |  |  |  ├── sales-payment
+   |  |  |  ├── sales-payment-dialog
+   |  |  |  ├── sales-payment-list
+   |  |  |  └── service
+   |  |  ├── seller
+   |  |  |  ├── components
+   |  |  |  |  ├── seller-region.dialog
+   |  |  |  |  └── seller.dialog
+   |  |  |  ├── models
+   |  |  |  ├── seller-list
+   |  |  |  ├── seller-region-list
+   |  |  |  └── service
+   |  |  ├── suppliers
+   |  |  |  ├── category-supplier
+   |  |  |  |  ├── category-supplier-dialog
+   |  |  |  |  └── category-supplier-list
+   |  |  |  ├── models
+   |  |  |  ├── service
+   |  |  |  └── supplier
+   |  |  |     ├── supplier-dialog
+   |  |  |     └── supplier-list
+   |  |  └── users
+   |  |     └── components
+   |  └── service
+   |     ├── dashboard
+   |     └── users
+   ├── assets
+   |  ├── demo
+   |  |  └── flags
+   |  ├── icons
+   |  ├── img
+   |  ├── sass
+   |  |  ├── layout
+   |  |  └── overrides
+   |  └── theme
+   |     ├── arya-blue
+   |     ├── arya-green
+   |     ├── arya-orange
+   |     ├── arya-purple
+   |     ├── bootstrap4-dark-blue
+   |     ├── bootstrap4-dark-purple
+   |     ├── bootstrap4-light-blue
+   |     ├── bootstrap4-light-purple
+   |     ├── fluent-light
+   |     ├── lara-dark-blue
+   |     |  └── fonts
+   |     ├── lara-dark-indigo
+   |     |  └── fonts
+   |     ├── lara-dark-purple
+   |     |  └── fonts
+   |     ├── lara-dark-teal
+   |     |  └── fonts
+   |     ├── lara-light-blue
+   |     |  └── fonts
+   |     ├── lara-light-indigo
+   |     |  └── fonts
+   |     ├── lara-light-purple
+   |     |  └── fonts
+   |     ├── lara-light-teal
+   |     |  └── fonts
+   |     ├── md-dark-deeppurple
+   |     |  └── fonts
+   |     ├── md-dark-indigo
+   |     |  └── fonts
+   |     ├── md-light-deeppurple
+   |     |  └── fonts
+   |     ├── md-light-indigo
+   |     |  └── fonts
+   |     ├── mdc-dark-deeppurple
+   |     |  └── fonts
+   |     ├── mdc-dark-indigo
+   |     |  └── fonts
+   |     ├── mdc-light-deeppurple
+   |     |  └── fonts
+   |     ├── mdc-light-indigo
+   |     |  └── fonts
+   |     ├── saga-blue
+   |     ├── saga-green
+   |     ├── saga-orange
+   |     ├── saga-purple
+   |     ├── tailwind-light
+   |     |  └── fonts
+   |     ├── vela-blue
+   |     ├── vela-green
+   |     ├── vela-orange
+   |     └── vela-purple
+   └── environments
+
+directory: 8380
+
+ignored: directory (423)

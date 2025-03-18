@@ -12,11 +12,13 @@ import { InventoryTransferRequestService } from '../service/inventory-transfer-r
 import { InventoryRequestTransferDetail } from '../models/inventory-request-transfer-detail';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { User } from 'src/app/models/user';
-import { ItemsBrowserWareHouseComponent } from 'src/app/pages/browser/items/items-browser-ware-house/items-browser-ware-house.component';
 import { ItemWareHouse } from 'src/app/pages/items/models/item-warehouse';
 import { WareHouseModel } from 'src/app/pages/items/warehouse/models/warehouse';
 import { ServiceWareHouseService } from 'src/app/pages/items/warehouse/service/service-ware-house.service';
 import { AuthService } from 'src/app/service/users/auth.service';
+import { ItemBrowserTransferComponent } from '../item-browser-transfer/item-browser-transfer.component';
+import { ItemBrowserModel } from '../models/item-browser';
+import { PrintInventoryRequestService } from '../service/print-request.service';
 
 @Component({
     selector: 'app-inventory-transfer-request-dialog',
@@ -27,9 +29,10 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
     @Output() InventoryRequestTransferModify = new EventEmitter<
         InventoryRequestTransfer[]
     >();
-    @ViewChild(ItemsBrowserWareHouseComponent)
-    ItemsBrowser: ItemsBrowserWareHouseComponent;
+    @ViewChild(ItemBrowserTransferComponent)
+    ItemsBrowser: ItemBrowserTransferComponent;
     transfer: InventoryRequestTransfer = new InventoryRequestTransfer();
+    transferDetail = [];
     isAdd: boolean;
     disabled: boolean = false;
     formTransfer: FormGroup;
@@ -42,19 +45,24 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
     index = 0;
     barcodeValue: string = '';
     changeWareHouse: boolean = false;
+    changeQuantityRequired: boolean = false;
+    itemList: ItemBrowserModel[] = [];
 
     constructor(
         private formBuilder: FormBuilder,
         private transferService: InventoryTransferRequestService,
         private authService: AuthService,
-        private wareHouseService: ServiceWareHouseService
-    ) // private printService: PrintTransferService
-    {
+        private wareHouseService: ServiceWareHouseService,
+        private printService: PrintInventoryRequestService
+    ) {
         this.usuario = this.authService.UserValue;
     }
 
     ngOnInit(): void {
-        this.changeWareHouse= !this.authService.hasPermission("btn_edit_warehouse");
+        this.changeWareHouse =
+            !this.authService.hasPermission('btn_edit_warehouse');
+
+
     }
 
     async _getWareHouse() {
@@ -81,14 +89,24 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
     }
 
     showDialog(transferNew: InventoryRequestTransfer, isAdd: boolean) {
-        this.changeWareHouse= this.authService.hasPermission("btn_edit_warehouse");
+        this.changeQuantityRequired =isAdd ? true:
+            this.authService.hasPermission('btn_edit_quantity_required');
+
+            console.log(this.authService.hasPermission('btn_edit_quantity_required'))
+
+        this.changeWareHouse =
+            this.authService.hasPermission('btn_edit_warehouse');
         this.display = true;
         this.new();
         this.isAdd = isAdd;
         this.disabled = !isAdd;
         this.transfer = transferNew;
+        this.transferDetail = transferNew.detail;
         this.docQuantity = transferNew.qtyTotal;
         this.doctotal = transferNew.docTotal;
+        if (!this.isAdd) {
+            this.index = this.transfer.detail.length;
+        }
         this._createFormBuild();
         this._getWareHouse();
     }
@@ -99,12 +117,11 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
             comment: [this.transfer.comment ?? '--', Validators.required],
             docTotal: [this.transfer.docTotal ?? 0],
             qtyTotal: [this.transfer.qtyTotal ?? 0],
-            fromWhsCode: [
-                this.transfer.fromWhsCode ?? 0,
+            fromWhsCode: [this.transfer.fromWhsCode ?? 0, Validators.required],
+            toWhsCode: [
+                this.transfer.toWhsCode ?? this.usuario.whsCode,
                 Validators.required,
             ],
-            toWhsCode: [this.transfer.toWhsCode ?? this.usuario.whsCode,
-                Validators.required,],
             createBy: [this.transfer.createBy ?? this.usuario.userId],
             detail: [[]],
         });
@@ -116,25 +133,21 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
     }
 
     addLine(detail: InventoryRequestTransferDetail[]) {
-        detail.push(
-            new InventoryRequestTransferDetail({
-                toWhsCode: 0,
-                toWhsName: '',
-                fromWhsCode: 0,
-                fromWhsName: '',
-                itemCode: '',
-                itemName: '',
-                transferRequestDetailId: 0,
-                transferRequestId: 0,
-                itemId: 0,
-                quantity: 1,
-                unitOfMeasureId: 0,
-                unitOfMeasureName: '',
-                price: 0,
-                dueDate: undefined,
-                lineTotal: 0,
-            })
-        );
+        this.transfer.detail = this.transferService.itemList.map((item) => {
+            const detail = new InventoryRequestTransferDetail();
+            detail.itemCode = item.itemCode;
+            detail.itemName = item.itemName;
+            detail.itemId = item.itemId;
+            detail.quantity = item.cantidad;
+            detail.price = item.avgPrice;
+            detail.quantityUnit = '1';
+            detail.dueDate = item.dueDate;
+            detail.stock = item.cantidad;
+            detail.lineTotal = item.cantidad * item.avgPrice;
+            detail.unitOfMeasureId = item.unitOfMeasureId;
+            detail.unitOfMeasureName = item.unitOfMeasureName;
+            return detail;
+        });
         this.showDialogItem(this.index);
         this.index++;
     }
@@ -148,19 +161,42 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
     }
 
     showDialogItem(index: number) {
-        this.ItemsBrowser.index = index;
+        const transformedDetails = this.transferDetail.map(
+            this.transformToItemBrowserModel
+        );
+        console.log(transformedDetails)
         this.ItemsBrowser.showDialog(
+            this.formTransfer.get('fromWhsCode').value,
             this.formTransfer.get('toWhsCode').value,
-            false
+            transformedDetails.length == 0 ? this.itemList : transformedDetails
         );
     }
 
+    transformToItemBrowserModel(
+        detail: InventoryRequestTransferDetail
+    ): ItemBrowserModel {
+        return {
+            itemId: detail.itemId,
+            itemCode: detail.itemCode,
+            barCode: '', // Asigna un valor adecuado si está disponible
+            itemName: detail.itemName,
+            stockAlmacenOrigen: detail.stock,
+            stockAlmacenDestino: 0, // Asigna un valor adecuado si está disponible
+            cantidad: detail.quantity,
+            dueDate: detail.dueDate,
+            avgPrice: detail.price,
+            unitOfMeasureId: detail.unitOfMeasureId,
+            unitOfMeasureName: detail.unitOfMeasureName,
+            itemCategoryName: '', // Asigna un valor adecuado si está disponible
+        };
+    }
+
     findBarcode(barcode: string) {
-        this.ItemsBrowser.index = this.index;
-        this.ItemsBrowser.findByBardCode(
-            this.formTransfer.get('fromWhsCode').value,
-            barcode
-        );
+        //  this.ItemsBrowser.index = this.index;
+        // this.ItemsBrowser.findByBardCode(
+        //     this.formTransfer.get('fromWhsCode').value,
+        //     barcode
+        // );
         this.transfer.detail.push(
             new InventoryRequestTransferDetail({
                 toWhsCode: 0,
@@ -173,11 +209,13 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
                 transferRequestId: 0,
                 itemId: 0,
                 quantity: 1,
+                quantityUnit: '0',
                 unitOfMeasureId: 0,
                 unitOfMeasureName: '',
                 price: 0,
                 dueDate: undefined,
                 lineTotal: 0,
+                stock: 0,
             })
         );
         this.index++;
@@ -198,47 +236,36 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
                 transferRequestId: 0,
                 itemId: 0,
                 quantity: 1,
+                quantityUnit: '0',
                 unitOfMeasureId: 0,
                 unitOfMeasureName: '',
                 price: 0,
                 dueDate: undefined,
                 lineTotal: 0,
+                stock: 0,
             })
         );
-        this.ItemsBrowser.index = this.transfer.detail.length - 1;
+        //  this.ItemsBrowser.index = this.transfer.detail.length - 1;
         this.showDialogItem(this.transfer.detail.length - 1);
     }
 
     browserItems(item: ItemWareHouse) {
-        if (this.ItemsBrowser.index != -1) {
-            let currentIndex = this.ItemsBrowser.index;
-            let itemFind = this.transfer.detail.find(
-                (x) => x.itemId == item.itemId
-            );
-            if (itemFind) {
-                this.transfer.detail.find((x) => x.itemId == item.itemId)
-                    .quantity++;
-                this.calculate();
-            } else {
-                this.transfer.detail[currentIndex].itemId = item.itemId;
-                this.transfer.detail[currentIndex].itemCode = item.itemCode;
-                this.transfer.detail[currentIndex].itemName = item.itemName;
-                this.transfer.detail[currentIndex].price = item.avgPrice ==0? 1 :item.avgPrice;
-                let dueDateItem = new Date(); // fecha actual
-                dueDateItem.setDate(dueDateItem.getDate() + 360);
-                this.transfer.detail[currentIndex].dueDate = dueDateItem;
-                this.transfer.detail[currentIndex].unitOfMeasureId =
-                    item.unitOfMeasureId;
-                this.transfer.detail[currentIndex].unitOfMeasureName =
-                    item.unitOfMeasureName;
-            }
-        }
-        this.ItemsBrowser.index = -1;
-        let deleteIndex = this.transfer.detail.filter((x) => x.itemId == 0);
-        this.index = this.index - deleteIndex.length;
-        this.transfer.detail = this.transfer.detail.filter(
-            (x) => x.itemId != 0
-        );
+        this.itemList = this.transferService.itemList;
+        this.transfer.detail = this.transferService.itemList.map((item) => {
+            const detail = new InventoryRequestTransferDetail();
+            detail.itemCode = item.itemCode;
+            detail.itemName = item.itemName;
+            detail.itemId = item.itemId;
+            detail.quantity = item.cantidad;
+            detail.quantityUnit = item.cantidad.toString();
+            detail.price = item.avgPrice;
+            detail.dueDate = item.dueDate;
+            detail.stock = item.stockAlmacenOrigen;
+            detail.lineTotal = item.cantidad * item.avgPrice;
+            detail.unitOfMeasureId = item.unitOfMeasureId;
+            detail.unitOfMeasureName = item.unitOfMeasureName;
+            return detail;
+        });
         this.calculate();
     }
 
@@ -280,9 +307,46 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
                 newTransfer.docTotal = this.doctotal;
                 newTransfer.qtyTotal = this.docQuantity;
                 let transfer = await this.transferService.add(newTransfer);
-                //this.printService.printRequestTransfer(transfer[0]);
+                await this.printService.printInventoryRequest(transfer[0]);
                 Messages.closeLoading();
                 Messages.Toas('Agregado Correctamente');
+                this.transferService.itemList = [];
+                this.itemList = [];
+                this.InventoryRequestTransferModify.emit(transfer);
+                this.display = false;
+                this.index = 0;
+            } catch (ex) {
+                Messages.closeLoading();
+                Messages.warning('Advertencia', ex.error.message);
+            }
+        }
+    }
+
+    async edit() {
+        if (this.formTransfer.valid) {
+            try {
+                Messages.loading(
+                    'Editando',
+                    'Editando solicitud de transferencia de mercaderia'
+                );
+
+                let newTransfer = this.formTransfer
+                    .value as InventoryRequestTransfer;
+                newTransfer.detail = this.transfer.detail;
+                newTransfer.detail.forEach(
+                    (x) => (x.toWhsCode = newTransfer.toWhsCode)
+                );
+                newTransfer.detail.forEach(
+                    (x) => (x.fromWhsCode = newTransfer.fromWhsCode)
+                );
+                newTransfer.docTotal = this.doctotal;
+                newTransfer.qtyTotal = this.docQuantity;
+                let transfer = await this.transferService.edit(newTransfer);
+                await this.printService.printInventoryRequest(transfer[0]);
+                this.transferService.itemList = [];
+                this.itemList = [];
+                Messages.closeLoading();
+                Messages.Toas('Editado Correctamente');
                 this.InventoryRequestTransferModify.emit(transfer);
                 this.display = false;
                 this.index = 0;
@@ -294,6 +358,6 @@ export class InventoryTransferRequestDialogComponent implements OnInit {
     }
 
     print() {
-        //this.printService.printRequestTransfer(this.transfer);
+        this.printService.printInventoryRequest(this.transfer);
     }
 }

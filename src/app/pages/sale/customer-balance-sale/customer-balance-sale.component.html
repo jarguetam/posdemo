@@ -1,0 +1,64 @@
+<div class="grid">
+    <div class="col-12 xl:col-12">
+        <div class="card">
+            <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+                <skeleton-table-component [title]="title"></skeleton-table-component>
+            </ng-template>
+            <ng-template #showTable>
+                <p-table #dt [value]="groupedCustomers" [paginator]="true" [rows]="5" responsiveLayout="scroll"
+                    styleClass="p-datatable-sm p-datatable-gridlines"
+                    [globalFilterFields]="['customerCode','customerName','sellerName']">
+                    <ng-template pTemplate="caption">
+                        <div class="header-container">
+                            <h4>{{title}}</h4>
+                            <div class="button-container">
+                                <h6 (click)="resetFilter()" class="highlighted-text">{{isMobile ? 'Pulse Mostrar todos' : 'F4 mostrar todos' }}</h6>
+                            </div>
+                            <div class="search-container">
+                                <span class="p-input-icon-left">
+                                    <i class="pi pi-search"></i>
+                                    <input pInputText type="text"
+                                        (input)="dt.filterGlobal($event.target.value, 'contains')"
+                                        placeholder="Buscar una palabra" />
+                                </span>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th pSortableColumn="customerCode">Código <p-sortIcon field="customerCode"></p-sortIcon>
+                            </th>
+                            <th pSortableColumn="customerName">Nombre <p-sortIcon field="customerName"></p-sortIcon>
+                            </th>
+                            <th pSortableColumn="sellerName">Vendedor <p-sortIcon field="sellerName"></p-sortIcon></th>
+                            <th pSortableColumn="total">Total <p-sortIcon field="total"></p-sortIcon></th>
+                            <th pSortableColumn="totalPaidToDate">Total Pagado <p-sortIcon
+                                    field="totalPaidToDate"></p-sortIcon></th>
+                            <th pSortableColumn="totalBalance">Saldo<p-sortIcon field="totalBalance"></p-sortIcon></th>
+                            <th>Acción</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-customer>
+                        <tr>
+                            <td>{{customer.customerCode}}</td>
+                            <td>{{customer.customerName}}</td>
+                            <td>{{customer.sellerName}}</td>
+                            <td>{{customer.total | currency:'L. '}}</td>
+                            <td>{{customer.totalPaidToDate | currency:'L. '}}</td>
+                            <td>{{customer.totalBalance | currency:'L. '}}</td>
+                            <td>
+                                <button [disabled]="disabled" type="button" pButton pRipple
+                                pTooltip="Generar" tooltipPosition="bottom" icon="pi pi-file-pdf"
+                                (click)="printPDf(customer)" class="p-button-rounded p-button-warning mr-2"></button>
+                                <button [disabled]="disabled" type="button" pButton pRipple
+                                pTooltip="Imprimir" tooltipPosition="bottom" icon="pi pi-print"
+                                (click)="printEsc(customer)" class="p-button-rounded p-button-secundary mr-2"></button>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </ng-template>
+        </div>
+    </div>
+
+</div>

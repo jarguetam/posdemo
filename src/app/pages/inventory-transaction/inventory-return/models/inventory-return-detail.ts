@@ -11,6 +11,7 @@ export class InventoryReturnDetailModel {
     quantityReturn: number;
     quantityDiference: number;
     comment: string;
+    itemCategoryName: string;
 
     constructor(data?: Partial<InventoryReturnDetailModel>) {
         if (data) {

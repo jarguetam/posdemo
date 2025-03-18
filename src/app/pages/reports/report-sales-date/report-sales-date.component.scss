@@ -1,0 +1,11 @@
+.pdf-container {
+    width: 100%;
+    height: calc(100vh - 100px); /* Ajusta este valor según el espacio que necesites */
+    overflow: hidden;
+}
+
+::ng-deep .ng2-pdf-viewer-container {
+    width: 80% !important;
+    height: 100% !important;
+    overflow: auto !important;
+}

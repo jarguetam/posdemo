@@ -13,6 +13,8 @@ import { HttpClient } from '@angular/common/http';
 import { PaymentSaleModel } from '../../sales-payment/models/payment-sale-model';
 import { DbLocalService } from 'src/app/service/db-local.service';
 import { DatePipe } from '@angular/common';
+import { DocumentSaleDetailModel } from '../models/document-detail-model';
+import { ConnectionStateService } from 'src/app/service/connection-state.service';
 
 @Injectable({
     providedIn: 'root',
@@ -21,8 +23,12 @@ export class SalesService {
     constructor(
         private http: HttpClient,
         private db: DbLocalService,
-        private datePipe: DatePipe
+        private datePipe: DatePipe,
+        private connectionStateService: ConnectionStateService
     ) {}
+
+    invoiceDetail: DocumentSaleDetailModel[] = [];
+
     private _isSync: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
         false
     );
@@ -35,6 +41,14 @@ export class SalesService {
         this._isSync.next(value);
     }
     //Orders
+    private async getOfflineOrders(): Promise<DocumentSaleModel[]> {
+        const ordersOffline = await this.db.orderSales.toArray();
+        return ordersOffline.map(order => ({
+            ...order,
+            detailDto: order.detail
+        }));
+    }
+
     async getOrderActive() {
         return await firstValueFrom(
             this.http.get<DocumentSaleModel[]>(
@@ -42,6 +56,7 @@ export class SalesService {
             )
         );
     }
+
     async getOrder() {
         return await firstValueFrom(
             this.http.get<DocumentSaleModel[]>(
@@ -50,30 +65,37 @@ export class SalesService {
         );
     }
 
-    async getOrderByDate(from: string, to: string) {
+    async getOrderByDate(from: string, to: string): Promise<DocumentSaleModel[]> {
+        // Si estamos en modo offline forzado o sin conexión, directamente usar datos locales
+        if (this.connectionStateService.isEffectivelyOffline()) {
+            return this.getOfflineOrders();
+        }
+
         try {
-            let invoices = await firstValueFrom(
+            // Intentar obtener datos del servidor
+            const invoices = await firstValueFrom(
                 this.http
                     .get<DocumentSaleModel[]>(
                         `${environment.uriLogistic}/api/Sales/GetOrderSaleByDate/${from}/${to}`
                     )
                     .pipe(
                         catchError((error) => {
+                            console.error('Error fetching orders:', error);
                             return throwError(
-                                () => 'Error en la solicitud HTTP'
+                                () => new Error('Error en la solicitud HTTP')
                             );
                         })
                     )
             );
-            let ordersOffline = await this.db.orderSales.toArray();
-            ordersOffline.map(
-                (invoice) => (invoice.detailDto = invoice.detail)
-            );
-            let combinedOrders = [...ordersOffline, ...invoices];
-            return combinedOrders;
+
+            // Obtener y combinar con órdenes offline
+            const offlineOrders = await this.getOfflineOrders();
+            return [...offlineOrders, ...invoices];
+
         } catch (error) {
-            let ordersOffline = await this.db.orderSales.toArray();
-            return ordersOffline;
+            // En caso de error, devolver solo los datos locales
+            console.warn('Fallback to offline data due to error:', error);
+            return this.getOfflineOrders();
         }
     }
 
@@ -129,7 +151,20 @@ export class SalesService {
         );
     }
 
-    async getInvoiceActiveCustomer(idCustomer: number) {
+    private async getOfflineInvoices(idCustomer: number): Promise<DocumentSaleModel[]> {
+        return await this.db.invoiceSeller
+            .where('customerId')
+            .equals(idCustomer)
+            .toArray();
+    }
+
+    async getInvoiceActiveCustomer(idCustomer: number): Promise<DocumentSaleModel[]> {
+        // Si estamos en modo offline forzado o sin conexión, usar datos locales
+        if (this.connectionStateService.isEffectivelyOffline()) {
+            console.log('Using offline data due to offline mode');
+            return this.getOfflineInvoices(idCustomer);
+        }
+
         try {
             const apiDataPromise = firstValueFrom(
                 this.http
@@ -137,15 +172,23 @@ export class SalesService {
                         `${environment.uriLogistic}/api/Sales/GetInvoiceSaleActiveCustomer${idCustomer}`
                     )
                     .pipe(
-                        catchError((error) => throwError(() => error)),
-                        timeout(5000) // Espera máximo 5 segundos para la respuesta de la API
+                        catchError((error) => {
+                            console.error('Error fetching invoices:', error);
+                            return throwError(() => error);
+                        }),
+                        timeout(150000)
                     )
             );
 
-            const invoice = (await Promise.race([
+            const invoice = await Promise.race([
                 apiDataPromise,
-                new Promise((resolve) => setTimeout(() => resolve([]), 3000)), // Devuelve un array vacío si la API no responde en 3 segundos
-            ])) as DocumentSaleModel[];
+                new Promise<DocumentSaleModel[]>((resolve) =>
+                    setTimeout(() => {
+                        console.warn('API request timed out');
+                        resolve([]);
+                    }, 150000)
+                )
+            ]);
 
             // Si invoice está vacío, significa que se resolvió el timeout
             if (invoice.length === 0) {
@@ -153,16 +196,24 @@ export class SalesService {
             }
 
             return invoice;
-        } catch (ex) {
-            const data = await this.db.invoiceSeller
-                .where('customerId')
-                .equals(idCustomer)
-                .toArray();
-            return data;
+
+        } catch (error) {
+            console.warn('Fallback to offline data due to error:', error);
+            return this.getOfflineInvoices(idCustomer);
         }
     }
 
-    async getInvoiceActiveSeller(idSeller: number) {
+    private async getOfflineSellerInvoices(): Promise<DocumentSaleModel[]> {
+        return await this.db.invoiceSeller.toArray();
+    }
+
+    async getInvoiceActiveSeller(idSeller: number): Promise<DocumentSaleModel[]> {
+        // Si estamos en modo offline forzado o sin conexión, usar datos locales
+        if (this.connectionStateService.isEffectivelyOffline()) {
+            console.log('Using offline data due to offline mode');
+            return this.getOfflineSellerInvoices();
+        }
+
         try {
             const apiDataPromise = firstValueFrom(
                 this.http
@@ -170,34 +221,67 @@ export class SalesService {
                         `${environment.uriLogistic}/api/Sales/GetInvoiceSaleActiveSeller${idSeller}`
                     )
                     .pipe(
-                        catchError((error) => throwError(() => error)),
-                        timeout(5000) // Espera máximo 5 segundos para la respuesta de la API
+                        catchError((error) => {
+                            console.error('Error fetching seller invoices:', error);
+                            return throwError(() => error);
+                        }),
+                        timeout(5000)
                     )
             );
 
-            const invoices = (await Promise.race([
+            const invoices = await Promise.race([
                 apiDataPromise,
-                new Promise((resolve) => setTimeout(() => resolve([]), 3000)), // Devuelve un array vacío si la API no responde en 3 segundos
-            ])) as DocumentSaleModel[];
+                new Promise<DocumentSaleModel[]>((resolve) =>
+                    setTimeout(() => {
+                        console.warn('API request timed out after 3 seconds');
+                        resolve([]);
+                    }, 3000)
+                )
+            ]);
 
             // Si invoices está vacío, significa que se resolvió el timeout
             if (invoices.length === 0) {
                 throw new Error('API request timed out');
             }
 
-            await this.db.invoiceSeller.clear();
-            await Promise.all(
-                invoices.map((inv) => this.db.invoiceSeller.add(inv))
-            );
+            // Actualizar la base de datos local con los nuevos datos
+            try {
+                await this.db.invoiceSeller.clear();
+                await Promise.all(
+                    invoices.map((inv) => this.db.invoiceSeller.add(inv))
+                );
+                console.log('Successfully updated local database with new invoices');
+            } catch (dbError) {
+                console.error('Error updating local database:', dbError);
+                // No lanzamos el error para no interrumpir el flujo principal
+            }
 
             return invoices;
+
         } catch (error) {
-            const invoicesOffline = await this.db.invoiceSeller.toArray();
-            return invoicesOffline;
+            console.warn('Fallback to offline data due to error:', error);
+            return this.getOfflineSellerInvoices();
         }
     }
 
-    async getInvoiceByDate(from: string, to: string) {
+    private async getOfflineDateInvoices(): Promise<DocumentSaleModel[]> {
+        const invoicesOffline = await this.db.invoice.toArray();
+        return invoicesOffline.map(invoice => ({
+            ...invoice,
+            detailDto: invoice.detail
+        }));
+    }
+
+    async getInvoiceByDate(from: string, to: string): Promise<DocumentSaleModel[]> {
+        // Obtenemos primero los datos offline ya que los necesitaremos en ambos casos
+        const offlineInvoices = await this.getOfflineDateInvoices();
+
+        // Si estamos en modo offline forzado o sin conexión, usar solo datos locales
+        if (this.connectionStateService.isEffectivelyOffline()) {
+            console.log('Using offline data due to offline mode');
+            return offlineInvoices;
+        }
+
         try {
             const apiDataPromise = firstValueFrom(
                 this.http
@@ -205,26 +289,38 @@ export class SalesService {
                         `${environment.uriLogistic}/api/Sales/GetInvoiceSaleByDate/${from}/${to}`
                     )
                     .pipe(
-                        catchError((error) =>
-                            throwError(() => 'Error en la solicitud HTTP')
-                        ),
-                        timeout(5000) // Espera máximo 5 segundos para la respuesta de la API
+                        catchError((error) => {
+                            console.error('Error fetching invoices by date:', error);
+                            return throwError(() => 'Error en la solicitud HTTP');
+                        }),
+                        timeout(15000)
                     )
             );
-            const invoices = (await Promise.race([
-                apiDataPromise,
-                new Promise((resolve) => setTimeout(resolve, 5000)),
-            ])) as DocumentSaleModel[];
 
-            let invoicesOffline = await this.db.invoice.toArray();
-            invoicesOffline.map(
-                (invoice) => (invoice.detailDto = invoice.detail)
-            );
-            let combinedInvoices = [...invoicesOffline, ...invoices];
-            return combinedInvoices;
+            const onlineInvoices = await Promise.race([
+                apiDataPromise,
+                new Promise<DocumentSaleModel[]>((resolve) =>
+                    setTimeout(() => {
+                        console.warn('API request timed out after 5 seconds');
+                        resolve([]);
+                    }, 150000)
+                )
+            ]);
+
+            // Combinar facturas online y offline
+            const combinedInvoices = [...offlineInvoices, ...onlineInvoices];
+
+            // Eliminar posibles duplicados basados en algún identificador único
+            const uniqueInvoices = Array.from(new Map(
+                combinedInvoices.map(invoice => [invoice.docId, invoice])
+            ).values());
+
+            console.log(`Combined ${offlineInvoices.length} offline and ${onlineInvoices.length} online invoices`);
+            return uniqueInvoices;
+
         } catch (error) {
-            let invoicesOffline = await this.db.invoice.toArray();
-            return invoicesOffline;
+            console.warn('Fallback to offline data due to error:', error);
+            return offlineInvoices;
         }
     }
 

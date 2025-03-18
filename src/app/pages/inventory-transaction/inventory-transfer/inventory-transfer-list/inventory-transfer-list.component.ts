@@ -7,6 +7,7 @@ import { InventoryTransferModel } from '../models/inventory-transfer';
 import { InventoryTransferService } from '../services/inventory-transfer.service';
 import { PrintTransferService } from '../services/print-transfer.service';
 import { InventoryTransferRequestToCompleteComponent } from '../../inventory-transfer-request/inventory-transfer-request-to-complete/inventory-transfer-request-to-complete.component';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-inventory-transfer-list',
@@ -26,7 +27,8 @@ export class InventoryTransferListComponent implements OnInit {
         private transferServices: InventoryTransferService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
-        private printService: PrintTransferService
+        private printService: PrintTransferService,
+        private datePipe: DatePipe,
     ) {}
 
     ngOnInit() {
@@ -36,11 +38,11 @@ export class InventoryTransferListComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
         });
@@ -50,8 +52,8 @@ export class InventoryTransferListComponent implements OnInit {
         try {
             this.loading = true;
             this.transferList = await this.transferServices.getByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
             );
             Messages.closeLoading();
             this.loading = false;

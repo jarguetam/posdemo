@@ -62,45 +62,9 @@ export class PrintInvoicePurchaseService {
         doc.setFont('helvetica', 'normal', 400);
         doc.text(`R.T.N.: ` , 20, 175);
         doc.text(`Direccion: `, 20, 185);
-        // doc.text(document.customerAddress, 20, 195);
         doc.text(`Termino de Pago: ` + document.payConditionName, 20, 205);
         doc.text(`Referencia: ` + document.reference, 20, 220);
-        // Columna Derecha sar
-        // doc.setFont('helvetica', 'normal', 'bold');
-        // doc.text('Régimen de facturación autorizado por la SAR', 290, 190);
-        //  doc.rect(280, 200, 300, 0.7, 'F');
-        // doc.text(`Codigo CAI: ` + document.cai, 290, 215);
-        // doc.rect(280, 220, 300, 0.7, 'F'); //Linea abajo
-        // doc.text(
-        //     `Rango de Facturacion: ` +
-        //         document.authorizedRangeFrom +
-        //         ` Al ` +
-        //         document.authorizedRangeTo,
-        //     290,
-        //     235
-        // );
-        // doc.rect(280, 240, 300, 0.7, 'F'); //Linea abajo
-        // doc.text(
-        //     `Fecha Limite de emision: ` +
-        //         new Date(document.limitIssue).toLocaleString(),
-        //     290,
-        //     255
-        // );
         doc.rect(18, 230, 562, 0.7, 'F'); //Linea abajo
-        // //Antes del detalle
-        // doc.text(`Numero de BL: `, 20, 275);
-        // doc.text(`Contenedor/VIN: `, 175, 275);
-        // doc.text(`Fecha llegada: `, 325, 275);
-        // doc.text(`Tiempo estadia: `, 500, 275);
-        // doc.setFont('helvetica', 'normal', 400);
-        // doc.text(document.blMaster, 20, 285);
-        // doc.text(document?.blHijo ?? '', 175, 285);
-        // doc.text(
-        //     new Date(document?.arrivalDate ?? '').toLocaleString(),
-        //     325,
-        //     285
-        // );
-        // doc.text(document?.stayTime.toString() + ' dias.', 500, 285);
     }
 
     private generateFooter(
@@ -132,28 +96,21 @@ export class PrintInvoicePurchaseService {
         doc.setTextColor('ffffff');
         doc.text(`Codigo`, 25, alturaDefecto-5);
         doc.text(`Descripcion`, 82, alturaDefecto-5);
-        doc.text(`Cantidad`, 250, alturaDefecto-5);
-        doc.text(`Unidad`, 300, alturaDefecto-5);
-        doc.text(`Precio`, 410, alturaDefecto-5);
-        doc.text(`Total`, 510, alturaDefecto-5);
+        doc.text(`Cantidad`, 320, alturaDefecto-5);
+        doc.text(`Unidad`, 380, alturaDefecto-5);
+        doc.text(`Precio`, 460, alturaDefecto-5);
+        doc.text(`Total`, 520, alturaDefecto-5);
         doc.setTextColor('000000');
-        //doc.text(document.docQty.toLocaleString(), 25, 320);
-        //doc.text(document.docTotal.toLocaleString(), 100, 320);
         for (var indexItem = 0; indexItem < (detail??[]).length; indexItem++)
         {
             lastHeight+= 20;
             let item = (detail??[])[indexItem];
-            //let date =new Date(item.dueDate).toLocaleString('dd/mm/yyyy')
             doc.text(`${item.itemCode}`, 25, lastHeight);
             doc.text(`${item.itemName}`, 82, lastHeight);
-            doc.text(`${item.quantity}`, 250, lastHeight);
-            doc.text(`${item.unitOfMeasureName}`, 310, lastHeight);
-            doc.text(`${item.price.toLocaleString('es-HN', { style: 'currency', currency: 'HNL' })}`, 410, lastHeight);
-            //doc.text(`${new Date(item.dueDate).toLocaleDateString('es-HN')}`, 600, lastHeight);
-            doc.text(`${item.lineTotal.toLocaleString('es-HN', { style: 'currency', currency: 'HNL' })}`,510 , lastHeight);
-           // doc.text(`${item.weight}`, 730, lastHeight);
-           // doc.rect(20, lastHeight+5, 750, 0.7, "F");
-
+            doc.text(`${item.quantity}`, 320, lastHeight);
+            doc.text(`${item.unitOfMeasureName}`, 380, lastHeight);
+            doc.text(`${item.price.toLocaleString('es-HN', { style: 'currency', currency: 'HNL' })}`, 460, lastHeight);
+            doc.text(`${item.lineTotal.toLocaleString('es-HN', { style: 'currency', currency: 'HNL' })}`,520 , lastHeight);
         };
 
        doc.rect(20, lastHeight + 20, 560, 0.7, 'F');
@@ -192,12 +149,12 @@ export class PrintInvoicePurchaseService {
 
         doc.rect(20, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro primera
         doc.rect(78, initialHeight, 0.7, totalHeight, 'F');
-        doc.rect(245, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro de los titulos//Despues de descripción
+        doc.rect(310, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro de los titulos//Despues de descripción
         // doc.rect(295, initialHeight, 0.7, totalHeight, "F");// Linea al centro de los titulos //despues de empaque
-        doc.rect(295, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro de los titulos despues de rack
-        doc.rect(400, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro de los titulos despues de dimensiones
+        doc.rect(370, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro de los titulos despues de rack
+        doc.rect(450, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro de los titulos despues de dimensiones
         // doc.rect(460, initialHeight, 0.7, totalHeight, "F");// Linea al centro de los titulos despues del vin
-        doc.rect(500, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro de los titulos despues de piezas
+        doc.rect(510, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro de los titulos despues de piezas
         // doc.rect(535, initialHeight, 0.7, totalHeight, "F");// Linea al centro de los titulos despues de kilos
         doc.rect(580, initialHeight, 0.7, totalHeight, 'F'); // Linea al centro de los titulos despues de kilos
     }
@@ -210,7 +167,7 @@ export class PrintInvoicePurchaseService {
         });
         doc.deletePage(1);
         let detail = [...document.detail];
-        const itemPerPage: number = 12;
+        const itemPerPage: number = 20;
         let pages: number = parseInt(
             (document.detail.length / itemPerPage).toString()
         );

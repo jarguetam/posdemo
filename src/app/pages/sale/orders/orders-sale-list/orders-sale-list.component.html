@@ -116,14 +116,31 @@
                                     </ng-template>
                                 </ng-template>
                             </td>
-
-                            <td style="width: 20%;">
-                                <button [disabled]="order.complete" (click)="editOrder(order)" pButton pTooltip="Editar"
-                                    pRipple type="button" icon="pi pi-pencil"
-                                    class="p-button p-component p-button-text p-button-icon-only"></button>
-                                <button (click)="print(order)" pButton pRipple pTooltip="Imprimir" type="button"
-                                    icon="pi pi-print"
-                                    class="p-button-help p-component p-button-text p-button-icon-only"></button>
+                            <td style="width: 25%;">
+                                <ng-container *ngIf="order.docId === 0; else showButtons">
+                                    <!-- Botón de sincronización -->
+                                    <button (click)="syncOrder(order)" pButton pTooltip="Sincronizar" type="button"
+                                        icon="pi pi-sync"
+                                        class="p-button-warning p-button-text p-button-icon-only"></button>
+                                    <button [disabled]="order.complete" (click)="editOrder(order)" pButton
+                                        pTooltip="Editar" pRipple type="button" icon="pi pi-pencil"
+                                        class="p-button p-component p-button-text p-button-icon-only"></button>
+                                    <button (click)="print(order)" pButton pRipple pTooltip="Imprimir" type="button"
+                                        icon="pi pi-print"
+                                        class="p-button-help p-component p-button-text p-button-icon-only"></button>
+                                </ng-container>
+                                <ng-template #showButtons>
+                                    <!-- Botones de edición e impresión -->
+                                    <button [disabled]="order.complete" (click)="editOrder(order)" pButton
+                                        pTooltip="Editar" pRipple type="button" icon="pi pi-pencil"
+                                        class="p-button p-component p-button-text p-button-icon-only"></button>
+                                    <!-- <button [disabled]="!order.complete" (click)="viewOrder(order)" pButton
+                                        pTooltip="Vizualizar" pRipple type="button" icon="pi pi-eye"
+                                        class="p-button p-component p-button-text p-button-icon-only"></button> -->
+                                    <button (click)="print(order)" pButton pRipple pTooltip="Imprimir" type="button"
+                                        icon="pi pi-print"
+                                        class="p-button-help p-component p-button-text p-button-icon-only"></button>
+                                </ng-template>
                             </td>
                         </tr>
                     </ng-template>
@@ -131,5 +148,5 @@
             </ng-template>
         </div>
     </div>
-    <app-orders-sale-dialog (OrderSaleModify)="orderModify($event)"></app-orders-sale-dialog>
+    <!-- <app-orders-sale-dialog (OrderSaleModify)="orderModify($event)"></app-orders-sale-dialog> -->
 </div>

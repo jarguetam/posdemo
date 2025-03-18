@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 import { User } from 'src/app/models/user';
 import { PrintEscPaymentService } from '../service/print-esc-payment.service';
 import { DbLocalService } from 'src/app/service/db-local.service';
+import { ConnectionStateService } from 'src/app/service/connection-state.service';
 
 @Component({
     selector: 'app-sales-payment-list',
@@ -40,10 +41,11 @@ export class SalesPaymentListComponent implements OnInit {
         private printService: PrintEscPaymentService,
         private router: Router,
         private db: DbLocalService,
+        private connectionStateService: ConnectionStateService
 
     ) {
         this._createFormBuild();
-        this.search();
+
         this.isMobile = this.detectMobile();
         this.usuario = this.auth.UserValue;
     }
@@ -173,28 +175,51 @@ export class SalesPaymentListComponent implements OnInit {
     }
 
     async syncPayment(payment: PaymentSaleModel) {
+        // Verificar si estamos en modo offline o sin conexión
+        if (this.connectionStateService.isEffectivelyOffline()) {
+            Messages.warning(
+                'Sin conexión',
+                'Por favor, habilite la conexión a internet para sincronizar los pagos.'
+            );
+            return;
+        }
+
         try {
             Messages.loading('Agregando', 'Agregando pago de venta');
+
+            // Ajustar la fecha al timezone local
             const currentDate = new Date();
             const localDateString = new Date(
-                currentDate.getTime() -
-                    currentDate.getTimezoneOffset() * 60000
+                currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
             );
             payment.docDate = localDateString;
+
+            // Intentar sincronizar el pago
             await this.paymentService.addPaymentSales(payment);
+
+            // Si la sincronización es exitosa, eliminar de la base local
             await this.db.payment.delete(payment.id);
             await this.search();
+
             Messages.closeLoading();
+            Messages.ok('Éxito', 'Pago sincronizado correctamente');
+
         } catch (ex) {
-            if (
-                ex.error.message ==
-                'Error: Este pago ya existe en la base de datos. UUID'
-            ) {
-                await this.db.payment.delete(payment.id);
-                this.search();
-            }
             Messages.closeLoading();
-            Messages.warning('Advertencia', ex.error.message);
+
+            // Manejar caso de pago duplicado
+            if (ex.error?.message === 'Error: Este pago ya existe en la base de datos. UUID') {
+                await this.db.payment.delete(payment.id);
+                await this.search();
+                Messages.warning('Advertencia', 'Este pago ya existe en la base de datos');
+                return;
+            }
+
+            // Manejar otros errores
+            Messages.warning(
+                'Advertencia',
+                ex.error?.message || 'Error al sincronizar el pago'
+            );
         }
     }
 }

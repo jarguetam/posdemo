@@ -1,6 +1,6 @@
 import { WizardConfigurationComponent } from './components/wizard-configuration/wizard-configuration.component';
 import { PreloadAllModules, RouterModule } from '@angular/router';
-import { NgModule, enableProdMode } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AppMainComponent } from './app.main.component';
 import { ErrorComponent } from './components/error/error.component';
@@ -276,6 +276,14 @@ import { AuthGuard } from './guard/auth.guard';
                                 import(
                                     './pages/sale/customer-account/customer-account.module'
                                 ).then((m) => m.CustomerAccountModule),
+                            canActivate: [AuthGuard],
+                        },
+                        {
+                            path: 'bluetooth-device-selector',
+                            loadChildren: () =>
+                                import(
+                                    './pages/bluetooth-device-selector/bluetooth-device-selector.module'
+                                ).then((m) => m.BluetoothDeviceSelectorModule),
                             canActivate: [AuthGuard],
                         },
                         {

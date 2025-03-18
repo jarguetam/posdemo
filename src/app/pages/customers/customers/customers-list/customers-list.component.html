@@ -36,22 +36,22 @@
                                     <span class="p-column-title">Codigo:</span>
                                     {{customer.customerCode }}
                                 </td>
-								<td style="width: 25%; min-width: 7rem;">
+								<td style="width: 20%; min-width: 7rem;">
                                     <span class="p-column-title">Nombre:</span>
                                     {{customer.customerName}}</td>
-								<td style="width: 15%; min-width: 7rem;">
+								<td style="width: 5%; min-width: 7rem;">
                                     <span class="p-column-title">Categoria:</span>
                                     {{customer.categoryName}}</td>
 								<td style="width: 15%; min-width: 7rem;">
                                     <span class="p-column-title">Direccion:</span>
                                     {{customer.address}}</td>
-								<td style="width: 15%; min-width: 7rem;">
+								<td style="width: 10%; min-width: 7rem;">
                                     <span class="p-column-title">Vendedor:</span>
                                     {{customer.sellerName}}</td>
 								<td style="width: 5%; min-width: 7rem;">
                                     <span class="p-column-title">Balance:</span>
                                     {{customer.balance | currency:'L.'}}</td>
-								<td style="width: 10%; min-width: 4rem;">
+								<td style="width: 15%; min-width: 4rem;">
                                     <span class="p-column-title">Creado:</span>
                                     {{customer.createByName}}</td>
 								<td style="width: 5%; min-width: 4rem;">
@@ -80,6 +80,6 @@
 	<app-customers-dialog (CustomerModify)="customerModify($event)"></app-customers-dialog>
 	<app-customer-special-price-dialog></app-customer-special-price-dialog>
 	<app-customer-price-list-assignment></app-customer-price-list-assignment>
-    <app-view-jornal-bp-dialog></app-view-jornal-bp-dialog>
+    <app-customer-balance></app-customer-balance>
 </div>
 

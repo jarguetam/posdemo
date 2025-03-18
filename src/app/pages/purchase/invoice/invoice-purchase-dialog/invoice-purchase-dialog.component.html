@@ -28,9 +28,11 @@
                     </div>
                     <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
-                            <i class="pi pi-comments"></i>
-                            <input id="docDate" [disabled]="disabled" type="date" pInputText #docDate
-                                formControlName="docDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <i class="pi pi-calendar"></i>
+                            <p-calendar formControlName="docDate" dateFormat="dd/mm/yy" [showTime]="true"
+                                hourFormat="24" [showSeconds]="false" [showIcon]="true"></p-calendar>
+                            <!-- <input id="docDate" [disabled]="disabled" type="date" pInputText #docDate
+                                formControlName="docDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }"> -->
                             <label for="docDate">Fecha Documento</label>
                         </span>
                         <div *ngIf="formInvoice.controls['docDate'].invalid && formInvoice.controls['docDate'].dirty">
@@ -291,13 +293,13 @@
             <br>
 
             <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
-                <button pButton type="button" [disabled]="formInvoice.invalid || loading" (click)="add()"
+                <button  pButton type="button" [disabled]="formInvoice.invalid || loading" (click)="add()"
                     label="Agregar"></button>
             </ng-template>
             <ng-template #addButton>
-                <button pButton type="button" [disabled]="formInvoice.invalid || loading" (click)="edit()"
+                <button *ngIf="!isView" pButton type="button" [disabled]="formInvoice.invalid || loading" (click)="edit()"
                     label="Editar"></button>
-                <button pButton type="button" (click)="cancelInvoice()" class="p-button-danger" label="Anular"></button>
+                <button *ngIf="!isView" pButton type="button" (click)="cancelInvoice()" class="p-button-danger" label="Anular"></button>
             </ng-template>
         </ng-template>
         <br><br><br><br><br>

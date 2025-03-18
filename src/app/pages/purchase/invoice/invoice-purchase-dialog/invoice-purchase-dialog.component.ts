@@ -54,6 +54,8 @@ export class InvoicePurchaseDialogComponent implements OnInit {
     index = 0;
     barcodeValue: string = '';
     company: CompanyInfo;
+    supplierPayConditionDays: number = 0;
+    isView: boolean = false;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -91,11 +93,12 @@ export class InvoicePurchaseDialogComponent implements OnInit {
         }
     }
 
-    showDialog(invoiceNew: DocumentModel, isAdd: boolean) {
+    showDialog(invoiceNew: DocumentModel, isAdd: boolean, isView: boolean = false) {
         this.display = true;
         this.new();
         this.isAdd = isAdd;
-        this.disabled = false;
+        this.isView = isView;
+        this.disabled = isView?true:false;
         this.invoice = invoiceNew;
         this.docQuantity = invoiceNew.docQty;
         this.doctotal = invoiceNew.docTotal;
@@ -123,8 +126,7 @@ export class InvoicePurchaseDialogComponent implements OnInit {
         this.formInvoice = this.formBuilder.group({
             docId: [this.invoice.docId ?? 0],
             docDate: [
-                this.invoice.docDate ??
-                    new Date().toISOString().substring(0, 10),
+                this.invoice.docDate ?? new Date(),
             ],
             docReference: [this.invoice.docReference ?? 0],
             supplierId: [this.invoice.supplierId ?? 0, Validators.required],
@@ -319,8 +321,15 @@ export class InvoicePurchaseDialogComponent implements OnInit {
         this.invoice.payConditionId = supplier.payConditionId;
         this.invoice.payConditionName = supplier.payConditionName;
         this.invoice.payConditionDays = supplier.payConditionDays;
+        const currentDate = new Date();
+
         let date = new Date(); // fecha actual
+        date = new Date(
+            currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
+        );
         date.setDate(date.getDate() + supplier.payConditionDays);
+
+        this.supplierPayConditionDays = supplier.payConditionDays;
         this.invoice.dueDate = date;
         this.isTax = supplier.tax;
         this._createFormBuild();
@@ -364,7 +373,11 @@ export class InvoicePurchaseDialogComponent implements OnInit {
 
                 let newEntry = this.formInvoice.value as DocumentModel;
                 newEntry.docId = 0;
-
+                if (newEntry.docDate) {
+                    const date = new Date(newEntry.docDate);
+                    const offset = date.getTimezoneOffset();
+                    newEntry.docDate = new Date(date.getTime() - (offset * 60 * 1000));
+                }
                 newEntry.detail = this.invoice.detail;
                 newEntry.detail.forEach((x) => (x.whsCode = newEntry.whsCode));
                 newEntry.disccounts = this.descuento;
@@ -372,7 +385,9 @@ export class InvoicePurchaseDialogComponent implements OnInit {
                 newEntry.subTotal = this.subdoctotal;
                 newEntry.tax = this.tax;
                 newEntry.docTotal = this.doctotal;
-                newEntry.dueDate = this.invoice.dueDate;
+                let dueDate = new Date(newEntry.docDate);
+                dueDate.setDate(dueDate.getDate() +this.supplierPayConditionDays);
+                newEntry.dueDate = dueDate;
                 newEntry.createBy = this.usuario.userId;
                 let invoice = await this.invoiceService.addInvoice(newEntry);
                 this.printService.printInvoice(invoice[0]);

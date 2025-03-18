@@ -1,0 +1,44 @@
+<div class="grid">
+    <div class="col-12 xl:col-12">
+        <div class="card">
+            <h4 class="my-2">{{title}}</h4>
+            <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+                <div class="grid p-fluid">
+                    <div class="col-12 md:col-4">
+                        <span class="mt-4 p-float-label">
+                            <p-dropdown [options]="wareHouseList" formControlName="whsCode" optionValue="whsCode"
+                                optionLabel="whsName" [showClear]="true" placeholder="Seleccione un almacén">
+                            </p-dropdown>
+                            <label for="whsCode">Almacén</label>
+                        </span>
+                        <div *ngIf="formFilter.get('whsCode').invalid && formFilter.get('whsCode').touched">
+                            <small class="p-error">Almacén es requerido</small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-4">
+                        <button class="mt-4" pButton type="button" [disabled]="formFilter.invalid || loading"
+                            (click)="loadPdf()" label="Generar reporte">
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <p-progressSpinner *ngIf="loading"></p-progressSpinner>
+
+            <div class="pdf-container" *ngIf="pdfSrc && !loading">
+                <!-- <button class="mt-4 mb-4" pButton type="button" (click)="downloadPdf()" label="Descargar PDF"></button> -->
+                <ngx-extended-pdf-viewer
+                    [src]="pdfBlob"
+                    [render-text]="true"
+                    [show-all]="true"
+                    [zoom]="'auto'"
+                    [textLayer]="true"
+                    [show-borders]="false"
+                    [expand]="true"
+                    [useBrowserLocale]="true"
+                    [height]="'80vh'">
+                </ngx-extended-pdf-viewer>
+            </div>
+        </div>
+    </div>
+</div>

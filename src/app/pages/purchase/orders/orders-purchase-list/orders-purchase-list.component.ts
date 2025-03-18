@@ -6,6 +6,7 @@ import { Messages } from 'src/app/helpers/messages';
 import { OrdersPurchaseDialogComponent } from '../orders-purchase-dialog/orders-purchase-dialog.component';
 import { OrderPurchaseService } from '../services/order.service';
 import { PrintOrderPurchaseService } from '../services/print-order-purchase.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-orders-purchase-list',
@@ -20,6 +21,7 @@ export class OrdersPurchaseListComponent implements OnInit {
     orderList: DocumentModel[];
     formFilter: FormGroup;
     constructor(
+        private datePipe: DatePipe,
         private orderServices: OrderPurchaseService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
@@ -33,11 +35,11 @@ export class OrdersPurchaseListComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
         });
@@ -47,8 +49,8 @@ export class OrdersPurchaseListComponent implements OnInit {
         try {
             this.loading = true;
             this.orderList = await this.orderServices.getOrderByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
             );
             Messages.closeLoading();
             this.loading = false;

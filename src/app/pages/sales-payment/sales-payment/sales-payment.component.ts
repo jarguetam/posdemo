@@ -146,8 +146,7 @@ export class SalesPaymentComponent implements OnInit {
             docTotal: [this.payment.docTotal ?? 0],
             createBy: [this.payment.createBy ?? this.usuario.userId],
             detail: [[]],
-            docDate: [this.payment.docDate ??
-                localDateString],
+            docDate: [this.payment.docDate ?? new Date()],
             sellerId: [
                 this.payment.sellerId ?? this.usuario.sellerId,
                 Validators.required,
@@ -180,11 +179,12 @@ export class SalesPaymentComponent implements OnInit {
         this.payment.payConditionId = customer.payConditionId;
         this.payment.payConditionName = customer.payConditionName;
         this.payment.docDate =this.formSales.controls['docDate'].value;
-
+        Messages.loading("Espere","Buscando Facturas");
         // await this.showSalesInvoice(customer.customerId);
         this.orderList = await this.orderServices.getInvoiceActiveCustomer(
             customer.customerId
         );
+        Messages.closeLoading();
         if (this.orderList.length == 0) {
             await Messages.warning(
                 'Advertencia',
@@ -265,6 +265,11 @@ export class SalesPaymentComponent implements OnInit {
             try {
                 let newEntry = this.formSales.value as PaymentSaleModel;
                 newEntry.docId = 0;
+                if (newEntry.docDate) {
+                    const date = new Date(newEntry.docDate);
+                    const offset = date.getTimezoneOffset();
+                    newEntry.docDate = new Date(date.getTime() - (offset * 60 * 1000));
+                }
                 newEntry.detail = this.detail;
                 newEntry.docTotal = this.doctotal;
                 newEntry.customerCode =

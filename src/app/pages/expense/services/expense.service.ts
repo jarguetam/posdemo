@@ -5,6 +5,7 @@ import { ExpenseTypeModel } from '../models/expense-type-model';
 import { environment } from 'src/environments/environment';
 import { ExpenseModel } from '../models/expense-model';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -19,6 +20,8 @@ export class ExpenseService {
             )
         );
     }
+
+
 
     async addExpenseType(request: ExpenseTypeModel) {
         return await firstValueFrom(

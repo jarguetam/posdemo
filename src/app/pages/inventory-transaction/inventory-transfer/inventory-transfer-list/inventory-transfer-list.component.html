@@ -10,7 +10,7 @@
 						<div class="col-12 md:col-4">
 							<span class="mt-4 p-float-label p-input-icon-left">
 								<i class="pi pi-calendar"></i>
-								<input id="from" type="date"  pInputText  formControlName="from">
+								<p-calendar formControlName="from" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
 								<label for="from">Desde</label>
 							</span>
 							<div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty" >
@@ -20,7 +20,7 @@
 						<div class="col-12 md:col-4">
 							<span class="mt-4 p-float-label p-input-icon-left">
 								<i class="pi pi-calendar"></i>
-								<input id="to" type="date"  pInputText  formControlName="to">
+								<p-calendar formControlName="to" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
 								<label for="to">Hasta</label>
 							</span>
 							<div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty" >
@@ -42,7 +42,7 @@
                                 <th pSortableColumn="fromWhsName">Almacen origen <p-sortIcon field="fromWhsName"></p-sortIcon> <p-columnFilter type="text" field="whsName" display="menu" class="ml-auto"></p-columnFilter></th>
                                 <th pSortableColumn="toWhsName">Almacen destino <p-sortIcon field="toWhsName"></p-sortIcon> <p-columnFilter type="text" field="whsName" display="menu" class="ml-auto"></p-columnFilter></th>
                                 <th pSortableColumn="comment">Comentario<p-sortIcon field="comment"></p-sortIcon> <p-columnFilter type="text" field="comment" display="menu" class="ml-auto"></p-columnFilter></th>
-								<th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon> <p-columnFilter type="text" field="docTotal" display="menu" class="ml-auto"></p-columnFilter></th>
+								<!-- <th pSortableColumn="docTotal">Total<p-sortIcon field="docTotal"></p-sortIcon> <p-columnFilter type="text" field="docTotal" display="menu" class="ml-auto"></p-columnFilter></th> -->
                                 <th pSortableColumn="transfer">Fecha de documento<p-sortIcon field="transfer"></p-sortIcon> <p-columnFilter type="text" field="transfer" display="menu" class="ml-auto"></p-columnFilter></th>
                                 <th pSortableColumn="transfer">Creado por<p-sortIcon field="transfer"></p-sortIcon> <p-columnFilter type="text" field="transfer" display="menu" class="ml-auto"></p-columnFilter></th>
                                 <th>Acción</th>
@@ -70,7 +70,7 @@
                                 <td style="width: 15%; min-width: 5rem;">{{transfer.fromWhsName}}</td>
                                 <td style="width: 15%; min-width: 5rem;">{{transfer.toWhsName}}</td>
                                 <td style="width: 15%; min-width: 4rem;">{{transfer.comment}}</td>
-								<td style="width: 10%; min-width: 5rem;">{{transfer.docTotal | currency:'L. '}}</td>
+								<!-- <td style="width: 10%; min-width: 5rem;">{{transfer.docTotal | currency:'L. '}}</td> -->
                                 <td style="width: 15%; min-width: 4rem;">{{transfer.transferDate |date:'dd/MM/yyyy H:mm a'}}</td>
                                 <td style="width: 10%; min-width: 4rem;">{{transfer.createByName}}</td>
 								<td style="width: 20%;">

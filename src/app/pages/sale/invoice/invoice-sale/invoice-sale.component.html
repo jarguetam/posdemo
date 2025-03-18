@@ -218,6 +218,7 @@
                                         <input #quantity id="quantity" [disabled]="disabled" pInputText type="number"
                                             (ngModelChange)="calculate()" [(ngModel)]="detail.quantity" mode="decimal"
                                             [minFractionDigits]="2" [min]="0" [max]="1000000"
+                                            (focus)="onCantidadFocus(item)"
                                             [ngModelOptions]="{standalone: true}" />
                                     </td>
                                     <td pEditableColumn>

@@ -18,7 +18,7 @@ export class PrintTicketService {
     constructor(private commonService: CommonService) {}
 
     async printInvoice(document: DocumentSaleModel) {
-        debugger
+
         let detail = [...(document.detailDto && document.detailDto.length > 0 ? document.detailDto : document.detail)];
         let height = this.calculateLastHeight(detail, 90);
         const doc = new jsPDF({

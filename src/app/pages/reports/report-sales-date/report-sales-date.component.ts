@@ -6,6 +6,7 @@ import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/service/users/auth.service';
 import { ReportsService } from '../service/reports.service';
 import { Messages } from 'src/app/helpers/messages';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-report-sales-date',
@@ -17,11 +18,14 @@ export class ReportSalesDateComponent implements OnInit {
     loading: boolean = false;
     title: string = 'Reporte de ventas por fecha';
     formFilter: FormGroup;
+    pdfSrc: any;
+    pdfBlob: Blob;
 
     constructor(
         private reportServices: ReportsService,
         private authService: AuthService,
-        private formBuilder: FormBuilder
+        private formBuilder: FormBuilder,
+        private datePipe: DatePipe,
     ) {
         this.user = this.authService.UserValue;
     }
@@ -33,11 +37,11 @@ export class ReportSalesDateComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             userId: [this.user.userId],
@@ -50,8 +54,8 @@ export class ReportSalesDateComponent implements OnInit {
             //this.loading = true;
             await this.reportServices
                 .getReportSalesPdf(
-                    this.formFilter.value.from,
-                    this.formFilter.value.to
+                    this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                    this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
                 )
                 .subscribe(async (blob) => {
                     let base64data = await blobToBase64(blob);
@@ -67,6 +71,27 @@ export class ReportSalesDateComponent implements OnInit {
             this.loading = false;
             Messages.warning('Advertencia', ex.message);
         }
+    }
+
+    async loadPdf() {
+        Messages.loading('Espere', 'Cargando reporte...');
+        await this.reportServices
+                .getReportSalesPdf(
+                    this.formFilter.value.from,
+                    this.formFilter.value.to
+                ).subscribe(
+            (pdfBlob: Blob) => {
+                this.pdfBlob = pdfBlob;
+                // Opción 1: Usar URL.createObjectURL
+                this.pdfSrc = { url: URL.createObjectURL(pdfBlob) };
+
+                this.loading = false;
+                Messages.closeLoading();
+            },
+            (error) => {
+                console.error('Error al cargar el PDF', error);
+            }
+        );
     }
 
     public base64ToBlob(b64Data, sliceSize = 512) {

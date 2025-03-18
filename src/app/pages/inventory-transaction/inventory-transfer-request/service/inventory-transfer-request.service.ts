@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { InventoryRequestTransfer } from '../models/inventory-request-transfer';
 import { environment } from 'src/environments/environment';
+import { ItemBrowserModel } from '../models/item-browser';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ import { environment } from 'src/environments/environment';
 export class InventoryTransferRequestService {
 
     constructor(private http: HttpClient) {}
+    itemList: ItemBrowserModel[] = [];
 
     async get() {
         return await firstValueFrom(
@@ -48,6 +50,23 @@ export class InventoryTransferRequestService {
             this.http.post<InventoryRequestTransfer[]>(
                 `${environment.uriLogistic}/api/InventoryTransaction/AddInventoryRequestTransfer`,
                 entry
+            )
+        );
+    }
+
+    async edit(entry: InventoryRequestTransfer) {
+        return await firstValueFrom(
+            this.http.put<InventoryRequestTransfer[]>(
+                `${environment.uriLogistic}/api/InventoryTransaction/UpdateInventoryRequestTransfer`,
+                entry
+            )
+        );
+    }
+
+    async getItemsToTransfer(from: number, to: number) {
+        return await firstValueFrom(
+            this.http.get<ItemBrowserModel[]>(
+                `${environment.uriLogistic}/api/InventoryTransaction/GetItemsToTransfer?almacenOrigen=${from}&almacenDestino=${to}`
             )
         );
     }

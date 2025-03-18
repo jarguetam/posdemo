@@ -1,29 +1,68 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AppMainComponent } from './app.main.component';
-import { tap } from 'rxjs';
+import { Subscription, tap } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { AuthService } from './service/users/auth.service';
 import { ConnectionService, ConnectionState } from 'ng-connection-service';
 import { SyncService } from './service/sync.service';
+import { Network } from '@capacitor/network';
+import { ConnectionStateService } from './service/connection-state.service';
 
 @Component({
     selector: 'app-topbar',
     templateUrl: './app.topbar.component.html',
     styleUrls: ['./app.topbar.component.scss'],
 })
-export class AppTopBarComponent {
+export class AppTopBarComponent implements OnInit, OnDestroy {
     items: MenuItem[];
-    currentState: ConnectionState;
-    status: boolean;
+    forceOffline: boolean = false;
+    syncProgress: number = 0;
+    syncInProgress: boolean = false;
     isMobile: boolean;
+
+    private subscriptions = new Subscription();
 
     constructor(
         public appMain: AppMainComponent,
         public auth: AuthService,
-        private connectionService: ConnectionService,
+        private connectionStateService: ConnectionStateService,
         private syncService: SyncService
     ) {
-        this.isMobile = this.isMobileDevice();
+        this.isMobile = window.innerWidth < 1024;
+        this.initMenuItems();
+    }
+
+    ngOnInit() {
+        this.subscriptions.add(
+            this.syncService.syncProgress.subscribe((progress) => {
+                this.syncProgress = progress;
+                this.syncInProgress = progress > 0 && progress < 100;
+            })
+        );
+
+        this.subscriptions.add(
+            this.connectionStateService.forceOffline$.subscribe(
+                (force) => (this.forceOffline = force)
+            )
+        );
+    }
+
+    ngOnDestroy() {
+        this.subscriptions.unsubscribe();
+    }
+
+    toggleOfflineMode() {
+        this.forceOffline = !this.forceOffline;
+        this.connectionStateService.toggleForceOffline(this.forceOffline);
+    }
+
+    sync() {
+        if (!this.syncInProgress && !this.forceOffline) {
+            this.syncService.syncAll();
+        }
+    }
+
+    private initMenuItems() {
         this.items = [
             {
                 label: 'Perfil',
@@ -33,49 +72,8 @@ export class AppTopBarComponent {
             {
                 label: 'Cerrar Sesión',
                 icon: 'pi pi-sign-out',
-                command: () => {
-                    this.auth.logout();
-                },
+                command: () => this.auth.logout(),
             },
         ];
-    }
-
-    async sync() {
-        await this.syncService.syncPayments();
-        await this.syncService.syncInvoices();
-        await this.syncService.syncData();
-    }
-
-    ngOnInit(): void {
-        this.connectionService
-            .monitor()
-            .pipe(
-                tap(async (newState: ConnectionState) => {
-                    this.currentState = newState;
-                    if (this.currentState.hasNetworkConnection) {
-                        this.status = true;
-
-                        //  await this.syncService.syncData();
-                        //this.getInvoice();
-                    } else {
-                        this.status = false;
-                    }
-                })
-            )
-            .subscribe();
-    }
-
-    getStyle() {
-        return this.status
-            ? 'pi pi-check-circle connected'
-            : 'pi pi-times-circle disconnected';
-    }
-
-    isMobileDevice() {
-        return window.innerWidth < 1024;
-    }
-
-    logout() {
-        this.auth.logout();
     }
 }

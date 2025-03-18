@@ -1,0 +1,39 @@
+.debe-row {
+    background-color: rgba(255, 165, 0, 0.1); /* Naranja claro */
+}
+
+.haber-row {
+    background-color: rgba(0, 0, 255, 0.1); /* Azul claro */
+}
+
+/* Para asegurar que el texto sea legible */
+.debe-row td, .haber-row td {
+    color: black;
+}
+
+.highlight-text {
+    color: red;
+    font-weight: bold;
+    justify-content: space-between;
+    align-items: right;
+    text-align: right;
+}
+
+.customer-info .row .col-12 .highlight-text {
+    text-align: right;
+}
+
+@media screen and (max-width: 40em) {
+    .customer-info .row .col-12:last-child {
+        margin-top: 10px;
+    }
+}
+
+/* Estilos para ajustar la visualización del PDF si es necesario */
+@media print {
+    #pdfTable {
+      font-size: 12px;
+    }
+  }
+
+

@@ -11,10 +11,11 @@ import { Branch } from '../models/branch';
 import { Correlative } from '../models/correlative-sar';
 import { PointSale } from '../models/point-sale';
 import { DbLocalService } from './db-local.service';
+import { ConnectionStateService } from './connection-state.service';
 
 @Injectable()
 export class CommonService {
-    constructor(private http: HttpClient, private dbLocal: DbLocalService) {}
+    constructor(private http: HttpClient, private dbLocal: DbLocalService, private connectionStateService: ConnectionStateService) {}
 
     public companyInfo(): CompanyInfo {
         let company = localStorage.getItem('companyInfo');
@@ -119,7 +120,18 @@ export class CommonService {
         );
     }
 
-    async getPayConditionActive() {
+    private async getOfflinePayConditions(): Promise<PayCondition[]> {
+        const payConditionOffline = await this.dbLocal.payCondition.toArray();
+        return payConditionOffline as PayCondition[];
+    }
+
+    async getPayConditionActive(): Promise<PayCondition[]> {
+        // Si estamos en modo offline forzado o sin conexión, usar datos locales
+        if (this.connectionStateService.isEffectivelyOffline()) {
+            console.log('Using offline pay condition data due to offline mode');
+            return this.getOfflinePayConditions();
+        }
+
         try {
             const apiDataPromise = firstValueFrom(
                 this.http
@@ -127,21 +139,46 @@ export class CommonService {
                         `${environment.uriLogistic}/api/Common/PayConditionActive`
                     )
                     .pipe(
-                        catchError((error) => throwError(() => error)),
-                        timeout(5000) // Espera máximo 5 segundos para la respuesta de la API
+                        catchError((error) => {
+                            console.error('Error fetching pay conditions:', error);
+                            return throwError(() => error);
+                        }),
+                        timeout(5000)
                     )
             );
-            const payCondition = (await Promise.race([
+
+            const payCondition = await Promise.race([
                 apiDataPromise,
-                new Promise((resolve) => setTimeout(resolve, 10000)),
-            ])) as PayCondition[];
-            this.dbLocal.payCondition.clear();
-            payCondition.map((pay) => this.dbLocal.payCondition.add(pay));
+                new Promise<PayCondition[]>((resolve) =>
+                    setTimeout(() => {
+                        console.warn('API request timed out after 10 seconds');
+                        resolve([]);
+                    }, 10000)
+                )
+            ]);
+
+            // Si no hay datos o están vacíos
+            if (!payCondition || payCondition.length === 0) {
+                throw new Error('No pay condition data received or timeout occurred');
+            }
+
+            // Actualizar la base de datos local
+            try {
+                await this.dbLocal.payCondition.clear();
+                await Promise.all(
+                    payCondition.map(pay => this.dbLocal.payCondition.add(pay))
+                );
+                console.log('Successfully updated local pay condition database');
+            } catch (dbError) {
+                console.error('Error updating local pay condition database:', dbError);
+                // No interrumpimos el flujo principal si falla la actualización local
+            }
+
             return payCondition;
+
         } catch (error) {
-            const payConditionOffline =
-                await this.dbLocal.payCondition.toArray();
-            return payConditionOffline as PayCondition[];
+            console.warn('Fallback to offline pay condition data due to error:', error);
+            return this.getOfflinePayConditions();
         }
     }
 
@@ -254,7 +291,18 @@ export class CommonService {
         }
     }
 
-    async getCorrelativeInvoiceById(id: number) {
+    private async getOfflineCorrelatives(): Promise<Correlative[]> {
+        const correlativeOffline = await this.dbLocal.correlative.toArray();
+        return correlativeOffline;
+    }
+
+    async getCorrelativeInvoiceById(id: number): Promise<Correlative[]> {
+        // Si estamos en modo offline forzado o sin conexión, usar datos locales
+        if (this.connectionStateService.isEffectivelyOffline()) {
+            console.log('Using offline correlative data due to offline mode');
+            return this.getOfflineCorrelatives();
+        }
+
         try {
             const apiDataPromise = firstValueFrom(
                 this.http
@@ -262,20 +310,46 @@ export class CommonService {
                         `${environment.uriLogistic}/api/Common/GetCorrelativeInvoiceById${id}`
                     )
                     .pipe(
-                        catchError((error) => throwError(() => error)),
-                        timeout(3000) // Espera máximo 5 segundos para la respuesta de la API
+                        catchError((error) => {
+                            console.error('Error fetching correlatives:', error);
+                            return throwError(() => error);
+                        }),
+                        timeout(3000)
                     )
             );
-            const correlative = (await Promise.race([
+
+            const correlative = await Promise.race([
                 apiDataPromise,
-                new Promise((resolve) => setTimeout(resolve, 3000)),
-            ])) as Correlative[];
-            this.dbLocal.correlative.clear();
-            correlative.map((pay) => this.dbLocal.correlative.add(pay));
+                new Promise<Correlative[]>((resolve) =>
+                    setTimeout(() => {
+                        console.warn('API request timed out after 3 seconds');
+                        resolve([]);
+                    }, 3000)
+                )
+            ]);
+
+            // Verificar si hay datos válidos
+            if (!correlative || correlative.length === 0) {
+                throw new Error('No correlative data received or timeout occurred');
+            }
+
+            // Actualizar la base de datos local
+            try {
+                await this.dbLocal.correlative.clear();
+                await Promise.all(
+                    correlative.map(corr => this.dbLocal.correlative.add(corr))
+                );
+                console.log('Successfully updated local correlative database');
+            } catch (dbError) {
+                console.error('Error updating local correlative database:', dbError);
+                // No interrumpimos el flujo principal si falla la actualización local
+            }
+
             return correlative;
+
         } catch (error) {
-            const correlativeOffline = await this.dbLocal.correlative.toArray();
-            return correlativeOffline;
+            console.warn('Fallback to offline correlative data due to error:', error);
+            return this.getOfflineCorrelatives();
         }
     }
 

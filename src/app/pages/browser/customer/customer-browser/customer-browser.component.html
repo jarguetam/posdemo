@@ -1,72 +1,94 @@
-<p-dialog [(visible)]="display" modal="true" blockScroll="true"
-    [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '850px', height: '800px'}">
-    <ng-template [ngIf]="loading" [ngIfElse]="showTable">
-        <skeleton-table-component [title]="title"></skeleton-table-component>
+<p-dialog [(visible)]="display" [modal]="true" [blockScroll]="true"
+    [breakpoints]="{'960px': '75vw', '640px': '100vw'}"
+    [style]="{width: '95%', height: '100vh', maxHeight: '100vh'}"
+    styleClass="p-fluid modern-customer-dialog">
+
+    <ng-template [ngIf]="loading" [ngIfElse]="showContent">
+        <p-skeleton height="100%"></p-skeleton>
     </ng-template>
 
-    <ng-template #showTable>
-        <p-table #dt [value]="customers" [rowHover]="true" [paginator]="true" [rows]="10" responsiveLayout="stack"
-            styleClass="p-datatable-sm p-datatable-gridlines"
-            [globalFilterFields]="['customerCode','customerName', 'categoryName', 'payConditionName','creditLine', 'address']">
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>Codigo
-                    </th>
-                    <th>Nombre
-                    </th>
-                    <th>Categoria
-                    </th>
-                    <th>Direccion
-                    </th>
-                    <th>Saldo
-                    </th>
-                    <th>Limite de credito
-                    </th>
-                    <th>Condicion de pago
-                    </th>
-                </tr>
-            </ng-template>
-            <ng-template pTemplate="caption">
-                <div class="header-container">
-                    <h4>{{title}}</h4>
-                    <div class="button-container">
-                        <button pButton class="p-button-text" class="ml-2" type="button" (click)="addCustomer()"
-                        pTooltip="Agregar nuevo cliente" tooltipPosition="bottom" label="+ Agregar cliente"></button>
-                        <h6 (click)="resetFilter()" class="highlighted-text">{{isMobile ? 'Pulse Mostrar todos' : 'F4 mostrar todos' }}</h6>
-                    </div>
-                    <div class="search-container">
-                        <span class="p-input-icon-left ml-auto">
-                            <i class="pi pi-search"></i>
-                            <input (keydown.enter)="firstMatchingItem = dt.filteredValue[0]; selectCustomerEnter()"
-                                pInputText type="text" #searchCustomer id="searchCustomer"
-                                (input)="dt.filterGlobal($event.target.value, 'contains')"
-                                placeholder="Buscar una palabra" />
-                        </span>
+    <ng-template #showContent>
+        <div class="customer-container">
+            <!-- Header Section -->
+            <div class="header-section p-2">
+                <div class="flex align-items-center justify-content-between">
+                    <span class="text-xl font-medium">{{title}}</span>
+                    <div class="flex align-items-center gap-2">
+                        <button pButton label="+ Agregar cliente"
+                            class="p-button-primary text-sm"
+                            (click)="addCustomer()">
+                        </button>
+                        <button pButton label="Mostrar todos"
+                            class="p-button-text text-sm"
+                            icon="pi pi-refresh"
+                            (click)="resetFilter()">
+                        </button>
                     </div>
                 </div>
-            </ng-template>
 
+                <!-- Search Bar -->
+                <div class="search-section">
+                    <span class="p-input-icon-left w-full">
+                        <i class="pi pi-search"></i>
+                        <input type="text" pInputText
+                            placeholder="Buscar una palabra"
+                            (input)="dt.filterGlobal($event.target.value, 'contains')"
+                            #searchCustomer>
+                    </span>
+                </div>
+            </div>
 
-            <ng-template pTemplate="body" let-item>
-                <tr (keydown.enter)="selectCustomer(item)" (click)="selectCustomer(item)" [pSelectableRow]="rowData">
-                    <td style="width: 15%; min-width: 2rem;"><span
-                            class="p-column-title">Codigo:</span>{{item.customerCode}}</td>
-                    <td style="width: 35%; min-width: 7rem;"><span
-                            class="p-column-title">Nombre:</span>{{item.customerName}}</td>
-                    <td style="width: 25%; min-width: 7rem;"><span
-                            class="p-column-title">Categoria:</span>{{item.categoryName}}</td>
-                    <td style="width: 25%; min-width: 7rem;"><span
-                            class="p-column-title">Direccion:</span>{{item.address}}</td>
-                    <td style="width: 15%; min-width: 7rem;"><span class="p-column-title">Saldo:</span>{{item.balance |
-                        currency:'L'}}</td>
-                    <td style="width: 15%; min-width: 7rem;"><span
-                            class="p-column-title">Credito:</span>{{item.creditLine | currency:'L'}}</td>
-                    <td style="width: 15%; min-width: 7rem;"><span
-                            class="p-column-title">Condicion:</span>{{item.payConditionName}}</td>
-                </tr>
-            </ng-template>
-        </p-table>
-        <app-customers-dialog (CustomerModify)="customerModify($event)"></app-customers-dialog>
+            <!-- Table Section -->
+            <div class="table-section">
+                <p-table #dt [value]="customers"
+                    [rowHover]="true"
+                    styleClass="p-datatable-sm p-datatable-gridlines"
+                    [globalFilterFields]="['customerCode','customerName', 'categoryName', 'payConditionName','creditLine', 'address']"
+                    [scrollable]="true"
+                    scrollHeight="calc(100vh - 130px)">
 
+                    <ng-template pTemplate="body" let-customer let-rowIndex="rowIndex">
+                        <tr (click)="selectCustomer(customer)" class="cursor-pointer">
+                            <td>
+                                <div class="customer-card surface-card">
+                                    <div class="flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="text-lg font-medium">{{customer.customerName}}</span>
+                                        </div>
+                                        <p-chip label="{{customer.categoryName}}" styleClass="p-chip-info"></p-chip>
+                                    </div>
+                                    <div class="customer-info flex flex-column gap-2">
+                                        <span class="text-sm flex align-items-center">
+                                            <i class="pi pi-user mr-2"></i>
+                                            <span class="text-600 mr-2">Código:</span>
+                                            {{customer.customerCode}}
+                                        </span>
+                                        
+                                        <span class="text-sm flex">
+                                            <i class="pi pi-map-marker mr-2 mt-1"></i>
+                                            <div class="flex flex-column">
+                                                <span class="text-600">Dirección:</span>
+                                                <span class="text-wrap">{{customer.address}}</span>
+                                            </div>
+                                        </span>
+                                        <span class="text-sm flex align-items-center">
+                                            <i class="pi pi-wallet mr-2"></i>
+                                            <span class="text-600 mr-2">Saldo:</span>
+                                            {{customer.balance | currency:'L'}}
+                                        </span>
+                                        <span class="text-sm flex align-items-center">
+                                            <i class="pi pi-credit-card mr-2"></i>
+                                            <span class="text-600 mr-2">Condición de Pago:</span>
+                                            {{customer.payConditionName}}
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
     </ng-template>
 </p-dialog>
+<app-customers-dialog (CustomerModify)="customerModify($event)"></app-customers-dialog>

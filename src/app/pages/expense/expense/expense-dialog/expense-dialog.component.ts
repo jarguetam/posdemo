@@ -113,10 +113,7 @@ export class ExpenseDialogComponent implements OnInit {
         this.formExpense = this.formBuilder.group({
             expenseId: [this.expense.expenseId ?? 0],
             expenseDate: [
-                new Date(this.expense.expenseDate)
-                    .toISOString()
-                    .substring(0, 10) ??
-                    new Date().toISOString().substring(0, 10),
+                this.expense.expenseDate ?? new Date(),
                 Validators.required,
             ],
             comment: [this.expense.comment ?? '-'],
@@ -204,6 +201,10 @@ export class ExpenseDialogComponent implements OnInit {
                 let newEntry = this.formExpense.value as ExpenseModel;
                 newEntry.detail = this.expense.detail;
                 newEntry.total = this.doctotal;
+                if (newEntry.expenseDate) {
+                    const offset = newEntry.expenseDate.getTimezoneOffset();
+                    newEntry.expenseDate = new Date(newEntry.expenseDate.getTime() - (offset * 60 * 1000));
+                }
                 let expense = await this.expenseService.addExpense(newEntry);
                 Messages.closeLoading();
                 Messages.Toas('Agregado Correctamente');

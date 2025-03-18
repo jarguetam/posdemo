@@ -10,7 +10,8 @@
 						<div class="col-12 md:col-4">
 							<span class="mt-4 p-float-label p-input-icon-left">
 								<i class="pi pi-calendar"></i>
-								<input id="from" type="date"  pInputText  formControlName="from">
+								<p-calendar formControlName="from" dateFormat="dd/mm/yy" [showTime]="true"
+                                hourFormat="24" [showSeconds]="false" [showIcon]="true"></p-calendar>
 								<label for="from">Desde</label>
 							</span>
 							<div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty" >
@@ -20,7 +21,7 @@
 						<div class="col-12 md:col-4">
 							<span class="mt-4 p-float-label p-input-icon-left">
 								<i class="pi pi-calendar"></i>
-								<input id="to" type="date"  pInputText  formControlName="to">
+								<p-calendar formControlName="to" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
 								<label for="to">Hasta</label>
 							</span>
 							<div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty" >

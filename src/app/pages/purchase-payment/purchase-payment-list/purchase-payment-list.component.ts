@@ -9,6 +9,7 @@ import { PurchasePaymentDialogComponent } from '../purchase-payment-dialog/purch
 
 import { PaymentPurchaseService } from '../service/payment-purchase.service';
 import { PrintPaymentPurchaseService } from '../service/print-payment-purchase.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-purchase-payment-list',
@@ -28,7 +29,7 @@ export class PurchasePaymentListComponent implements OnInit {
         private paymentService: PaymentPurchaseService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
-        private printService: PrintPaymentPurchaseService
+        private datePipe: DatePipe,
     ) {}
 
     ngOnInit() {
@@ -40,11 +41,11 @@ export class PurchasePaymentListComponent implements OnInit {
         const localDateString = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10);
         this.formFilter = this.formBuilder.group({
             from: [
-                localDateString,
+                new Date(),
                 Validators.required,
             ],
             to: [
-                localDateString,
+                new Date(),
                 Validators.required,
             ],
         });
@@ -54,8 +55,8 @@ export class PurchasePaymentListComponent implements OnInit {
         try {
             this.loading = true;
             this.paymentList = await this.paymentService.getPaymentPurchaseByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
             );
             Messages.closeLoading();
             this.loading = false;

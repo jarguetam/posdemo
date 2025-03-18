@@ -7,7 +7,8 @@ import { Messages } from 'src/app/helpers/messages';
 import { Router } from '@angular/router';
 import { ConnectionService, ConnectionState } from 'ng-connection-service';
 import { DbLocalService } from 'src/app/service/db-local.service';
-import { User } from 'src/app/models/user';
+import * as CryptoJS from 'crypto-js';
+
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
@@ -39,6 +40,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     valCheck: string[] = ['remember'];
     userName: string;
     password: string;
+    rememberMe: boolean = false;
 
     config: AppConfig;
 
@@ -74,6 +76,9 @@ export class LoginComponent implements OnInit, OnDestroy {
                 })
             )
             .subscribe();
+
+        // Load saved credentials if available
+        this.loadSavedCredentials();
     }
 
     async login(): Promise<void> {
@@ -81,6 +86,11 @@ export class LoginComponent implements OnInit, OnDestroy {
         (await this.auth.loginOnline(this.userName, this.password)).subscribe(
             (result) => {
                 Messages.closeLoading();
+                if (this.rememberMe) {
+                    this.saveCredentials();
+                } else {
+                    this.clearSavedCredentials();
+                }
                 this.router.navigateByUrl('/');
             },
             (error) => {
@@ -88,6 +98,28 @@ export class LoginComponent implements OnInit, OnDestroy {
                 Messages.warning('Advertencia', error.message);
             }
         );
+    }
+
+    saveCredentials(): void {
+        const encryptedUsername = CryptoJS.AES.encrypt(this.userName, 'secret_key').toString();
+        const encryptedPassword = CryptoJS.AES.encrypt(this.password, 'secret_key').toString();
+        localStorage.setItem('rememberedUser', encryptedUsername);
+        localStorage.setItem('rememberedPass', encryptedPassword);
+    }
+
+    loadSavedCredentials(): void {
+        const savedUsername = localStorage.getItem('rememberedUser');
+        const savedPassword = localStorage.getItem('rememberedPass');
+        if (savedUsername && savedPassword) {
+            this.userName = CryptoJS.AES.decrypt(savedUsername, 'secret_key').toString(CryptoJS.enc.Utf8);
+            this.password = CryptoJS.AES.decrypt(savedPassword, 'secret_key').toString(CryptoJS.enc.Utf8);
+            this.rememberMe = true;
+        }
+    }
+
+    clearSavedCredentials(): void {
+        localStorage.removeItem('rememberedUser');
+        localStorage.removeItem('rememberedPass');
     }
 
     ngOnDestroy(): void {

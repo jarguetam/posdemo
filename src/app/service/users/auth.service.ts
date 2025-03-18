@@ -84,7 +84,6 @@ export class AuthService {
             })
             .pipe(
                 map((user) => {
-
                     if (user && user.token) {
                         let isDark = user.theme.toLowerCase().includes('dark');
                         this.changeTheme(user.theme, isDark);
@@ -180,10 +179,8 @@ export class AuthService {
 
     async logout() {
         sessionStorage.removeItem('currentUser');
-        //await this.db.clearAllTables();
         this.currentUserSubject.next(null);
         this.router.navigate(['/login']);
-        //this.changeTheme('lara-light-indigo', false);
     }
 
     changeTheme(theme: string, dark: boolean) {

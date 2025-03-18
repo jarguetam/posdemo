@@ -1,3 +1,4 @@
+import { PriceSpecialCustomerModel } from './../pages/customers/models/price-special-customer';
 import { Injectable } from '@angular/core';
 import { DocumentSaleModel } from '../pages/sale/models/document-model';
 import Dexie, { Table } from 'dexie';
@@ -12,6 +13,7 @@ import { WizardModel } from '../components/wizard-configuration/model/wizard-mod
 import { PaymentSaleModel } from '../pages/sales-payment/models/payment-sale-model';
 import { Messages } from '../helpers/messages';
 import { InventoryReturnModel } from '../pages/inventory-transaction/inventory-return/models/inventory-return-model';
+import { CustomerAccountModel } from '../pages/sale/customer-account/models/customer-account-model';
 
 @Injectable({
     providedIn: 'root',
@@ -30,10 +32,12 @@ export class DbLocalService extends Dexie {
     payment!: Table<PaymentSaleModel, number>;
     orderSales!: Table<DocumentSaleModel, number>;
     inventoryReturn!: Table<InventoryReturnModel, number>;
+    specialPrices: Table<PriceSpecialCustomerModel, number>;
+    customerAccountModel: Table<CustomerAccountModel, number>;
 
     constructor() {
         super('dbposweb');
-        this.version(25).stores({
+        this.version(30).stores({
             invoice: '++id, uuid, customerId',
             inventory: '++id, listPriceId, itemId',
             customers: '++id, customerId',
@@ -45,8 +49,10 @@ export class DbLocalService extends Dexie {
             wizard: '++id, complete',
             invoiceSeller: '++id, customerId, docId',
             payment:'++id, uuid',
-            orderSales: '++id',
-            inventoryReturn: '++idOffline'
+            orderSales: '++id, uuid, customerId',
+            inventoryReturn: '++idOffline',
+            specialPrices: '++id, customerId, itemId, priceListId',
+            customerAccountModel: '++id, invoiceNumber',
         });
         this.open()
             .then((data) => console.log('DB Opened'))

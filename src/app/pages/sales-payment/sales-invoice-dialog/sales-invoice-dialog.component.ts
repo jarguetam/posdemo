@@ -29,12 +29,21 @@ export class SalesInvoiceDialogComponent implements OnInit {
         try {
             this.display = true;
             this.loading = true;
-            this.orderList = await this.orderServices.getInvoiceActiveCustomer(idCustomer);
-            if (this.orderList.length==0) {
-               await Messages.warning("Advertencia", "Este cliente no tiene facturas pendientes de pago.");
+
+            const orderList = await this.orderServices.getInvoiceActiveCustomer(idCustomer);
+            const uniqueOrdersId = new Set<number>();
+
+            this.orderList = orderList.filter(item => {
+                if (uniqueOrdersId.has(item.docId)) return false;
+                uniqueOrdersId.add(item.docId);
+                return true;
+            });
+
+            if (this.orderList.length === 0) {
+                await Messages.warning("Advertencia", "Este cliente no tiene facturas pendientes de pago.");
                 this.display = false;
             }
-            //Messages.closeLoading();
+
             this.loading = false;
         } catch (ex) {
             this.loading = false;

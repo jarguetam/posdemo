@@ -19,6 +19,7 @@ import { LiquidationService } from '../../services/liquidation.service';
 import { LiquidationViewModel } from '../../models/liquidation-view-model';
 import { SalesService } from 'src/app/pages/sale/services/sales.service';
 import { InvoiceSaleDialogComponent } from 'src/app/pages/sale/invoice/invoice-sale-dialog/invoice-sale-dialog.component';
+import { from } from 'rxjs';
 
 @Component({
     selector: 'app-liquidation-dialog',
@@ -91,10 +92,16 @@ export class LiquidationDialogComponent implements OnInit {
     async search() {
         try {
             this.loading = true;
+            // Formatear la fecha manteniendo el tipo Date pero sin tiempo
+            const from = new Date(this.formLiquidation.value.from);
+            from.setHours(0, 0, 0, 0);
+            const to = new Date(this.formLiquidation.value.to);
+            to.setHours(0, 0, 0, 0);
+
             this.detailView =
                 await this.liquidationService.getLiquidationDetail(
-                    this.formLiquidation.value.from,
-                    this.formLiquidation.value.to,
+                    from.toISOString(),
+                    to.toISOString(),
                     this.formLiquidation.value.sellerId
                 );
             this.liquidation.detail = this.detailView.map((viewModel) => {
@@ -224,6 +231,7 @@ export class LiquidationDialogComponent implements OnInit {
             deposit: [this.liquidation.deposit ?? 0],
             totalDifference: [this.liquidation.totalDifference ?? 0],
             active: [this.liquidation.active ?? 0],
+            comment: [this.liquidation.comment ?? '-'],
             createdBy: [this.liquidation.createdBy ?? this.usuario.userId],
             detail: [[]],
         });

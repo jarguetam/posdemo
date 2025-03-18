@@ -5,7 +5,7 @@
                 <skeleton-table-component [title]="title"></skeleton-table-component>
             </ng-template>
             <ng-template #showTable>
-                <div *ngIf="!isMobile">
+                <div *ngIf="!isMobile || (isMobile && usuario.roleId === 1)">
                     <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
                         <div class="grid p-fluid">
                             <div class="col-12 md:col-4">

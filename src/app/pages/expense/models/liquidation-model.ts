@@ -16,6 +16,7 @@ export class LiquidationModel {
     createdDate: Date;
     createdBy: number;
     active: boolean;
+    comment:string;
     detail: LiquidationDetailModel[];
     createdByName: string;
     sellerName: string;

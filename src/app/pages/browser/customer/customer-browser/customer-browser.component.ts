@@ -1,13 +1,9 @@
-import { filter } from 'rxjs/operators';
 import {
-    ChangeDetectorRef,
     Component,
-    ElementRef,
     EventEmitter,
     HostListener,
     OnInit,
     Output,
-    QueryList,
     Renderer2,
     ViewChild,
 } from '@angular/core';

@@ -353,7 +353,8 @@ export class InvoiceSaleComponent implements OnInit {
         this.ItemsBrowser.showDialog(
             this.formInvoice.get('whsCode').value,
             this.formInvoice.get('customerId').value,
-            this.invoice.priceListId
+            this.invoice.priceListId,
+            this.invoice.detail
         );
     }
 
@@ -781,5 +782,9 @@ export class InvoiceSaleComponent implements OnInit {
         this.router.navigate(['/listado-facturas-venta'], {
             state: {},
         });
+    }
+
+    onCantidadFocus(item: DocumentSaleDetailModel) {
+        item.quantity = null;
     }
 }

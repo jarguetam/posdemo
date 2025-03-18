@@ -1,0 +1,97 @@
+<p-dialog header="Movimientos" [(visible)]="display" modal="true" blockScroll="true"
+    [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '1160px', height: '920px'}">
+    <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+        <skeleton-table-component [title]="title"></skeleton-table-component>
+    </ng-template>
+    <ng-template #showTable>
+        <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+            <div class="grid p-fluid">
+                <div class="col-12 md:col-3">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-calendar"></i>
+                        <input id="from" type="date" pInputText formControlName="from">
+                        <label for="from">Desde</label>
+                    </span>
+                    <div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty">
+                        <small *ngIf="formFilter.controls['from'].errors.required" id="from" class="p-error block">Desde
+                            es requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-3">
+                    <span class="mt-4 p-float-label p-input-icon-left">
+                        <i class="pi pi-calendar"></i>
+                        <input id="to" type="date" pInputText formControlName="to">
+                        <label for="to">Hasta</label>
+                    </span>
+                    <div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty">
+                        <small *ngIf="formFilter.controls['to'].errors.required" id="to" class="p-error block">Hasta es
+                            requerido</small>
+                    </div>
+                </div>
+                <div class="col-12 md:col-2">
+                    <button class="mt-4" pButton type="button" [disabled]="formFilter.invalid || loading"
+                        (click)="_getData()" label="Buscar"></button>
+                    <button *ngIf="journalList.length > 0" pButton pRipple label="PDF" icon="pi pi-file-pdf"
+                        (click)="downloadPDF()" class="p-button-warning"></button>
+                </div>
+            </div>
+        </form>
+
+        <div class="grid p-fluid customer-info mb-3">
+            <div class="col-12 md:col-8">
+                <h5 *ngIf="journalList.length > 0">{{journalList[0].customerCode}} - {{journalList[0].customerName}}
+                </h5>
+            </div>
+            <div *ngIf="journalList.length > 0" class="col-12 md:col-4 highlight-text">
+                <strong>Saldo Anterior: </strong>{{journalList[0].saldoAnterior | currency:'L'}}
+            </div>
+        </div>
+        <p-table #dt [value]="journalList" [rowHover]="true" [paginator]="true" [rows]="15" responsiveLayout="stack"
+            styleClass="p-datatable-sm p-datatable-gridlines"
+            [globalFilterFields]="['customerCode', 'customerName', 'documents', 'createByName', 'documentReferent']">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="fecha">Fecha <p-sortIcon field="fecha"></p-sortIcon></th>
+                    <th pSortableColumn="documents">Documento <p-sortIcon field="documents"></p-sortIcon></th>
+                    <th pSortableColumn="referencia">Referencia <p-sortIcon field="referencia"></p-sortIcon></th>
+                    <th pSortableColumn="condicion">Condición <p-sortIcon field="condicion"></p-sortIcon></th>
+                    <th pSortableColumn="debe">Debe <p-sortIcon field="debe"></p-sortIcon></th>
+                    <th pSortableColumn="haber">Haber <p-sortIcon field="haber"></p-sortIcon></th>
+                    <th pSortableColumn="balance">Saldo <p-sortIcon field="balance"></p-sortIcon></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+                <tr [pSelectableRow]="item" [ngStyle]="{'background-color': getBackgroundColor(item.transValue)}">
+                    <td>
+                        <span class="p-column-title">Fecha:</span>
+                        {{item.fecha | date:'dd/MM/yyyy'}}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Documento:</span>
+                        {{item.documents}}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Referencia:</span>
+                        {{item.referencia}}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Condición:</span>
+                        {{item.condicion}}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Debe:</span>
+                        {{item.debe | currency:'L'}}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Haber:</span>
+                        {{item.haber | currency:'L'}}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Saldo:</span>
+                        {{item.balance | currency:'L'}}
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </ng-template>
+</p-dialog>

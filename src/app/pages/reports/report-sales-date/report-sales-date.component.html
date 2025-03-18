@@ -15,7 +15,7 @@
                             <div class="col-12 md:col-4">
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <i class="pi pi-calendar"></i>
-                                    <input id="from" type="date" pInputText formControlName="from">
+                                    <p-calendar formControlName="from" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
                                     <label for="from">Desde</label>
                                 </span>
                                 <div *ngIf="formFilter.controls['from'].invalid && formFilter.controls['from'].dirty">
@@ -26,7 +26,7 @@
                             <div class="col-12 md:col-4">
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <i class="pi pi-calendar"></i>
-                                    <input id="to" type="date" pInputText formControlName="to">
+                                    <p-calendar formControlName="to" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
                                     <label for="to">Hasta</label>
                                 </span>
                                 <div *ngIf="formFilter.controls['to'].invalid && formFilter.controls['to'].dirty">
@@ -36,7 +36,17 @@
                             </div>
                             <div class="col-12 md:col-4">
                                 <button class="mt-4" pButton type="button" [disabled]="formFilter.invalid || loading"
-                                    (click)="getReport()" label="Generar reporte"></button>
+                                    (click)="loadPdf()" label="Generar reporte"></button>
+                            </div>
+
+                            <p-progressSpinner *ngIf="loading"></p-progressSpinner>
+
+                            <div class="pdf-container" *ngIf="pdfSrc && !loading">
+                                <!-- <button class="mt-4 mb-4" pButton type="button" (click)="downloadPdf()" label="Descargar PDF"></button> -->
+                                <ngx-extended-pdf-viewer [src]="pdfBlob" [render-text]="true" [show-all]="true"
+                                    [zoom]="'auto'" [textLayer]="true" [show-borders]="false" [expand]="true"
+                                    [useBrowserLocale]="true" [height]="'80vh'">
+                                </ngx-extended-pdf-viewer>
                             </div>
                         </div>
                     </form>

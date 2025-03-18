@@ -1,0 +1,68 @@
+<p-dialog header="Articulos de inventario" [(visible)]="display" modal="true" blockScroll="true"
+    [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="{width: '850px', height: '800px'}">
+
+    <div class="button-container">
+        <div class="top-row">
+            <button pButton type="button" (click)="save()" label="Agregar" class="p-button-success"></button>
+            <p-dropdown [options]="categories" [(ngModel)]="selectedCategory"
+                       (onChange)="filterTable($event)" optionLabel="name"
+                       placeholder="Seleccionar categoría" [showClear]="true">
+            </p-dropdown>
+            <button pButton type="button" (click)="close()"
+                    label="Cerrar" class="p-button-warning">
+            </button>
+        </div>
+        <div class="bottom-row">
+            <input pInputText type="text" #search id="search"
+                   (input)="filterTable($event)" placeholder="Buscar una palabra"
+                   (focus)="search.value=''; filterTable($event)"
+                   class="p-inputtext-sm">
+        </div>
+     </div>
+
+    <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+        <skeleton-table-component [title]="title"></skeleton-table-component>
+    </ng-template>
+    <ng-template #showTable>
+        <p-table #dt [value]="itemList" [rowHover]="true" responsiveLayout="stack"
+            styleClass="p-datatable-sm p-datatable-gridlines"
+            [globalFilterFields]="['itemCode','itemName', 'barCode', 'stockAlmacenOrigen', 'stockAlmacenDestino', 'cantidad', 'dueDate','itemCategoryName', 'avgPrice', 'unitOfMeasureName']">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="itemCode">Codigo</th>
+                    <th pSortableColumn="itemName">Nombre</th>
+                    <th pSortableColumn="stockAlmacenOrigen">Stock Origen</th>
+                    <th pSortableColumn="stockAlmacenDestino">Stock Destino</th>
+                    <th pSortableColumn="cantidad">Cantidad</th>
+                </tr>
+            </ng-template>
+
+
+            <ng-template pTemplate="body" let-item>
+                <tr [pSelectableRow]="rowData">
+                    <td style="width: 10%; min-width: 2rem;">
+                        <span class="p-column-title">Codigo:</span>{{item.itemCode}}
+                    </td>
+                    <td style="width: 20%; min-width: 7rem;">
+                        <span class="p-column-title">Nombre:</span>{{item.itemName}}
+                    </td>
+                    <td style="width: 10%; min-width: 7rem;">
+                        <span class="p-column-title">Stock Origen:</span>{{item.stockAlmacenOrigen}}
+                    </td>
+                    <td style="width: 10%; min-width: 7rem;">
+                        <span class="p-column-title">Stock Destino:</span>{{item.stockAlmacenDestino}}
+                    </td>
+                    <td style="width: 10%; min-width: 7rem;">
+                        <span class="p-column-title">Cantidad:</span>
+                        <input pInputText
+                               type="number"
+                               [(ngModel)]="item.cantidad"
+                               (change)="onCantidadChange(item)"
+                               (focus)="onCantidadFocus(item)"
+                               #cantidadInput>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </ng-template>
+</p-dialog>

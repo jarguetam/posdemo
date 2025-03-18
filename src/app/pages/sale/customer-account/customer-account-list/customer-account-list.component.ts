@@ -1,23 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Messages } from 'src/app/helpers/messages';
 import { AuthService } from 'src/app/service/users/auth.service';
 import { CustomerAccountModel } from '../models/customer-account-model';
 import { CustomerAccountService } from '../services/customer-account.service';
 import * as XLSX from 'xlsx';
 import { User } from 'src/app/models/user';
+import { SalesPaymentDialogComponent } from 'src/app/pages/sales-payment/sales-payment-dialog/sales-payment-dialog.component';
+import { PaymentSaleModel } from 'src/app/pages/sales-payment/models/payment-sale-model';
+import { PaymentSaleDetailModel } from 'src/app/pages/sales-payment/models/payment-sale-detail-model';
 
 @Component({
-  selector: 'app-customer-account-list',
-  templateUrl: './customer-account-list.component.html',
-  styleUrls: ['./customer-account-list.component.scss']
+    selector: 'app-customer-account-list',
+    templateUrl: './customer-account-list.component.html',
+    styleUrls: ['./customer-account-list.component.scss'],
 })
 export class CustomerAccountListComponent implements OnInit {
-
+    @ViewChild(SalesPaymentDialogComponent)
+    SalesPaymentDialog: SalesPaymentDialogComponent;
     loading: boolean = false;
     title: string = 'Cuentas por cobrar clientes';
     accountList: CustomerAccountModel[];
     totalBalanceFrom61To90Days: number = 0;
     totalBalanceDue: number;
+    totalBalance: number;
     totalBalanceAt30Days: number;
     totalBalanceFrom31To60Days: number;
     totalBalanceFrom91To120Days: number;
@@ -36,8 +41,8 @@ export class CustomerAccountListComponent implements OnInit {
     }
 
     getBalanceStyle(balance: number) {
-        return balance !== 0 ? {'color': 'red'} : {};
-      }
+        return balance !== 0 ? { color: 'red' } : {};
+    }
 
     async search() {
         try {
@@ -59,32 +64,42 @@ export class CustomerAccountListComponent implements OnInit {
 
     calcularTotales(): void {
         this.totalBalanceFrom61To90Days = this.accountList.reduce(
-          (total, order) => total + order.balanceFrom61To90Days, 0
+            (total, order) => total + order.balanceFrom61To90Days,
+            0
         );
         this.totalunexpiredBalance = this.accountList.reduce(
-            (total, order) => total + order.unexpiredBalance, 0
-          );
+            (total, order) => total + order.unexpiredBalance,
+            0
+        );
         this.totalBalanceDue = this.accountList.reduce(
-          (total, order) => total + order.balanceDue, 0
+            (total, order) => total + order.balanceDue,
+            0
         );
 
         this.totalBalanceAt30Days = this.accountList.reduce(
-          (total, order) => total + order.balanceAt30Days, 0
+            (total, order) => total + order.balanceAt30Days,
+            0
         );
 
         this.totalBalanceFrom31To60Days = this.accountList.reduce(
-          (total, order) => total + order.balanceFrom31To60Days, 0
+            (total, order) => total + order.balanceFrom31To60Days,
+            0
         );
 
         this.totalBalanceFrom91To120Days = this.accountList.reduce(
-          (total, order) => total + order.balanceFrom91To120Days, 0
+            (total, order) => total + order.balanceFrom91To120Days,
+            0
         );
 
         this.totalBalanceMoreThan120Days = this.accountList.reduce(
-          (total, order) => total + order.balanceMoreThan120Days, 0
+            (total, order) => total + order.balanceMoreThan120Days,
+            0
         );
-      }
-
+        this.totalBalance = this.accountList.reduce(
+            (total, order) => total + order.balance,
+            0
+        );
+    }
 
     exportToExcel() {
         Messages.loading('Exportando', 'Espere un momento...');
@@ -127,4 +142,61 @@ export class CustomerAccountListComponent implements OnInit {
         Messages.closeLoading();
     }
 
+    paymentModify(event) {
+        this.search();
+    }
+    transformCustomerAccountToPaymentSaleDetail(customerAccount: CustomerAccountModel): PaymentSaleDetailModel {
+        return {
+            docDetailId: 0, // Asigna un valor apropiado
+            docId: customerAccount.invoiceNumber,
+            invoiceId: customerAccount.invoiceNumber,
+            invoiceReference: customerAccount.uuid, // Asigna un valor apropiado
+            invoiceDate: customerAccount.docDate, // Asigna un valor apropiado
+            dueDate: customerAccount.dueDate,
+            subTotal: customerAccount.docTotal, // Asigna un valor apropiado
+            taxTotal: customerAccount.tax, // Asigna un valor apropiado
+            discountTotal: customerAccount.discountsTotal, // Asigna un valor apropiado
+            lineTotal: customerAccount.docTotal,
+            isDelete: false, // Asigna un valor apropiado
+            sumApplied: 0,
+            balance: customerAccount.balance,
+            reference: '' // Asigna un valor apropiado
+        };
+    }
+
+    transformCustomerAccountToPaymentSale(customerAccount: CustomerAccountModel): PaymentSaleModel {
+        const paymentSaleDetail = this.transformCustomerAccountToPaymentSaleDetail(customerAccount);
+
+        return {
+            id: 0, // Asigna un valor apropiado
+            docId: 0,
+            customerId: customerAccount.customerId,
+            customerCode: customerAccount.customerCode,
+            customerName: customerAccount.customerName,
+            payConditionId: customerAccount.payConditionId, // Asigna un valor apropiado
+            docDate: new Date(), // Asigna un valor apropiado
+            canceled: false, // Asigna un valor apropiado
+            comment: '--', // Asigna un valor apropiado
+            reference: '--', // Asigna un valor apropiado
+            cashSum: 0, // Asigna un valor apropiado
+            chekSum: 0, // Asigna un valor apropiado
+            transferSum: 0, // Asigna un valor apropiado
+            cardSum: 0, // Asigna un valor apropiado
+            docTotal: customerAccount.docTotal,
+            createBy: this.usuario.userId, // Asigna un valor apropiado
+            complete: false, // Asigna un valor apropiado
+            detail: [paymentSaleDetail],
+            payConditionName: customerAccount.payConditionName,
+            createByName: '', // Asigna un valor apropiado
+            sellerId: customerAccount.sellerId,
+            uuid: customerAccount.uuid, // Asigna un valor apropiado
+            offline: false // Asigna un valor apropiado
+        };
+    }
+    addPayment(account: CustomerAccountModel) {
+        const paymentSale = this.transformCustomerAccountToPaymentSale(account)
+        console.log(account);
+        this.SalesPaymentDialog.showDialog(paymentSale, true);
+
+    }
 }

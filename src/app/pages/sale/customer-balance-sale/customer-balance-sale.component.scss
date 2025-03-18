@@ -1,0 +1,17 @@
+.button-container {
+    display: flex;
+    gap: 8px;
+}
+
+.highlighted-text {
+    font-weight: bold; /* Cambia el peso de la fuente para resaltar */
+    color: red; /* Cambia el color del texto para resaltar */
+    /* Puedes agregar otros estilos de resaltado según tus preferencias */
+  }
+
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}

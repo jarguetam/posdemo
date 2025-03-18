@@ -88,6 +88,13 @@ import { VirtualScrollerModule } from 'primeng/virtualscroller';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ReportSalesDateComponent } from './report-sales-date/report-sales-date.component';
 import { ReportCxcSellerComponent } from './report-cxc-seller/report-cxc-seller.component';
+import { ReportViewComponent } from './report-view/report-view.component';
+import { ReportInventoryPdfComponent } from './report-inventory-pdf/report-inventory-pdf.component';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { ReportSalesMargenComponent } from './report-sales-margen/report-sales-margen.component';
+import { ReportExpenseResumComponent } from './report-expense-resum/report-expense-resum.component';
+
 
 @NgModule({
     declarations: [
@@ -96,6 +103,10 @@ import { ReportCxcSellerComponent } from './report-cxc-seller/report-cxc-seller.
         ReportPurchaseComponent,
         ReportSalesDateComponent,
         ReportCxcSellerComponent,
+        ReportViewComponent,
+        ReportInventoryPdfComponent,
+        ReportSalesMargenComponent,
+        ReportExpenseResumComponent,
     ],
     imports: [
         CommonModule,
@@ -118,6 +129,7 @@ import { ReportCxcSellerComponent } from './report-cxc-seller/report-cxc-seller.
         ChipModule,
         ChipsModule,
         CodeHighlighterModule,
+        PdfViewerModule,
         ColorPickerModule,
         ConfirmDialogModule,
         ConfirmPopupModule,
@@ -183,6 +195,7 @@ import { ReportCxcSellerComponent } from './report-cxc-seller/report-cxc-seller.
         TreeSelectModule,
         TreeTableModule,
         VirtualScrollerModule,
+        NgxExtendedPdfViewerModule
     ],
 })
 export class ReportsModule {}

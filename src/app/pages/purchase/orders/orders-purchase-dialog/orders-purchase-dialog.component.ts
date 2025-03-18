@@ -1,8 +1,6 @@
-import { element } from 'protractor';
 import { AuthService } from 'src/app/service/users/auth.service';
 import {
     Component,
-    ElementRef,
     EventEmitter,
     HostListener,
     OnInit,
@@ -13,8 +11,6 @@ import {
 import { DocumentDetailModel } from '../../models/document-detail';
 import { DocumentModel } from './../../models/document';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { ItemModel } from 'src/app/pages/items/models/items';
-import { ItemsBrowserComponent } from 'src/app/pages/browser/items/items-browser/items-browser.component';
 import { Messages } from 'src/app/helpers/messages';
 import { OrderPurchaseService } from './../services/order.service';
 import { PrintOrderPurchaseService } from '../services/print-order-purchase.service';
@@ -24,8 +20,10 @@ import { SupplierModel } from 'src/app/pages/suppliers/models/supplier';
 import { User } from 'src/app/models/user';
 import { WareHouseModel } from 'src/app/pages/items/warehouse/models/warehouse';
 import { InvoicePurchaseDialogComponent } from '../../invoice/invoice-purchase-dialog/invoice-purchase-dialog.component';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { CompanyInfo } from 'src/app/models/company-info';
+import { ItemsBrowserPurchaseComponent } from 'src/app/pages/browser/items-browser-purchase/items-browser-purchase.component';
+import { ItemWareHouse } from 'src/app/pages/items/models/item-warehouse';
+import { ItemService } from 'src/app/pages/items/service/items.service';
 
 @Component({
     selector: 'app-orders-purchase-dialog',
@@ -34,7 +32,8 @@ import { CompanyInfo } from 'src/app/models/company-info';
 })
 export class OrdersPurchaseDialogComponent implements OnInit {
     @Output() OrderPurchaseModify = new EventEmitter<DocumentModel[]>();
-    @ViewChild(ItemsBrowserComponent) ItemsBrowser: ItemsBrowserComponent;
+    @ViewChild(ItemsBrowserPurchaseComponent)
+    ItemsBrowser: ItemsBrowserPurchaseComponent;
     @ViewChild(SupplierBrowserComponent)
     SupplierBrowser: SupplierBrowserComponent;
     @ViewChild(InvoicePurchaseDialogComponent)
@@ -65,7 +64,8 @@ export class OrdersPurchaseDialogComponent implements OnInit {
         private wareHouseService: ServiceWareHouseService,
         private printService: PrintOrderPurchaseService,
         private auth: AuthService,
-        private renderer: Renderer2
+        private renderer: Renderer2,
+        private itemService: ItemService
     ) {
         this.usuario = this.auth.UserValue;
         this.company = this.auth.CompanyValue;
@@ -201,33 +201,34 @@ export class OrdersPurchaseDialogComponent implements OnInit {
 
     showDialogItem(index: number) {
         this.ItemsBrowser.index = index;
-        this.ItemsBrowser.showDialog('ItemActive');
+        this.ItemsBrowser.index = index;
+        this.ItemsBrowser.showDialog(1, 1, 1, this.order.detail);
     }
 
     findBarcode(barcode: string) {
-        this.ItemsBrowser.findByBardCode(barcode, 'ItemActiveByBarcode');
-        this.order.detail.push(
-            new DocumentDetailModel({
-                whsName: '',
-                itemCode: '',
-                itemName: '',
-                docDetailId: 0,
-                docId: 0,
-                itemId: 0,
-                quantity: 1,
-                stock: 0,
-                price: 0,
-                dueDate: undefined,
-                lineTotal: 0,
-                whsCode: 0,
-                unitOfMeasureId: 0,
-                unitOfMeasureName: '',
-                isDelete: false,
-                isTax: false,
-                taxValue: 0,
-            })
-        );
-        this.ItemsBrowser.index = this.order.detail.length - 1;
+        // this.ItemsBrowser.findByBardCode(barcode, 'ItemActiveByBarcode');
+        // this.order.detail.push(
+        //     new DocumentDetailModel({
+        //         whsName: '',
+        //         itemCode: '',
+        //         itemName: '',
+        //         docDetailId: 0,
+        //         docId: 0,
+        //         itemId: 0,
+        //         quantity: 1,
+        //         stock: 0,
+        //         price: 0,
+        //         dueDate: undefined,
+        //         lineTotal: 0,
+        //         whsCode: 0,
+        //         unitOfMeasureId: 0,
+        //         unitOfMeasureName: '',
+        //         isDelete: false,
+        //         isTax: false,
+        //         taxValue: 0,
+        //     })
+        // );
+        // this.ItemsBrowser.index = this.order.detail.length - 1;
     }
 
     @HostListener('document:keydown.F2', ['$event']) onF2Keydown(
@@ -258,39 +259,53 @@ export class OrdersPurchaseDialogComponent implements OnInit {
         this.showDialogItem(this.order.detail.length - 1);
     }
 
-    browserItems(item: ItemModel) {
+    browserItems(item: ItemWareHouse) {
         if (this.ItemsBrowser.index != -1) {
             let currentIndex = this.ItemsBrowser.index;
             let itemFind = this.order.detail.find(
                 (x) => x.itemId == item.itemId
             );
+
             if (itemFind) {
                 this.order.detail.find((x) => x.itemId == item.itemId)
                     .quantity++;
                 this.calculate();
             } else {
-                this.order.detail[currentIndex].itemId = item.itemId;
-                this.order.detail[currentIndex].itemCode = item.itemCode;
-                this.order.detail[currentIndex].itemName = item.itemName;
-                this.order.detail[currentIndex].unitOfMeasureId =
-                    item.unitOfMeasureId;
-                this.order.detail[currentIndex].unitOfMeasureName =
-                    item.unitOfMeasureName;
-                this.order.detail[currentIndex].price = item.pricePurchase;
-                let dueDateItem = new Date(); // fecha actual
-                dueDateItem.setDate(dueDateItem.getDate() + 360);
-                this.order.detail[currentIndex].dueDate = dueDateItem;
-                this.order.detail[currentIndex].stock = item.stock;
-                this.order.detail[currentIndex].isTax = item.tax;
-                this.isTax= item.tax;
+                this.order.detail = this.itemService.itemsListService.map(
+                    (item) => {
+                        const detail = new DocumentDetailModel();
+                        detail.itemId = item.itemId;
+                        detail.itemCode = item.itemCode;
+                        detail.itemName = item.itemName;
+                        detail.quantity = item.quantity;
+                        detail.price = item.avgPrice;
+                        detail.dueDate = new Date(
+                            new Date().setDate(new Date().getDate() + 360)
+                        );
+                        detail.stock = item.stock;
+                        detail.isTax = item.tax;
+                        detail.lineTotal = item.quantity * item.avgPrice;
+                        detail.unitOfMeasureId = item.unitOfMeasureId;
+                        detail.unitOfMeasureName = item.unitOfMeasureName;
+                        return detail;
+                    }
+                );
             }
         }
+
         this.ItemsBrowser.index = -1;
         let deleteIndex = this.order.detail.filter((x) => x.itemId == 0);
         this.index = this.index - deleteIndex.length;
         this.order.detail = this.order.detail.filter((x) => x.itemId != 0);
         this.calculate();
-        this.renderer.selectRootElement('#quantity').focus();
+        // setTimeout(() => {
+        //     this.calculate();
+        //     this.vsTable.scrollTo({ bottom: 0, behavior: 'smooth' });
+        //     const lastQuantityInput = this.quantityInputs.last;
+        //     if (lastQuantityInput) {
+        //         lastQuantityInput.nativeElement.focus();
+        //     }
+        // }, 500);
     }
 
     showDialogSupplier() {
@@ -304,7 +319,11 @@ export class OrdersPurchaseDialogComponent implements OnInit {
         this.order.payConditionId = supplier.payConditionId;
         this.order.payConditionName = supplier.payConditionName;
         this.order.payConditionDays = supplier.payConditionDays;
+        const currentDate = new Date();
         let date = new Date(); // fecha actual
+        date = new Date(
+            currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
+        );
         date.setDate(date.getDate() + supplier.payConditionDays);
         this.order.dueDate = date;
         this.isTax = supplier.tax;

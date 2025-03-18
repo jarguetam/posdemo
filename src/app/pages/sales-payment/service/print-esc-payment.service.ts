@@ -4,40 +4,49 @@ import { CommonService } from 'src/app/service/common.service';
 import { Messages } from 'src/app/helpers/messages';
 import EscPosEncoder from 'esc-pos-encoder-ionic';
 import { PrinterConectionService } from 'src/app/service/printer-conection.service';
+import { Router } from '@angular/router';
 
 @Injectable({
     providedIn: 'root',
 })
 export class PrintEscPaymentService {
-    printerCharacteristic;
-    documentModel: PaymentSaleModel;
-
     constructor(
         private commonService: CommonService,
-        private conectPrinter: PrinterConectionService
+        private conectPrinter: PrinterConectionService,
+        private router: Router
     ) {}
 
-    async printInvoice(document: PaymentSaleModel) {
-        let print = await Messages.question(
-            'Impresion',
-            '¿Desea imprimir la factura?'
-        );
-        if (print) {
-            Messages.loading('Impresion', 'Imprimiendo documento...');
-            await this.connectPrinter(document);
+    async printInvoice(document: PaymentSaleModel): Promise<void> {
+        const shouldPrint = await this.confirmPrint();
+        if (shouldPrint) {
+            await this.ensurePrinterConnected();
+            await this.sendToPrint(document);
+        }
+    }
+
+    private async confirmPrint(): Promise<boolean> {
+        return await Messages.question('Impresión', '¿Desea imprimir la factura?');
+    }
+
+    private async ensurePrinterConnected(): Promise<void> {
+        Messages.loading('Impresión', 'Conectando a la impresora...');
+        if (!this.conectPrinter.isPrinterConnected) {
+            this.router.navigate(['/bluetooth-device-selector']);
+            throw new Error('Printer not connected');
+        }
+    }
+
+    private async sendToPrint(document: PaymentSaleModel): Promise<void> {
+        try {
+            await this.generateHeader(document);
+            await this.generateDetail(document);
+            await this.generateFooter(document);
+        } finally {
             Messages.closeLoading();
         }
     }
 
-    async sendToPrint(document: PaymentSaleModel) {
-        await this.generateHeader(document);
-
-        await this.generateDetail(document);
-
-        await this.generateFooter(document);
-    }
-
-    async generateHeader(document: PaymentSaleModel) {
+    private async generateHeader(document: PaymentSaleModel): Promise<void> {
         const companyInfo = await this.commonService.companyInfo();
         const companyEncoder = new EscPosEncoder()
             .initialize()
@@ -57,16 +66,8 @@ export class PrintEscPaymentService {
             .codepage('cp437')
             .newline()
             .line('Pago N°: ' + document.docId.toString())
-            .line(
-                'Fecha de pago: ' +
-                    new Date(document.docDate).toLocaleDateString('es-HN')
-            )
-            .line(
-                'Cliente: ' +
-                    document.customerCode +
-                    '-' +
-                    document.customerName
-            )
+            .line('Fecha de pago: ' + new Date(document.docDate).toLocaleDateString('es-HN'))
+            .line('Cliente: ' + document.customerCode + '-' + document.customerName)
             .line('Termino de pago: ' + document.payConditionName)
             .line('Referencia: ' + document.reference)
             .newline()
@@ -78,38 +79,36 @@ export class PrintEscPaymentService {
             .initialize()
             .codepage('cp437')
             .bold()
-            .line('------------------------------------------------') // Línea horizontal
+            .line('------------------------------------------------')
             .line('Factura          Vencimiento     Pago      Saldo')
-            .line('------------------------------------------------') // Línea horizontal
+            .line('------------------------------------------------')
             .encode();
 
         await this.printToPrinter(detailHeader);
     }
-    async generateDetail(document: PaymentSaleModel) {
-        const detail = document.detail ? [...document.detail] : [];
+
+    private async generateDetail(document: PaymentSaleModel): Promise<void> {
+        const detail = document.detail || [];
         for (const item of detail) {
-            const invoiceNum = item.invoiceId.toString().padEnd(20);
-            const dueDate = new Date(item.dueDate)
-                .toLocaleDateString('es-HN')
-                .padStart(8);
-            const lineTotal = item.lineTotal.toFixed(2).toString().padStart(8);
-            let result = (item.balance - item.sumApplied).toFixed(2).toString();
-            const saldo = result.padStart(8);
-            const sumApplied = item.sumApplied
-                .toFixed(2)
-                .toString()
-                .padStart(11);
             const detailItems = new EscPosEncoder()
                 .initialize()
                 .codepage('cp437')
-                .line(`${invoiceNum}${dueDate}${sumApplied}${saldo}`)
+                .line(this.formatDetailLine(item))
                 .encode();
 
             await this.printToPrinter(detailItems);
         }
     }
 
-    async generateFooter(document: PaymentSaleModel) {
+    private formatDetailLine(item: any): string {
+        const invoiceNum = item.invoiceId.toString().padEnd(20);
+        const dueDate = new Date(item.dueDate).toLocaleDateString('es-HN').padStart(8);
+        const sumApplied = item.sumApplied.toFixed(2).toString().padStart(11);
+        const saldo = Math.max(item.balance - item.sumApplied, 0).toFixed(2).toString().padStart(8);
+        return `${invoiceNum}${dueDate}${sumApplied}${saldo}`;
+    }
+
+    private async generateFooter(document: PaymentSaleModel): Promise<void> {
         const total = document.docTotal.toFixed(2).toString().padStart(8);
         const footer = new EscPosEncoder()
             .initialize()
@@ -149,46 +148,46 @@ export class PrintEscPaymentService {
         await this.printToPrinter(footer3);
     }
 
-    async await100ms(): Promise<void> {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-    }
+    private async printToPrinter(data: Uint8Array): Promise<void> {
+        if (!this.conectPrinter.isPrinterConnected) {
+            await this.handlePrinterNotConnected();
+            return;
+        }
 
-    async connectPrinter(document: PaymentSaleModel) {
         try {
-            if (this.conectPrinter.isPrinterConect) {
-                await this.sendToPrint(document); // Iniciar impresión después de la conexión
-            } else {
-                await this.conectPrinter.connectPrinter();
-                if (this.conectPrinter.isPrinterConect) {
-                    await this.sendToPrint(document);
-                }
-            }
+            await this.sendDataInChunks(data);
         } catch (error) {
-            Messages.warning('Error durante la impresión:', error);
+            await this.handlePrintError(error);
         }
     }
 
-    async printToPrinter(result) {
-        if (this.conectPrinter.printerCharacteristic != null) {
-            const MAX_CHUNK_SIZE = 32; // Tamaño del chunk reducido a 32 bytes
-            const DELAY_BETWEEN_CHUNKS = 50; // Retraso de 50 milisegundos entre chunks
+    private async handlePrinterNotConnected(): Promise<void> {
+        await Messages.warning('Error', 'No hay una impresora conectada. Por favor, seleccione una impresora primero.');
+        this.router.navigate(['/bluetooth-device-selector']);
+    }
 
-            for (let offset = 0; offset < result.byteLength; offset += MAX_CHUNK_SIZE) {
-                const chunk = result.slice(offset, offset + MAX_CHUNK_SIZE);
+    private async sendDataInChunks(data: Uint8Array): Promise<void> {
+        const MAX_CHUNK_SIZE = 32;
+        const chunks = this.splitDataIntoChunks(data, MAX_CHUNK_SIZE);
 
-                try {
-                    await this.conectPrinter.printerCharacteristic.writeValue(chunk);
-
-                    // Agregar un retraso entre cada chunk para permitir que el dispositivo procese
-                    await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_CHUNKS));
-                } catch (error) {
-                    Messages.warning(
-                        'Error al imprimir',
-                        'Ocurrió un error al imprimir, por favor vuelva a conectar la impresora. ' + error
-                    );
-                    // Opcionalmente podrías intentar reconectar la impresora aquí si es necesario
-                }
-            }
+        for (const chunk of chunks) {
+            await this.conectPrinter.printData(new DataView(chunk.buffer));
         }
+    }
+
+    private splitDataIntoChunks(data: Uint8Array, chunkSize: number): Uint8Array[] {
+        const chunks: Uint8Array[] = [];
+        for (let i = 0; i < data.length; i += chunkSize) {
+            chunks.push(data.slice(i, i + chunkSize));
+        }
+        return chunks;
+    }
+
+    private async handlePrintError(error: any): Promise<void> {
+        console.error('Error de impresión:', error);
+        await Messages.warning(
+            'Error al imprimir',
+            'Ocurrió un error al imprimir, por favor vuelva a conectar la impresora.'
+        );
     }
 }

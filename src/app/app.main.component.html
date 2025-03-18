@@ -10,7 +10,8 @@
     <div class="layout-sidebar">
         <app-menu></app-menu>
     </div>
-    <div class="layout-main-container">
+    <!-- [ngStyle]="{'padding-top': '80px', 'padding-bottom': '30px', 'padding-left': '8px', 'padding-right': '8px'}" -->
+    <div class="layout-main-container" [ngStyle]="{'padding-top': '80px', 'padding-bottom': '30px', 'padding-left': '8px', 'padding-right': '8px'}">
         <div class="layout-main">
             <router-outlet></router-outlet>
         </div>

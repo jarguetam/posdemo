@@ -8,7 +8,7 @@ export class DocumentModel {
     supplierName: string;
     payConditionId: number;
     payConditionDays: number;
-    docDate: Date;
+    docDate: Date= new Date();
     dueDate: Date;
     canceled: true;
     comment: string;

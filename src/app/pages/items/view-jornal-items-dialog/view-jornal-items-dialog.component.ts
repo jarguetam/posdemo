@@ -5,6 +5,7 @@ import { ItemService } from '../service/items.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { WareHouseModel } from '../warehouse/models/warehouse';
 import { ServiceWareHouseService } from '../warehouse/service/service-ware-house.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-view-jornal-items-dialog',
@@ -22,6 +23,7 @@ export class ViewJornalItemsDialogComponent implements OnInit {
         private commonService: ItemService,
         private formBuilder: FormBuilder,
         private wareHouseService: ServiceWareHouseService,
+        private datePipe: DatePipe,
     ) {}
 
     ngOnInit(): void {
@@ -31,11 +33,11 @@ export class ViewJornalItemsDialogComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             whsCode: [0]
@@ -47,8 +49,8 @@ export class ViewJornalItemsDialogComponent implements OnInit {
             this.loading = true;
             this.jornalList = await this.commonService.getItemsJornal(
                 this.itemId,
-                this.formFilter.value.from,
-                this.formFilter.value.to,
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd'),
                 this.formFilter.value.whsCode,
             );
             Messages.closeLoading();

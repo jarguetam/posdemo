@@ -111,11 +111,9 @@ export class InventoryEntryDialogComponent implements OnInit {
     }
 
     _createFormBuild() {
-        const currentTimeStamp = Date.now();
-        const currentDate = new Date(currentTimeStamp);
         this.formEntry = this.formBuilder.group({
             entryId: [this.entry.entryId ?? 0],
-            entryDate: [this.entry.entryDate ?? currentDate.toISOString().substring(0, 10)],
+            entryDate: [this.entry.entryDate ?? new Date(),],
             comment: [this.entry.comment ?? 'Entrada de mercancia', Validators.required],
             docTotal: [this.entry.docTotal ?? 0],
             whsCode: [
@@ -269,6 +267,12 @@ export class InventoryEntryDialogComponent implements OnInit {
                 );
 
                 let newEntry = this.formEntry.value as InventoryEntryModel;
+                 // Ajustar la zona horaria para que se guarde la hora local correcta
+                 if (newEntry.entryDate) {
+                    const date = new Date(newEntry.entryDate);
+                    const offset = date.getTimezoneOffset();
+                    newEntry.entryDate = new Date(date.getTime() - (offset * 60 * 1000));
+                }
                 newEntry.detail = this.entry.detail;
                 newEntry.detail.forEach((x) => (x.whsCode = newEntry.whsCode));
                 newEntry.docTotal = this.doctotal;

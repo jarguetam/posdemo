@@ -10,7 +10,9 @@
                     <div class="col-12 md:col-6">
                         <span class="mt-4 p-float-label p-input-icon-left">
                             <i class="pi pi-calendar"></i>
-                            <input id="expenseDate" type="date" pInputText formControlName="expenseDate">
+                            <p-calendar formControlName="expenseDate" dateFormat="dd/mm/yy" [showTime]="true"
+                                hourFormat="24" [showSeconds]="false" [showIcon]="true"></p-calendar>
+                            <!-- <input id="expenseDate" type="date" pInputText formControlName="expenseDate"> -->
                             <label for="expenseDate">Fecha Gasto</label>
                         </span>
                         <div

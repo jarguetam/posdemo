@@ -7,6 +7,7 @@ import { DocumentModel } from '../../models/document';
 import { OrderPurchaseService } from '../../orders/services/order.service';
 import { InvoicePurchaseDialogComponent } from '../invoice-purchase-dialog/invoice-purchase-dialog.component';
 import { PrintInvoicePurchaseService } from '../service/print-invoice-purchase.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-invoice-purchase-list',
@@ -26,7 +27,8 @@ export class InvoicePurchaseListComponent implements OnInit {
         private invoiceService: OrderPurchaseService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
-        private printService: PrintInvoicePurchaseService
+        private printService: PrintInvoicePurchaseService,
+        private datePipe: DatePipe,
     ) {}
 
     ngOnInit() {
@@ -36,11 +38,11 @@ export class InvoicePurchaseListComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
         });
@@ -50,8 +52,8 @@ export class InvoicePurchaseListComponent implements OnInit {
         try {
             this.loading = true;
             this.invoiceList = await this.invoiceService.getInvoiceByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
             );
             Messages.closeLoading();
             this.loading = false;
@@ -95,7 +97,7 @@ export class InvoicePurchaseListComponent implements OnInit {
             );
             return;
         }
-        this.InvoicePurchaseDialog.showDialog(invoice, false);
+        this.InvoicePurchaseDialog.showDialog(invoice, false, true);
     }
 
     print(invoice: DocumentModel) {

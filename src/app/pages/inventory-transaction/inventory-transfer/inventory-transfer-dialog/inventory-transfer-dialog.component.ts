@@ -14,6 +14,7 @@ import { User } from 'src/app/models/user';
 import { WareHouseModel } from 'src/app/pages/items/warehouse/models/warehouse';
 import { PrintTransferService } from '../services/print-transfer.service';
 import { ItemService } from 'src/app/pages/items/service/items.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-inventory-transfer-dialog',
@@ -44,7 +45,8 @@ export class InventoryTransferDialogComponent implements OnInit {
         private authService: AuthService,
         private wareHouseService: ServiceWareHouseService,
         private printService: PrintTransferService,
-        private itemServices: ItemService
+        private itemServices: ItemService,
+        private datePipe: DatePipe,
     ) {
         this.usuario = this.authService.UserValue;
     }
@@ -73,6 +75,7 @@ export class InventoryTransferDialogComponent implements OnInit {
     }
 
     async showDialog(transferNew: InventoryTransferModel, isAdd: boolean) {
+        debugger
         this.display = true;
         this.new();
         this.isAdd = isAdd;
@@ -93,8 +96,7 @@ export class InventoryTransferDialogComponent implements OnInit {
         this.formTransfer = this.formBuilder.group({
             transferId: [this.transfer.transferId ?? 0],
             transferDate:  [
-                this.transfer.transferDate ??
-                    new Date().toISOString().substring(0, 10),
+                new Date(),
             ],
             comment: [this.transfer.comment ?? '--', Validators.required],
             docTotal: [this.transfer.docTotal ??0],
@@ -129,6 +131,7 @@ export class InventoryTransferDialogComponent implements OnInit {
                 transferId: 0,
                 itemId: 0,
                 quantity: 1,
+                quantityUnit: '1',
                 stock:0,
                 unitOfMeasureId:0,
                 unitOfMeasureName:'',
@@ -172,6 +175,7 @@ export class InventoryTransferDialogComponent implements OnInit {
                 transferId: 0,
                 itemId: 0,
                 quantity: 1,
+                quantityUnit: '1',
                 stock:0,
                 unitOfMeasureId:0,
                 unitOfMeasureName:'',
@@ -198,6 +202,7 @@ export class InventoryTransferDialogComponent implements OnInit {
                 transferId: 0,
                 itemId: 0,
                 quantity: 1,
+                quantityUnit: '1',
                 stock:0,
                 unitOfMeasureId:0,
                 unitOfMeasureName:'',
@@ -230,6 +235,7 @@ export class InventoryTransferDialogComponent implements OnInit {
             this.transfer.detail[currentIndex].unitOfMeasureId = item.unitOfMeasureId;
             this.transfer.detail[currentIndex].unitOfMeasureName = item.unitOfMeasureName;
             this.transfer.detail[currentIndex].stock = item.stock;
+            this.transfer.detail[currentIndex].quantityUnit = '1';
             }
         }
         this.ItemsBrowser.index = -1;
@@ -265,6 +271,14 @@ export class InventoryTransferDialogComponent implements OnInit {
                 );
 
                 let newTransfer = this.formTransfer.value as InventoryTransferModel;
+
+                // Ajustar la zona horaria para que se guarde la hora local correcta
+                if (newTransfer.transferDate) {
+                    const date = new Date(newTransfer.transferDate);
+                    const offset = date.getTimezoneOffset();
+                    newTransfer.transferDate = new Date(date.getTime() - (offset * 60 * 1000));
+                }
+
                 newTransfer.detail = this.transfer.detail;
                 newTransfer.detail.forEach(x=> x.toWhsCode = newTransfer.toWhsCode);
                 newTransfer.detail.forEach(x=> x.fromWhsCode = newTransfer.fromWhsCode);

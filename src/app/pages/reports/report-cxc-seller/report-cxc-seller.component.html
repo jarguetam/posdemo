@@ -9,9 +9,9 @@
                     <h4 class="my-2">{{title}}</h4>
                 </div>
                 <!-- <br> -->
-                <div class="card">
-                    <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
-                        <div class="grid p-fluid">
+                <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+                    <div class="grid p-fluid">
+                        <div class="col-12 md:col-4">
                             <span class="mt-4 p-float-label p-input-icon-left">
                                 <p-dropdown [options]="sellerList" formControlName="sellerId" optionValue="sellerId"
                                     optionLabel="sellerName"></p-dropdown>
@@ -21,15 +21,31 @@
                                 <small *ngIf="formFilter.controls['sellerId'].errors.required" id="sellerId"
                                     class="p-error block">Vendedor es requerido</small>
                             </div>
-                            <div class="col-12 md:col-4">
-                                <button class="mt-4" pButton type="button" [disabled]="formFilter.invalid || loading"
-                                    (click)="getReport()" label="Generar reporte"></button>
-                            </div>
+
                         </div>
-                    </form>
-                </div>
+                        <div class="col-12 md:col-4 mt-5">
+                            <p-checkbox binary=true label="Solo Saldo Vencido"  name="groupname" [formControl]="formFilter.controls['onlyOverDue']"></p-checkbox>
+                        </div>
+
+                        <div class="col-12 md:col-4">
+                            <button class="mt-4" pButton type="button" [disabled]="formFilter.invalid || loading"
+                                (click)="loadPdf()" label="Generar reporte"></button>
+                        </div>
+
+                        <p-progressSpinner *ngIf="loading"></p-progressSpinner>
+
+                        <div class="pdf-container" *ngIf="pdfSrc && !loading">
+                            <!-- <button class="mt-4 mb-4" pButton type="button" (click)="downloadPdf()" label="Descargar PDF"></button> -->
+                            <ngx-extended-pdf-viewer [src]="pdfBlob" [render-text]="true" [show-all]="true"
+                                [zoom]="'auto'" [textLayer]="true" [show-borders]="false" [expand]="true"
+                                [useBrowserLocale]="true" [height]="'80vh'">
+                            </ngx-extended-pdf-viewer>
+                        </div>
+                    </div>
+                </form>
+
             </ng-template>
+
         </div>
     </div>
 </div>
-

@@ -5,6 +5,7 @@ import { ExpenseService } from '../../services/expense.service';
 import { Messages } from 'src/app/helpers/messages';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/service/users/auth.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-expense-list',
@@ -22,6 +23,7 @@ export class ExpenseListComponent implements OnInit {
         private expenseService: ExpenseService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
+        private datePipe: DatePipe,
     ) {}
 
     ngOnInit() {
@@ -31,11 +33,11 @@ export class ExpenseListComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
         });
@@ -45,8 +47,8 @@ export class ExpenseListComponent implements OnInit {
         try {
             this.loading = true;
             this.expenseList = await this.expenseService.getExpenseByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
             );
             Messages.closeLoading();
             this.loading = false;

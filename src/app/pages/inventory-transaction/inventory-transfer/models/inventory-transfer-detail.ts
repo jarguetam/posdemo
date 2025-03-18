@@ -5,6 +5,7 @@ export class InventoryTransferDetailModel {
     transferId: number;
     itemId: number;
     quantity: number;
+    quantityUnit: string;
     stock:number;
     price: number;
     dueDate: Date;

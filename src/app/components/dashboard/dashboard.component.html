@@ -62,7 +62,7 @@
             </div>
         </div>
     </div>
-<!-- Columna izquierda -->
+    <!-- Columna izquierda -->
     <div class="col-12 xl:col-6">
         <div class="custom-card" *ngIf="ver_rentabilidad">
             <h5>Rentabilidad por mes</h5>
@@ -89,7 +89,8 @@
                 <div class="flex justify-content-between mb-3">
                     <div>
                         <span class="block font-medium mb-3">Cuentas por Pagar</span>
-                        <div class="text-900 text-green-500 font-medium text-xl">L. {{ dataDashboard[12]?.data[0]?.qty | number}}</div>
+                        <div class="text-900 text-green-500 font-medium text-xl">L. {{ dataDashboard[12]?.data[0]?.qty |
+                            number}}</div>
                     </div>
                     <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
                         [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
@@ -103,7 +104,8 @@
                 <div class="flex justify-content-between mb-3">
                     <div>
                         <span class="block font-medium mb-3">Cuentas por Cobrar</span>
-                        <div class="text-900 text-green-500 font-medium text-xl">L. {{ dataDashboard[10]?.data[0]?.qty | number}}</div>
+                        <div class="text-900 text-green-500 font-medium text-xl">L. {{ dataDashboard[10]?.data[0]?.qty |
+                            number}}</div>
                     </div>
                     <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
                         [ngStyle]="{width: '2.5rem', height: '2.5rem'}">
@@ -113,7 +115,7 @@
             </div>
         </div>
     </div>
-<!-- Columna derecha -->
+    <!-- Columna derecha -->
     <div class="col-12 xl:col-6">
         <div class="custom-card" *ngIf="ver_ventas_vendedor">
             <h5>Ventas por vendedor mes actual</h5>

@@ -3,7 +3,6 @@ import { DocumentSaleModel } from './../../models/document-model';
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Messages } from 'src/app/helpers/messages';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { CopyOrderListComponent } from 'src/app/pages/purchase/invoice/copy-order-list/copy-order-list.component';
 import { AuthService } from 'src/app/service/users/auth.service';
 import { CopyOrderSaleListComponent } from '../copy-order-list/copy-order-list.component';
 import { InvoiceSaleDialogComponent } from '../invoice-sale-dialog/invoice-sale-dialog.component';
@@ -15,8 +14,8 @@ import { PrintTicketService } from '../../services/print-ticket.service';
 import { CompanyInfo } from 'src/app/models/company-info';
 import { ConnectionService, ConnectionState } from 'ng-connection-service';
 import { tap } from 'rxjs';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { PrintEscPosService } from '../../services/print-esc-pos.service';
+import { ConnectionStateService } from 'src/app/service/connection-state.service';
 
 @Component({
     selector: 'app-invoice-sale-list',
@@ -48,7 +47,8 @@ export class InvoiceSaleListComponent implements OnInit {
         private db: DbLocalService,
         private printTicketService: PrintTicketService,
         private printBluethootService: PrintEscPosService,
-        private connectionService: ConnectionService
+        private connectionService: ConnectionService,
+        private connectionStateService: ConnectionStateService
     ) {
         this.isMobile = this.detectMobile();
         this._createFormBuild();
@@ -60,8 +60,8 @@ export class InvoiceSaleListComponent implements OnInit {
     ngOnInit() {
         this.invoiceService.isSync$.subscribe(async (isSync: boolean) => {
             this.loading = isSync;
-            if(this.loading === false){
-              await this.search();
+            if (this.loading === false) {
+                await this.search();
             }
         });
 
@@ -73,7 +73,7 @@ export class InvoiceSaleListComponent implements OnInit {
                     this.currentState = newState;
                     if (this.currentState.hasNetworkConnection) {
                         this.status = true;
-                       // await this.search();
+                        // await this.search();
                     } else {
                         this.status = false;
                     }
@@ -91,19 +91,16 @@ export class InvoiceSaleListComponent implements OnInit {
 
     _createFormBuild() {
         const currentDate = new Date();
-        const localDateString = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10);
+        const localDateString = new Date(
+            currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
+        )
+            .toISOString()
+            .substring(0, 10);
         this.formFilter = this.formBuilder.group({
-            from: [
-                localDateString,
-                Validators.required,
-            ],
-            to: [
-                localDateString,
-                Validators.required,
-            ],
+            from: [localDateString, Validators.required],
+            to: [localDateString, Validators.required],
         });
     }
-
 
     async search() {
         try {
@@ -117,7 +114,7 @@ export class InvoiceSaleListComponent implements OnInit {
                     (x) => x.sellerId === this.usuario.sellerId
                 );
             }
-            this.loading =false;
+            this.loading = false;
             Messages.closeLoading();
         } catch (ex) {
             this.loading = false;
@@ -140,9 +137,12 @@ export class InvoiceSaleListComponent implements OnInit {
         }
         if (this.isMobile) {
             //this.InvoiceSaleDialog.showDialog(new DocumentSaleModel(), true);
-            await this.router.navigate(['/listado-facturas-venta/factura-movil'], {
-                state: {},
-            });
+            await this.router.navigate(
+                ['/listado-facturas-venta/factura-movil'],
+                {
+                    state: {},
+                }
+            );
         } else {
             await this.router.navigate(['/listado-facturas-venta/factura'], {
                 state: {},
@@ -158,10 +158,10 @@ export class InvoiceSaleListComponent implements OnInit {
             );
             return;
         }
-       // this.InvoiceSaleDialog.showDialog(invoice, false);
-       await this.router.navigate(['/listado-facturas-venta/factura-movil'], {
-        state: {invoice},
-    });
+        // this.InvoiceSaleDialog.showDialog(invoice, false);
+        await this.router.navigate(['/listado-facturas-venta/factura-movil'], {
+            state: { invoice },
+        });
     }
 
     async viewInvoice(invoice: DocumentSaleModel) {
@@ -173,17 +173,36 @@ export class InvoiceSaleListComponent implements OnInit {
             return;
         }
         await this.router.navigate(['/listado-facturas-venta/factura-movil'], {
-            state: {invoice},
+            state: { invoice },
         });
     }
 
     async print(invoice: DocumentSaleModel) {
         if (this.isMobile) {
-            await this.printBluethootService.printInvoice(invoice);
+            await this.printBluethootService.printInvoice(invoice, 'Factura');
         } else if (this.company.printLetter === true) {
-            await this.printService.printInvoice(invoice);
+            let print = await Messages.question(
+                'Impresion',
+                `¿Desea imprimir en impresora portatil?`
+            );
+            if (print) {
+                await this.printBluethootService.printInvoice(
+                    invoice,
+                    'Factura'
+                );
+
+            } else {
+                await this.printService.printInvoice(invoice);
+            }
         } else {
-            await this.printTicketService.printInvoice(invoice);
+            if (print) {
+                await this.printBluethootService.printInvoice(
+                    invoice,
+                    'Factura'
+                );
+            } else {
+                await this.printTicketService.printInvoice(invoice);
+            }
         }
     }
 
@@ -191,9 +210,14 @@ export class InvoiceSaleListComponent implements OnInit {
         this.CopyOrderList.showDialog();
     }
 
-    orderSelected(order: DocumentSaleModel) {
+    async orderSelected(order: DocumentSaleModel) {
         order.docReference = order.docId;
-        this.InvoiceSaleDialog.showDialog(order, true);
+        order.comment = `Basado en pedido N°: ${order.docId}`;
+        let invoice = order;
+        invoice.detailDto = order.detail;
+        await this.router.navigate(['/listado-facturas-venta/factura-movil'], {
+            state: { invoice },
+        });
     }
 
     @HostListener('document:keydown', ['$event'])
@@ -213,29 +237,41 @@ export class InvoiceSaleListComponent implements OnInit {
     }
 
     async syncInvoice(invoice: DocumentSaleModel) {
-        debugger
+        // Verificar si estamos en modo offline o sin conexión
+        if (this.connectionStateService.isEffectivelyOffline()) {
+            Messages.warning(
+                'Sin conexión',
+                'Por favor, habilite la conexión a internet para sincronizar las facturas.'
+            );
+            return;
+        }
+
         try {
-            //const MIN_DATE = new Date('0001-01-01T00:00:00Z'); // 01/01/0001
-            //invoice.docDate = MIN_DATE;
             const currentDate = new Date();
             const localDateString = new Date(
-                currentDate.getTime() -
-                    currentDate.getTimezoneOffset() * 60000
+                currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
             );
             invoice.docDate = localDateString;
-            Messages.loading('Agregando', 'Agregando factura de venta');
-            await this.invoiceService.addInvoice(invoice);
 
+            Messages.loading('Agregando', 'Agregando factura de venta');
+
+            await this.invoiceService.addInvoice(invoice);
             await this.db.invoice.delete(invoice.id);
             await this.search();
+
             Messages.closeLoading();
+            Messages.ok('Éxito', 'Factura sincronizada correctamente');
+
         } catch (ex) {
-            if(ex.error.message=="Error: Esta factura ya existe en la base de datos. UUID"){
-                await this.db.invoice.delete(invoice.id);
-                this.search();
-            }
             Messages.closeLoading();
-            Messages.warning('Advertencia', ex.error.message);
+
+            if (ex.error?.message === 'Error: Esta factura ya existe en la base de datos. UUID') {
+                await this.db.invoice.delete(invoice.id);
+                await this.search();
+                Messages.warning('Advertencia', 'Esta factura ya existe en la base de datos');
+            } else {
+                Messages.warning('Advertencia', ex.error?.message || 'Error al sincronizar la factura');
+            }
         }
     }
 }

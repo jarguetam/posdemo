@@ -115,11 +115,9 @@ export class InventoryOutPutDialogComponent implements OnInit {
     }
 
     _createFormBuild() {
-        const currentTimeStamp = Date.now();
-        const currentDate = new Date(currentTimeStamp);
         this.formOutPut = this.formBuilder.group({
             outPutId: [this.outPut.outputId ?? 0],
-            outputDate: [this.outPut.outputDate ?? currentDate.toISOString().substring(0, 10)],
+            outputDate: [this.outPut.outputDate ?? new Date()],
             comment: [this.outPut.comment ?? 'Salida de mercancia', Validators.required],
             docTotal: [this.outPut.docTotal ?? 0],
             whsCode: [
@@ -274,6 +272,11 @@ export class InventoryOutPutDialogComponent implements OnInit {
                 Messages.loading('Agregando', 'Agregando salida de mercaderia');
 
                 let newOutPut = this.formOutPut.value as InventoryOutPutModel;
+                if (newOutPut.outputDate) {
+                    const date = new Date(newOutPut.outputDate);
+                    const offset = date.getTimezoneOffset();
+                    newOutPut.outputDate = new Date(date.getTime() - (offset * 60 * 1000));
+                }
                 newOutPut.detail = this.outPut.detail;
                 newOutPut.detail.forEach(
                     (x) => (x.whsCode = newOutPut.whsCode)

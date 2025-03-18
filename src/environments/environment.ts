@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  uriLogistic:"http://localhost:50209"//"https://www.dpos.somee.com"//"https://localhost:5001"//
+  uriLogistic:"http://localhost:3001"//"http://190.92.95.84:9096"//"https://www.dpos.somee.com"//"https://localhost:5001"//
 };
 
 /*

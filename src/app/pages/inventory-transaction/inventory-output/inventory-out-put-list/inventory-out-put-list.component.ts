@@ -6,6 +6,7 @@ import { InventoryOutPutModel } from '../models/inventory-output';
 import { InventoryOutPutService } from '../services/inventory-out-put.service';
 import { Messages } from 'src/app/helpers/messages';
 import { PrintOupPutService } from '../services/print-oup-put.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-inventory-out-put-list',
@@ -23,7 +24,8 @@ export class InventoryOutPutListComponent implements OnInit {
         private outPutServices: InventoryOutPutService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
-        private printService: PrintOupPutService
+        private printService: PrintOupPutService,
+         private datePipe: DatePipe,
     ) {}
 
     ngOnInit() {
@@ -33,11 +35,11 @@ export class InventoryOutPutListComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
         });
@@ -47,8 +49,8 @@ export class InventoryOutPutListComponent implements OnInit {
         try {
             this.loading = true;
             this.outPutList = await this.outPutServices.getByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
             );
             Messages.closeLoading();
             this.loading = false;

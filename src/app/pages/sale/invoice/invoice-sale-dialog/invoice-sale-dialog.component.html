@@ -6,8 +6,29 @@
 
 <div class="grid">
     <div class="col-12 xl:col-12">
-        <div class="card">
+
+        <div class="card"
+            [ngStyle]="{'padding-top': '8px', 'padding-bottom': '30px', 'padding-left': '8px', 'padding-right': '8px'}">
             <ng-container>
+                <p-confirmDialog #cd [transitionOptions]="'0.25ms'">
+                    <ng-template pTemplate="header">
+                        <h3>Tipo Factura</h3>
+                    </ng-template>
+                    <ng-template pTemplate="icon">
+                        <i class="pi pi-question-circle" style="font-size: 2rem"></i>
+                    </ng-template>
+                    <ng-template pTemplate="message">
+                        <p>¿Qué tipo de factura desea generar?</p>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+                        <button type="button" pButton icon="pi pi-money-bill" label="Contado" (click)="cd.accept()"
+                            class="p-button-success p-button-raised">
+                        </button>
+                        <button type="button" pButton icon="pi pi-calendar" label="Crédito" (click)="cd.reject()"
+                            class="p-button-info p-button-raised">
+                        </button>
+                    </ng-template>
+                </p-confirmDialog>
                 <ng-template [ngIf]="loading" [ngIfElse]="data">
                     <skeleton-table-component [title]="title"></skeleton-table-component>
                 </ng-template>
@@ -16,8 +37,7 @@
                     <form [formGroup]="formInvoice" *ngIf="formInvoice" class="mb-5">
                         <div class="grid p-fluid">
                             <div class="col-6 md:col-6 mt-4">
-                                <p-chip
-                                    [style]="{'background-color': status ? '#4CAF50' : '#FF5722', 'color': 'white', 'border-radius': '5px', 'padding': '8px', 'display': 'flex', 'align-items': 'center'}">
+                                <p-chip [style]="chipStyle" class="connection-status">
                                     <i [class]="status ? 'pi pi-check' : 'pi pi-times'" style="margin-right: 8px;"></i>
                                     <span>{{status ? 'Conectado' : 'Desconectado'}}</span>
                                 </p-chip>
@@ -30,21 +50,22 @@
                                 </span>
                                 <div
                                     *ngIf="formInvoice.controls['payConditionId'].invalid && formInvoice.controls['payConditionId'].dirty">
-                                    <small *ngIf="formInvoice.controls['payConditionId'].errors.required" id="payConditionId"
-                                        class="p-error block">Condicion de pago es requerido</small>
+                                    <small *ngIf="formInvoice.controls['payConditionId'].errors.required"
+                                        id="payConditionId" class="p-error block">Condicion de pago es requerido</small>
                                 </div>
                             </div>
 
                             <div class="col-12 md:col-12" [hidden]="true">
                                 <span class="mt-4 p-float-label p-input-icon-left">
-                                    <p-dropdown [disabled]="disabledwsh" [options]="sarList" formControlName="correlativeId"
-                                        optionValue="correlativeId" optionLabel="description"></p-dropdown>
+                                    <p-dropdown [disabled]="disabledwsh" [options]="sarList"
+                                        formControlName="correlativeId" optionValue="correlativeId"
+                                        optionLabel="description"></p-dropdown>
                                     <label for="correlativeId">Numeracion</label>
                                 </span>
                                 <div
                                     *ngIf="formInvoice.controls['correlativeId'].invalid && formInvoice.controls['correlativeId'].dirty">
-                                    <small *ngIf="formInvoice.controls['correlativeId'].errors.required" id="correlativeId"
-                                        class="p-error block">Numeracion es requerido</small>
+                                    <small *ngIf="formInvoice.controls['correlativeId'].errors.required"
+                                        id="correlativeId" class="p-error block">Numeracion es requerido</small>
                                 </div>
                             </div>
                             <div class="col-12 md:col-12">
@@ -54,7 +75,8 @@
                                             (click)="showDialogCustomer()" pTooltip="Buscar Clientes"
                                             tooltipPosition="bottom"></button>
                                         <input id="customerCode" [disabled]="disabled" type="text" pInputText
-                                            formControlName="customerCode" [attr.disabled]="true" placeholder="Buscar Cliente"
+                                            formControlName="customerCode" [attr.disabled]="true"
+                                            placeholder="Buscar Cliente"
                                             [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
                                         <input [disabled]="disabled" id="itemCode" type="text" pInputText
                                             formControlName="customerName" [attr.disabled]="true"
@@ -63,17 +85,19 @@
                                 </span>
                                 <div
                                     *ngIf="formInvoice.controls['customerName'].invalid && formInvoice.controls['customerName'].dirty">
-                                    <small *ngIf="formInvoice.controls['customerName'].errors.required" id="customerName"
-                                        class="p-error block">Cliente es requerido</small>
+                                    <small *ngIf="formInvoice.controls['customerName'].errors.required"
+                                        id="customerName" class="p-error block">Cliente es requerido</small>
                                 </div>
                             </div>
                             <div class="col-12 md:col-6" [hidden]="true">
                                 <span class="mt-4 p-float-label p-input-icon-left">
-                                    <p-dropdown [disabled]="disabledwsh" [options]="wareHouseList" formControlName="whsCode"
-                                        optionValue="whsCode" optionLabel="whsName"></p-dropdown>
+                                    <p-dropdown [disabled]="disabledwsh" [options]="wareHouseList"
+                                        formControlName="whsCode" optionValue="whsCode"
+                                        optionLabel="whsName"></p-dropdown>
                                     <label for="whsCode">Almacen</label>
                                 </span>
-                                <div *ngIf="formInvoice.controls['whsCode'].invalid && formInvoice.controls['whsCode'].dirty">
+                                <div
+                                    *ngIf="formInvoice.controls['whsCode'].invalid && formInvoice.controls['whsCode'].dirty">
                                     <small *ngIf="formInvoice.controls['whsCode'].errors.required" id="whsCode"
                                         class="p-error block">Almacen es requerido</small>
                                 </div>
@@ -86,7 +110,8 @@
                                         optionLabel="sellerName"></p-dropdown>
                                     <label for="sellerId">Vendedor</label>
                                 </span>
-                                <div *ngIf="formInvoice.controls['sellerId'].invalid && formInvoice.controls['sellerId'].dirty">
+                                <div
+                                    *ngIf="formInvoice.controls['sellerId'].invalid && formInvoice.controls['sellerId'].dirty">
                                     <small *ngIf="formInvoice.controls['sellerId'].errors.required" id="sellerId"
                                         class="p-error block">Vendedor es requerido</small>
                                 </div>
@@ -95,11 +120,13 @@
                             <div class="col-6 md:col-6 linea">
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <i class="pi pi-comments"></i>
-                                    <input id="comment" [disabled]="disabled" type="text" pInputText formControlName="comment"
+                                    <input id="comment" [disabled]="disabled" type="text" pInputText
+                                        formControlName="comment"
                                         [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
                                     <label for="comment">Comentario</label>
                                 </span>
-                                <div *ngIf="formInvoice.controls['comment'].invalid && formInvoice.controls['comment'].dirty">
+                                <div
+                                    *ngIf="formInvoice.controls['comment'].invalid && formInvoice.controls['comment'].dirty">
                                     <small *ngIf="formInvoice.controls['comment'].errors.required" id="comment"
                                         class="p-error block">Comentario es requerido</small>
                                 </div>
@@ -108,7 +135,8 @@
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <i class="pi pi-comments"></i>
                                     <input id="reference" [disabled]="disabled" type="text" pInputText
-                                        formControlName="reference" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                                        formControlName="reference"
+                                        [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
                                     <label for="reference">Referencia</label>
                                 </span>
                                 <div
@@ -119,7 +147,8 @@
                             </div>
                             <div class="col-12 md:col-12">
                                 <sw-item-list *ngFor="let item of list" [inside]="item" [item-class]="'list-custom'"
-                                    [editTemplate]="editTemplate" [trashTemplate]="trashTemplate" (callback)="action($event)">
+                                    [editTemplate]="editTemplate" [trashTemplate]="trashTemplate"
+                                    (callback)="action($event)">
                                 </sw-item-list>
                                 <ng-template #editTemplate>
                                     <button [disabled]="disabled" (click)="deleteLine(detail.itemCode)" pButton pRipple
@@ -138,13 +167,13 @@
                             <div class="col-12 md:col-12">
                                 <p-table #dt [value]="invoice.detail" responsiveLayout="scroll"
                                     styleClass="p-datatable-sm p-datatable-striped"
-                                    [globalFilterFields]="['itemCode','itemName', 'quantity', 'itemName']" scrollHeight="264px"
-                                    [virtualScroll]="true" [virtualRowHeight]="10" [rows]="1">
+                                    [globalFilterFields]="['itemCode','itemName', 'quantity', 'itemName']"
+                                    scrollHeight="264px" [virtualScroll]="true" [virtualRowHeight]="10" [rows]="1">
                                     <ng-template pTemplate="header">
                                         <tr [pSelectableRow]="rowData">
                                             <!-- <th>Codigo</th> -->
                                             <th>Descripcion </th>
-                                            <th>Cantidad</th>
+                                            <th>Cant.</th>
                                             <th>Precio</th>
                                             <!-- <th>Stock Actual</th> -->
                                             <!-- <th>Vencimiento</th>
@@ -160,12 +189,12 @@
                                                 tooltipPosition="bottom" label="Agregar Linea"></button>
                                         </div> -->
                                         <div class="p-inputgroup">
-                                            <input [autofocus]="true" #barcode id="barcode" [disabled]="disabled" type="text"
+                                            <!-- <input [autofocus]="true" #barcode id="barcode" [disabled]="disabled" type="text"
                                                 pInputText (keydown.enter)="findBarcode(barcode.value); barcode.value=''"
                                                 placeholder="Buscar producto"
-                                                [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
-                                            <button [disabled]="disabled" type="button" pButton pRipple icon="pi pi-search"
-                                                pTooltip="Buscar Productos" tooltipPosition="bottom"
+                                                [ngClass]="{ 'is-invalid': submitted && f.name.errors }"> -->
+                                            <button [disabled]="disabled" type="button" pButton pRipple
+                                                icon="pi pi-search" pTooltip="Buscar Productos" tooltipPosition="bottom"
                                                 (click)="addLine(invoice.detail, rowIndex)"></button>
                                         </div>
                                     </ng-template>
@@ -182,18 +211,19 @@
                                                 </p-cellEditor>
                                             </td>
                                             <td>
-                                                <span class="p-column-title">Cantidad</span>
-                                                <input #quantity id="quantity" [disabled]="disabled" pInputText type="number"
-                                                    (ngModelChange)="calculate()" [(ngModel)]="detail.quantity" mode="decimal"
-                                                    [minFractionDigits]="2" [min]="0" [max]="1000000"
+                                                <span class="p-column-title">Cant.</span>
+                                                <input #quantity id="quantity" [disabled]="disabled" pInputText
+                                                    type="number" (ngModelChange)="calculate()"
+                                                    [(ngModel)]="detail.quantity" mode="decimal" [minFractionDigits]="2"
+                                                    [min]="0" [max]="1000000" (focus)="onCantidadFocus(detail)"
                                                     [ngModelOptions]="{standalone: true}" />
                                             </td>
                                             <td>
                                                 <span class="p-column-title">Precio:</span>
                                                 <input #price id="price" [disabled]="!this.usuario.editPrice" pInputText
-                                                    type="number" (ngModelChange)="calculate()" [(ngModel)]="detail.price"
-                                                    mode="decimal" [minFractionDigits]="2" [min]="0" [max]="1000000"
-                                                    [ngModelOptions]="{standalone: true}" />
+                                                    type="number" (ngModelChange)="calculate()"
+                                                    [(ngModel)]="detail.price" mode="decimal" [minFractionDigits]="2"
+                                                    [min]="0" [max]="1000000" [ngModelOptions]="{standalone: true}" />
                                                 <!-- <p-cellEditor>
                                                     <ng-template pTemplate="input">
                                                         <input [disabled]="disabled" pInputText type="text"
@@ -219,8 +249,8 @@
                                                 </p-cellEditor>
                                             </td>
                                             <td style="width: 12%;"><span class="p-column-title">Acción</span>
-                                                <button [disabled]="disabled" (click)="deleteLine(detail.itemCode)" pButton
-                                                    pRipple type="button" icon="pi pi-trash"
+                                                <button [disabled]="disabled" (click)="deleteLine(detail.itemCode)"
+                                                    pButton pRipple type="button" icon="pi pi-trash"
                                                     class="p-button p-component p-button-text p-button-icon-only"></button>
                                             </td>
                                         </tr>
@@ -279,20 +309,21 @@
                     <app-payment-metod-dialog (PaymentMetod)="selectPaymentMetod($event)"></app-payment-metod-dialog>
 
                     <ng-template [ngIf]="isAdd" [ngIfElse]="addButton">
-                        <button pButton type="button" [disabled]="formInvoice.invalid || loading" (click)="addTypeInvoice()"
-                            label="Agregar"></button>
-                            &nbsp;
-                        <button pButton type="button" [disabled]=" loading" (click)="exit()"
-                            label="Salir" class="p-button-danger"></button>
+                        <button pButton type="button" [disabled]="formInvoice.invalid || loading"
+                            (click)="addTypeInvoice()" label="Agregar"></button>
+                        &nbsp;
+                        <button pButton type="button" [disabled]=" loading" (click)="exit()" label="Salir"
+                            class="p-button-danger"></button>
                     </ng-template>
                     <ng-template #addButton>
                         <button pButton type="button" [disabled]="formInvoice.invalid || loading" (click)="edit()"
                             label="Editar"></button>
-                            &nbsp;
-                        <button pButton type="button" (click)="cancelInvoice()" class="p-button-danger" label="Anular"></button>
                         &nbsp;
-                        <button pButton type="button" [disabled]=" loading" (click)="exit()"
-                        label="Salir" class="p-button-danger"></button>
+                        <button pButton type="button" (click)="cancelInvoice()" class="p-button-danger"
+                            label="Anular"></button>
+                        &nbsp;
+                        <button pButton type="button" [disabled]=" loading" (click)="exit()" label="Salir"
+                            class="p-button-danger"></button>
                     </ng-template>
                 </ng-template>
 

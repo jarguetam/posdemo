@@ -1,0 +1,87 @@
+<div class="grid">
+    <div class="col-12 xl:col-12">
+        <div class="card">
+            <ng-template [ngIf]="loading" [ngIfElse]="showTable">
+                <skeleton-table-component [title]="title"></skeleton-table-component>
+            </ng-template>
+            <ng-template #showTable>
+                <div class="card">
+                    <h4 class="my-2">{{title}}</h4>
+                </div>
+                <!-- <br> -->
+                <div class="card">
+                    <form [formGroup]="formFilter" *ngIf="formFilter" class="mb-5">
+                        <div class="grid p-fluid">
+                            <div class="col-12 md:col-8">
+                                <span class="p-float-label p-input-icon-left">
+                                    <p-dropdown [options]="reportList" formControlName="reportId" optionValue="viewName" optionLabel="name"></p-dropdown>
+                                    <label for="reportId">Reporte</label>
+                                </span>
+                                <div *ngIf="formFilter.controls['reportId'].invalid && formFilter.controls['reportId'].dirty">
+                                    <small *ngIf="formFilter.controls['reportId'].errors.required" id="reportId" class="p-error block">Reporte es requerido</small>
+                                </div>
+                            </div>
+                            <div class="col-12 md:col-4">
+                                <button  pButton type="button" [disabled]="formFilter.invalid || loading" (click)="getReport()" label="Generar reporte"></button>
+                            </div>
+                        </div>
+
+                    </form>
+                    <ng-container *ngIf="reportData.length > 0">
+                        <p-table #dt [value]="reportData" [paginator]="true" [rows]="10" responsiveLayout="scroll"
+                                 styleClass="p-datatable-sm p-datatable-gridlines"
+                                 [globalFilterFields]="globalFilterFields">
+                          <ng-template pTemplate="header">
+                            <tr>
+                              <th *ngFor="let col of columns" [pSortableColumn]="col.field">
+                                {{col.header}}
+                                <p-sortIcon [field]="col.field"></p-sortIcon>
+                                <p-columnFilter type="text" [field]="col.field" display="menu" class="ml-auto"></p-columnFilter>
+                              </th>
+                            </tr>
+                          </ng-template>
+                          <ng-template pTemplate="caption">
+                            <div class="header-container">
+                              <h4>{{titleReport}}</h4>
+                              <div class="button-container">
+                                <button pButton pRipple label="Excel" pTooltip="Excel" icon="pi pi-file-excel"
+                                        class="p-button-success mr-2" (click)="exportToExcel()"></button>
+
+                              </div>
+                              <div class="search-container">
+                                <span class="p-input-icon-left">
+                                  <i class="pi pi-search"></i>
+                                  <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')"
+                                         placeholder="Buscar una palabra" />
+                                </span>
+                              </div>
+                            </div>
+                          </ng-template>
+                          <ng-template pTemplate="body" let-row>
+                            <tr>
+                              <td *ngFor="let col of columns">
+                                <ng-container [ngSwitch]="col.type">
+                                  <ng-container *ngSwitchCase="'date'">
+                                    {{row[col.field] | date:'dd/MM/yyyy'}}
+                                  </ng-container>
+                                  <ng-container *ngSwitchCase="'number'">
+                                    {{row[col.field] | number:'1.2-2'}}
+                                  </ng-container>
+                                  <ng-container *ngSwitchCase="'currency'">
+                                    {{row[col.field] | currency:'L. ':'symbol':'1.2-2'}}
+                                  </ng-container>
+                                  <ng-container *ngSwitchDefault>
+                                    {{row[col.field]}}
+                                  </ng-container>
+                                </ng-container>
+                              </td>
+                            </tr>
+                          </ng-template>
+                        </p-table>
+                      </ng-container>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
+

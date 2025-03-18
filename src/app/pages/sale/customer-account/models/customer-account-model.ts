@@ -3,10 +3,19 @@ export class CustomerAccountModel{
     customerCode: string;
     customerName: string;
     sellerName: string;
+    frecuency: string;
     sellerId: number;
     payConditionName: string;
+    uuid: string;
+    payConditionId: number;
     invoiceNumber: number;
     dueDate: Date;
+    docDate: Date;
+    docTotal: number;
+    subTotal: number;
+    tax: number;
+    discountsTotal: number;
+    paidToDate: number;
     balance: number;
     unexpiredBalance: number;
     balanceDue: number;
@@ -16,4 +25,5 @@ export class CustomerAccountModel{
     balanceFrom91To120Days: number;
     balanceMoreThan120Days: number;
     daysExpired: number;
+    id: number;
 }

@@ -6,6 +6,7 @@ import { InventoryEntryModel } from './../models/inventory-entry';
 import { InventoryEntryService } from './../services/inventory-entry.service';
 import { Messages } from 'src/app/helpers/messages';
 import { PrintEntryService } from '../services/print-entry.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-inventory-entry-list',
@@ -23,7 +24,8 @@ export class InventoryEntryListComponent implements OnInit {
         private entryServices: InventoryEntryService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
-        private printService: PrintEntryService
+        private printService: PrintEntryService,
+        private datePipe: DatePipe,
     ) {}
 
     ngOnInit() {
@@ -33,11 +35,11 @@ export class InventoryEntryListComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
         });
@@ -47,8 +49,8 @@ export class InventoryEntryListComponent implements OnInit {
         try {
             this.loading = true;
             this.entryList = await this.entryServices.getByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
             );
             Messages.closeLoading();
             this.loading = false;

@@ -11,12 +11,14 @@ import { ItemPriceCustomerModel } from '../models/item-price-customer';
 import { DbLocalService } from 'src/app/service/db-local.service';
 import { FrequencyModel } from '../models/frequency-model';
 import { ZoneModel } from '../models/zone-model';
+import { CustomerBalanceModel } from '../models/customer-balance-model';
+import { ConnectionStateService } from 'src/app/service/connection-state.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class CustomersService {
-    constructor(private http: HttpClient, private db: DbLocalService) {}
+    constructor(private http: HttpClient, private db: DbLocalService,private connectionStateService: ConnectionStateService) {}
 
     async getCustomerCategory() {
         return await firstValueFrom(
@@ -138,32 +140,65 @@ export class CustomersService {
         );
     }
 
-    async getCustomerActive() {
+    private async getOfflineCustomers(): Promise<CustomerModel[]> {
+        const customersOffline = await this.db.customers.toArray();
+        return customersOffline;
+    }
+
+    async getCustomerActive(): Promise<CustomerModel[]> {
+        // Si estamos en modo offline forzado o sin conexión, usar datos locales
+        if (this.connectionStateService.isEffectivelyOffline()) {
+            console.log('Using offline customer data due to offline mode');
+            return this.getOfflineCustomers();
+        }
+
         try {
             const apiDataPromise = firstValueFrom(
-                this.http.get<CustomerModel[]>(`${environment.uriLogistic}/api/Customers/CustomerActive`).pipe(
-                    catchError((error) => throwError(() => error)),
-                    timeout(5000) // Espera máximo 5 segundos para la respuesta de la API
-                )
+                this.http
+                    .get<CustomerModel[]>(
+                        `${environment.uriLogistic}/api/Customers/CustomerActive`
+                    )
+                    .pipe(
+                        catchError((error) => {
+                            console.error('Error fetching customers:', error);
+                            return throwError(() => error);
+                        }),
+                        timeout(10000)
+                    )
             );
 
             const customers = await Promise.race([
                 apiDataPromise,
-                new Promise(resolve => setTimeout(() => resolve([]), 3000)) // Devuelve un array vacío si la API no responde en 3 segundos
-            ]) as CustomerModel[];
+                new Promise<CustomerModel[]>((resolve) =>
+                    setTimeout(() => {
+                        console.warn('API request timed out after 8 seconds');
+                        resolve([]);
+                    }, 8000)
+                )
+            ]);
 
-            // Si customers está vacío, significa que se resolvió el timeout
-            if (customers.length === 0) {
-                throw new Error('API request timed out');
+            // Si no hay datos o están vacíos
+            if (!customers || customers.length === 0) {
+                throw new Error('No customer data received or timeout occurred');
             }
 
-            await this.db.customers.clear();
-            await Promise.all(customers.map(customer => this.db.customers.add(customer)));
+            // Actualizar la base de datos local
+            try {
+                await this.db.customers.clear();
+                await Promise.all(
+                    customers.map(customer => this.db.customers.add(customer))
+                );
+                console.log('Successfully updated local customer database');
+            } catch (dbError) {
+                console.error('Error updating local customer database:', dbError);
+                // No interrumpimos el flujo principal si falla la actualización local
+            }
 
             return customers;
+
         } catch (error) {
-            const customersOffline = await this.db.customers.toArray();
-            return customersOffline;
+            console.warn('Fallback to offline customer data due to error:', error);
+            return this.getOfflineCustomers();
         }
     }
 
@@ -199,6 +234,14 @@ export class CustomersService {
         return await firstValueFrom(
             this.http.get<ZoneModel[]>(
                 `${environment.uriLogistic}/api/Customers/CustomerZone`
+            )
+        );
+    }
+
+    async getCustomerBalance(bpId: number, from: Date, to: Date) {
+        return await firstValueFrom(
+            this.http.get<CustomerBalanceModel[]>(
+                `${environment.uriLogistic}/api/Common/GetCustomerJournal${bpId}/${from}/${to}`
             )
         );
     }

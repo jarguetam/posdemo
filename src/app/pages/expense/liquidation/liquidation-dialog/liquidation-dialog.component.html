@@ -10,7 +10,9 @@
                     <div class="col-12 md:col-3">
                         <span class="mt-4 p-float-label p-input-icon-left">
                             <i class="pi pi-calendar"></i>
-                            <input id="from" type="date" pInputText formControlName="from">
+                            <p-calendar formControlName="from" dateFormat="dd/mm/yy" [showTime]="false"
+                                [showIcon]="true"></p-calendar>
+                            <!-- <input id="from" type="date" pInputText formControlName="from"> -->
                             <label for="from">Desde</label>
                         </span>
                         <div *ngIf="formLiquidation.controls['from'].invalid && formLiquidation.controls['from'].dirty">
@@ -21,7 +23,9 @@
                     <div class="col-12 md:col-3">
                         <span class="mt-4 p-float-label p-input-icon-left">
                             <i class="pi pi-calendar"></i>
-                            <input id="to" type="date" pInputText formControlName="to">
+                            <p-calendar formControlName="to" dateFormat="dd/mm/yy" [showTime]="false"
+                                [showIcon]="true"></p-calendar>
+                            <!-- <input id="to" type="date" pInputText formControlName="to"> -->
                             <label for="to">Hasta</label>
                         </span>
                         <div *ngIf="formLiquidation.controls['to'].invalid && formLiquidation.controls['to'].dirty">
@@ -100,6 +104,14 @@
                                 <p-inputNumber mode="currency" currency="HNL" locale="es-HN" id="totalDifference"
                                     formControlName="totalDifference" [readonly]="true" class="total"></p-inputNumber>
                                 <label for="totalDifference">Diferencia</label>
+                            </span>
+                        </div>
+                        <div class="col-12 md:col-12">
+                            <span class="mt-4 p-float-label p-input-icon-left">
+                                <i class="pi pi-comments"></i>
+                                <input id="comment" type="text" pInputText
+                                    formControlName="comment" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                                <label for="comment">Comentario</label>
                             </span>
                         </div>
 

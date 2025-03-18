@@ -4,6 +4,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Messages } from 'src/app/helpers/messages';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/service/users/auth.service';
+import { SyncService } from 'src/app/service/sync.service';
 
 @Component({
   selector: 'app-copy-order-sales-list',
@@ -21,13 +22,16 @@ export class CopyOrderSaleListComponent implements OnInit {
 
     constructor(
         private orderServices: SalesService,
-        private auth: AuthService
+        private auth: AuthService,
+        private stateService: SyncService
     ) {
         this.usuario = this.auth.UserValue;
     }
 
     ngOnInit() {
-        this.search();
+        if(this.stateService.status){
+            this.search();
+        }
     }
 
 

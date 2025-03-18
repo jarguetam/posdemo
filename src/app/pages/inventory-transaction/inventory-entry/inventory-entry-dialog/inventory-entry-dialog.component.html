@@ -9,9 +9,11 @@
                 <div class="grid p-fluid">
                     <div class="col-12 md:col-4">
                         <span class="mt-4 p-float-label p-input-icon-left">
-                            <i class="pi pi-comments"></i>
-                            <input id="entryDate" [disabled]="disabled" type="date" pInputText #entryDate
-                                formControlName="entryDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                            <i class="pi pi-calendar"></i>
+                            <p-calendar formControlName="entryDate" dateFormat="dd/mm/yy" [showTime]="true"
+                                hourFormat="24" [showSeconds]="false" [showIcon]="true"></p-calendar>
+                            <!-- <input id="entryDate" [disabled]="disabled" type="date" pInputText #entryDate
+                                formControlName="entryDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }"> -->
                             <label for="entryDate">Fecha Documento</label>
                         </span>
                         <div *ngIf="formEntry.controls['entryDate'].invalid && formEntry.controls['entryDate'].dirty">

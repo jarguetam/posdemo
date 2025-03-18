@@ -25,11 +25,12 @@ import { PaymentSalesService } from '../service/payment-sales.service';
 import { SellerModel } from '../../seller/models/seller';
 import { SellerService } from '../../seller/service/seller.service';
 import { ConnectionService, ConnectionState } from 'ng-connection-service';
-import { tap } from 'rxjs';
+import { combineLatest, tap } from 'rxjs';
 import { DbLocalService } from 'src/app/service/db-local.service';
 import { PrintEscPaymentService } from '../service/print-esc-payment.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Router } from '@angular/router';
+import { ConnectionStateService } from 'src/app/service/connection-state.service';
 
 @Component({
     selector: 'app-sales-payment-dialog',
@@ -71,25 +72,32 @@ export class SalesPaymentDialogComponent implements OnInit {
         private connectionService: ConnectionService,
         private db_local: DbLocalService,
         private printService: PrintEscPaymentService,
-        private router: Router
+        private router: Router,
+        private auth: AuthService,
+        private connectionStateService: ConnectionStateService
     ) {
         this.usuario = this.authService.UserValue;
-    }
-    ngOnInit(): void {
-        this.connectionService
-            .monitor()
+        // Combinar el monitor de red con el estado de offline forzado
+        combineLatest([
+            this.connectionService.monitor(),
+            this.connectionStateService.forceOffline$,
+        ])
             .pipe(
-                tap((newState: ConnectionState) => {
-                    this.currentState = newState;
-                    if (this.currentState.hasNetworkConnection) {
-                        this.status = true;
-                    } else {
-                        this.status = false;
-                    }
+                tap(([networkState, forceOffline]) => {
+                    this.currentState = networkState;
+                    // El status es true solo si hay conexión de red Y no está forzado el modo offline
+                    this.status =
+                        networkState.hasNetworkConnection && !forceOffline;
+
+                    // Log para debugging
+                    console.log(
+                        `Network: ${networkState.hasNetworkConnection}, Force Offline: ${forceOffline}, Final Status: ${this.status}`
+                    );
                 })
             )
             .subscribe();
     }
+    ngOnInit(): void {}
 
     showDialog(paymentNew: PaymentSaleModel, isAdd: boolean) {
         if (paymentNew.id != null && paymentNew.id !== 0) {
@@ -195,7 +203,7 @@ export class SalesPaymentDialogComponent implements OnInit {
                 docDetailId: 0,
                 docId: 0,
                 invoiceId: document.docId,
-                invoiceReference: document.docId.toString(),
+                invoiceReference: document.uuid,
                 invoiceDate: document.docDate,
                 dueDate: document.dueDate,
                 subTotal: document.subTotal,
@@ -255,6 +263,16 @@ export class SalesPaymentDialogComponent implements OnInit {
     async add() {
         if (this.formSales.valid) {
             try {
+                const invalidPayment = this.detail.some(
+                    (item) => item.sumApplied > item.balance
+                );
+                if (invalidPayment) {
+                    Messages.warning(
+                        'Error',
+                        'No puede aplicar un pago mayor al saldo pendiente.'
+                    );
+                    return;
+                }
                 const newEntry = {
                     ...this.formSales.value,
                     docId: 0,
@@ -279,31 +297,65 @@ export class SalesPaymentDialogComponent implements OnInit {
                     'Agregando',
                     'Agregando pago de factura de venta'
                 );
+
                 if (this.status) {
+                    newEntry.offline = false;
                     let payment = await this.paymentService.addPaymentSales(
                         newEntry
                     );
                     await this.deleteOrUpdate(newEntry);
-                    this.PaymentSalesModify.emit(payment);
+                    // this.PaymentSalesModify.emit(payment);
                     this.formSales.controls['reference'].setValue('');
-                    await this.printService.printInvoice(newEntry);
-                    this.display = false;
+
                     Messages.closeLoading();
+                    await this.printService.printInvoice(newEntry);
+                    this.PaymentSalesModify.emit(payment);
+                    this.display = false;
                 } else {
-                    await this.db_local.table('payment').add(newEntry);
+                    let correlative = await this.db_local.correlative.toArray();
+                    const currentDate = new Date();
+                    const hondurasOffset = -6 * 60; // Honduras tiene una diferencia horaria de -6 horas respecto a UTC
+                    const localDate = new Date(
+                        currentDate.getTime() +
+                            (currentDate.getTimezoneOffset() + hondurasOffset) *
+                                60000
+                    );
+                    newEntry.docDate = currentDate;
+                    newEntry.offline = true;
+
+                    await this.db_local
+                        .table('payment')
+                        .add(newEntry)
+                        .then(async (data) => {
+                            await this.updateCorrelative(
+                                correlative[0].correlativeId
+                            );
+                        });
                     let paymentOffline = await this.db_local.payment.toArray();
                     await this.deleteOrUpdate(newEntry);
+                    newEntry.docId = correlative[0].currentCorrelative + 1;
+                    //this.PaymentSalesModify.emit(paymentOffline);
+                    this.formSales.controls['reference'].setValue('');
+                    Messages.closeLoading();
+
                     await this.printService.printInvoice(newEntry);
                     this.PaymentSalesModify.emit(paymentOffline);
-                    this.formSales.controls['reference'].setValue('');
                     this.display = false;
-                    Messages.closeLoading();
                 }
             } catch (ex) {
                 Messages.closeLoading();
                 Messages.warning('Advertencia', ex.error.message);
             }
         }
+    }
+
+    async updateCorrelative(correlativeId: number) {
+        await this.db_local.correlative
+            .where('correlativeId')
+            .equals(correlativeId)
+            .modify((x) => {
+                x.currentCorrelative = x.currentCorrelative + 1;
+            });
     }
 
     private async deleteOrUpdate(newEntry: any) {
@@ -320,8 +372,32 @@ export class SalesPaymentDialogComponent implements OnInit {
                 } else {
                     await this.db_local.invoiceSeller.update(inv[0].id, inv[0]);
                 }
-                
-                await this.db_local.customers.where('customerId')
+                let invAccount = await this.db_local.customerAccountModel
+                    .where('invoiceNumber')
+                    .equals(invoice.invoiceId)
+                    .toArray();
+                invAccount[0].paidToDate = invoice.sumApplied;
+                invAccount[0].balance =
+                    invAccount[0].balance - invoice.sumApplied;
+                if (invAccount[0].balance <= 0) {
+                    await this.db_local.customerAccountModel.delete(
+                        invAccount[0].invoiceNumber
+                    );
+                    await this.db_local.customers
+                    .where('customerId')
+                    .equals(newEntry.customerId)
+                    .modify((x) => {
+                        x.limitInvoiceCredit +=1;
+                    });
+                } else {
+                    await this.db_local.customerAccountModel.update(
+                        invAccount[0].id,
+                        invAccount[0]
+                    );
+                }
+
+                await this.db_local.customers
+                    .where('customerId')
                     .equals(newEntry.customerId)
                     .modify((x) => {
                         x.balance = x.balance - invoice.sumApplied;
@@ -341,6 +417,13 @@ export class SalesPaymentDialogComponent implements OnInit {
     }
 
     async edit() {
+        if (!this.auth.hasPermission('btn_editar_cobro')) {
+            Messages.warning(
+                'No tiene acceso',
+                'No puede editar por favor solicite el acceso.'
+            );
+            return;
+        }
         if (this.formSales.valid) {
             try {
                 Messages.loading('Agregando', 'Editando pago de cliente');
@@ -368,13 +451,20 @@ export class SalesPaymentDialogComponent implements OnInit {
     }
 
     async cancelInvoice() {
+        if (!this.auth.hasPermission('btn_anular_cobro')) {
+            Messages.warning(
+                'No tiene acceso',
+                'No puede anular por favor solicite el acceso.'
+            );
+            return;
+        }
         let cancel = await Messages.question(
             'Cancelacion',
             'Cancelar esta pago es irreversible. ¿Seguro desea continuar?'
         );
         if (cancel) {
-            debugger
             try {
+                debugger;
                 if (this.isOffline) {
                     await this.db_local.payment.delete(this.offlineId);
                     let result =

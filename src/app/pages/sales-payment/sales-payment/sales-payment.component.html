@@ -24,8 +24,10 @@
                             <div class="col-12 md:col-4">
                                 <span class="mt-4 p-float-label p-input-icon-left">
                                     <i class="pi pi-comments"></i>
-                                    <input id="docDate" [disabled]="disabled" type="date" pInputText #docDate
-                                        formControlName="docDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }">
+                                    <p-calendar formControlName="docDate" dateFormat="dd/mm/yy" [showTime]="true"
+                                        hourFormat="24" [showSeconds]="false" [showIcon]="true"></p-calendar>
+                                    <!-- <input id="docDate" [disabled]="disabled" type="date" pInputText #docDate
+                                        formControlName="docDate" [ngClass]="{ 'is-invalid': submitted && f.name.errors }"> -->
                                     <label for="docDate">Fecha Documento</label>
                                 </span>
                                 <div *ngIf="formSales.controls['docDate'].invalid && formSales.controls['docDate'].dirty">

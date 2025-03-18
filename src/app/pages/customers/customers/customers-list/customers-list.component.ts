@@ -6,8 +6,8 @@ import { CustomersService } from '../../service/customers.service';
 import { CustomerSpecialPriceDialogComponent } from '../customer-special-price-dialog/customer-special-price-dialog.component';
 import { CustomersDialogComponent } from '../customers-dialog/customers-dialog.component';
 import { CustomerPriceListAssignmentComponent } from '../customer-price-list-assignment/customer-price-list-assignment.component';
-import { ViewJornalBpDialogComponent } from 'src/app/pages/common/view-jornal-bp-dialog/view-jornal-bp-dialog.component';
 import { User } from 'src/app/models/user';
+import { CustomerBalanceComponent } from '../customer-balance/customer-balance.component';
 
 @Component({
     selector: 'app-customers-list',
@@ -21,8 +21,8 @@ export class CustomersListComponent implements OnInit {
     CustomerSpecialPriceDialog: CustomerSpecialPriceDialogComponent;
     @ViewChild(CustomerPriceListAssignmentComponent)
     CustomerPriceListAssignment: CustomerPriceListAssignmentComponent;
-    @ViewChild(ViewJornalBpDialogComponent)
-    ViewJornalBpDialog: ViewJornalBpDialogComponent;
+    @ViewChild(CustomerBalanceComponent)
+    ViewJornalBpDialog: CustomerBalanceComponent;
     title: string = 'Listado de clientes';
     customerList: CustomerModel[];
     loading: boolean = false;
@@ -107,6 +107,6 @@ export class CustomersListComponent implements OnInit {
             );
             return;
         }
-        this.ViewJornalBpDialog.showDialog(customerId, 'C');
+        this.ViewJornalBpDialog.showDialog(customerId);
     }
 }

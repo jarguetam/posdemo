@@ -6,6 +6,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/service/users/auth.service';
 import { PrintOupPutService } from '../../inventory-output/services/print-oup-put.service';
 import { InventoryReturnService } from '../services/inventory-return.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-inventory-return-list',
@@ -23,6 +24,7 @@ export class InventoryReturnListComponent implements OnInit {
         private returnService: InventoryReturnService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
+         private datePipe: DatePipe,
     ) {}
 
     ngOnInit() {
@@ -34,11 +36,11 @@ export class InventoryReturnListComponent implements OnInit {
         const localDateString = new Date(currentDate.getTime() - currentDate.getTimezoneOffset() * 60000).toISOString().substring(0, 10);
         this.formFilter = this.formBuilder.group({
             from: [
-                localDateString,
+                new Date(),
                 Validators.required,
             ],
             to: [
-                localDateString,
+                new Date(),
                 Validators.required,
             ],
         });
@@ -48,10 +50,10 @@ export class InventoryReturnListComponent implements OnInit {
         try {
             this.loading = true;
             this.returnInventoryList = await this.returnService.getByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
             );
-           
+
             Messages.closeLoading();
             this.loading = false;
         } catch (ex) {

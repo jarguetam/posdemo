@@ -1,4 +1,10 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    OnInit,
+    Output,
+    ViewChild,
+} from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Messages } from 'src/app/helpers/messages';
 import { User } from 'src/app/models/user';
@@ -12,6 +18,7 @@ import { SellerModel } from 'src/app/pages/seller/models/seller';
 import { SellerRegion } from 'src/app/pages/seller/models/seller-region';
 import { SellerService } from 'src/app/pages/seller/service/seller.service';
 import { DbLocalService } from 'src/app/service/db-local.service';
+import { Table } from 'primeng/table';
 
 @Component({
     selector: 'app-inventory-return-dialog',
@@ -22,7 +29,7 @@ export class InventoryReturnDialogComponent implements OnInit {
     @Output() InventoryReturnModify = new EventEmitter<
         InventoryReturnModel[]
     >();
-
+    @ViewChild('dt') dt: Table;
     return: InventoryReturnModel = new InventoryReturnModel();
     isAdd: boolean;
     isOffline: boolean;
@@ -40,6 +47,8 @@ export class InventoryReturnDialogComponent implements OnInit {
     regionList: SellerRegion[] = [];
     complete: boolean = false;
     private intervalId: any;
+    categories: any[] = [];
+    selectedCategory: any = null;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -123,6 +132,24 @@ export class InventoryReturnDialogComponent implements OnInit {
         }
     }
 
+    filterTable(event: any) {
+        let filterValue: string;
+
+        if (event.target) {
+            // Caso del input text
+            filterValue = (event.target as HTMLInputElement).value;
+        } else if (event.value) {
+            // Caso cuando se selecciona un item del dropdown
+            filterValue = event.value.name;
+        } else {
+            // Caso cuando se limpia la selección
+            filterValue = '';
+        }
+
+        console.log(filterValue);
+        this.dt.filterGlobal(filterValue, 'contains');
+    }
+
     showDialog(returnNew: InventoryReturnModel, isAdd: boolean) {
         this.display = true;
         this.new();
@@ -139,18 +166,14 @@ export class InventoryReturnDialogComponent implements OnInit {
     }
 
     _createFormBuild() {
-        const currentDate = new Date();
-        const localDateString = new Date(
-            currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
-        )
-            .toISOString()
-            .substring(0, 10);
         if (this.isAdd) {
-            this.return.docDate = currentDate;
+            this.return.docDate = new Date();
+        } else {
+            this.return.docDate = new Date(this.return.docDate);
         }
         this.formReturn = this.formBuilder.group({
             id: [this.return.id ?? 0],
-            docDate: [localDateString],
+            docDate: [this.return.docDate],
             sellerId: [this.return.sellerId ?? 0, Validators.required],
             regionId: [this.return.regionId ?? 0, Validators.required],
             whsCode: [
@@ -214,9 +237,13 @@ export class InventoryReturnDialogComponent implements OnInit {
 
             // Inicializar el detalle de retorno si está en línea
             if (!this.isOffline) {
+                // Formatear la fecha manteniendo el tipo Date pero sin tiempo
+                const date = new Date(this.formReturn.value.docDate);
+                date.setHours(0, 0, 0, 0);
+
                 this.return.detail =
                     await this.returnService.getInventoryReturnResumen(
-                        this.formReturn.value.docDate,
+                        date.toISOString(),
                         this.formReturn.value.whsCode
                     );
             } else {
@@ -257,7 +284,11 @@ export class InventoryReturnDialogComponent implements OnInit {
                 );
                 this.return.detail = [...this.return.detail, ...newOnlineItems];
             }
-
+            this.categories = [
+                ...new Set(
+                    this.return.detail.map((item) => item.itemCategoryName)
+                ),
+            ].map((cat) => ({ name: cat }));
             this.calculateAll();
             Messages.closeLoading();
             this.loading = false;
@@ -281,6 +312,12 @@ export class InventoryReturnDialogComponent implements OnInit {
 
                 let newReturn = this.formReturn.value as InventoryReturnModel;
                 newReturn.detail = this.return.detail;
+                if (newReturn.docDate) {
+                    // Formatear la fecha manteniendo el tipo Date pero sin tiempo
+                    const date = new Date(newReturn.docDate);
+                    date.setHours(0, 0, 0, 0);
+                    newReturn.docDate = date;
+                }
                 let returnResult = await this.returnService.add(newReturn);
                 Messages.closeLoading();
                 Messages.Toas('Agregado Correctamente');
@@ -408,6 +445,12 @@ export class InventoryReturnDialogComponent implements OnInit {
                     Messages.warning('Advertencia', ex.message);
                 }
             }
+        }
+    }
+
+    onCantidadFocus(item: InventoryReturnDetailModel) {
+        if (item.quantityReturn == 0) {
+            item.quantityReturn = null;
         }
     }
 }

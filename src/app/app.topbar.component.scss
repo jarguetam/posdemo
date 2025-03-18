@@ -4,6 +4,15 @@
     margin-left: auto; /* Mueve el indicador al lado derecho de la topbar */
 }
 
+.layout-topbar {
+    .sync-progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+}
 .layout-topbar-status i {
     font-size: 1.5rem; /* Tamaño del ícono */
     margin-right: 0.5rem; /* Espacio entre el ícono y el texto */
@@ -27,6 +36,23 @@
     justify-content: flex-end; /* Alinear al extremo derecho de la barra */
     height: 60px; /* Ajusta la altura según tus necesidades */
     padding: 0 20px; /* Espaciado interno de la barra */
+}
+
+.layout-topbar {
+    @apply fixed top-0 left-0 right-0 h-16 px-4
+           flex items-center justify-between
+           bg-white dark:bg-gray-800
+           border-b border-gray-200 dark:border-gray-700;
+}
+
+:host ::ng-deep {
+    .p-progressbar {
+        background: rgba(var(--primary-color-rgb), 0.2);
+    }
+
+    .p-progressbar-determinate .p-progressbar-value {
+        background: var(--primary-color);
+    }
 }
 
 // .seller-chip {
@@ -59,4 +85,3 @@
 }
 
 /* Agregar otros estilos según sea necesario */
-

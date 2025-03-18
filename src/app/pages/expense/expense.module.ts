@@ -8,11 +8,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Components2AppModule } from 'src/app/components.modules-2';
 import { ExpenseDialogComponent } from './expense/expense-dialog/expense-dialog.component';
 import { ExpenseListComponent } from './expense/expense-list/expense-list.component';
-import { LiquidationListComponent } from './liquidation/liquidation-list/liquidation-list.component';
-import { LiquidationDialogComponent } from './liquidation/liquidation-dialog/liquidation-dialog.component';
-import { ButtonModule } from 'primeng/button';
-import { InvoiceModule } from '../purchase/invoice/invoice.module';
-import { AppModule } from 'src/app/app.module';
+import { LiquidationMoneyComponent } from './liquidation-money/liquidation-money.component';
+import { LiquidationMoneyListComponent } from './liquidation-money/liquidation-money-list/liquidation-money-list.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +17,8 @@ import { AppModule } from 'src/app/app.module';
     ExpenseTypeDialogComponent,
     ExpenseListComponent,
     ExpenseDialogComponent,
-    
+    LiquidationMoneyComponent,
+    LiquidationMoneyListComponent
 
   ],
   imports: [

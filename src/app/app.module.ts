@@ -38,7 +38,11 @@ import { ListRolesComponent } from './pages/roles/list.roles.component';
 import { ListUsersComponent } from './pages/users/list.users.component';
 import { ListWareHouseComponent } from './pages/items/warehouse/list-ware-house/list-ware-house.component';
 import { LoadingComponent } from './components/loading/loading.component';
-import { LocationStrategy, HashLocationStrategy, DatePipe } from '@angular/common';
+import {
+    LocationStrategy,
+    HashLocationStrategy,
+    DatePipe,
+} from '@angular/common';
 import { LoginComponent } from './pages/login/login.component';
 import { MenuService } from './service/app.menu.service';
 import { NgModule } from '@angular/core';
@@ -64,8 +68,8 @@ import { UserDialogComponent } from './pages/users/components/user.dialog.compon
 import { UserService } from './service/users/user.service';
 import { WareHouseDialogComponent } from './pages/items/warehouse/ware-house-dialog/ware-house-dialog.component';
 import { WebcamModule } from 'ngx-webcam';
-import {ColorPickerModule} from 'primeng/colorpicker';
-import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import { ColorPickerModule } from 'primeng/colorpicker';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { InventoryOutPutListComponent } from './pages/inventory-transaction/inventory-output/inventory-out-put-list/inventory-out-put-list.component';
 import { InventoryOutPutDialogComponent } from './pages/inventory-transaction/inventory-output/inventory-out-put-dialog/inventory-out-put-dialog.component';
 import { ItemsBrowserWareHouseComponent } from './pages/browser/items/items-browser-ware-house/items-browser-ware-house.component';
@@ -124,8 +128,19 @@ import { LiquidationDialogComponent } from './pages/expense/liquidation/liquidat
 import { LiquidationListComponent } from './pages/expense/liquidation/liquidation-list/liquidation-list.component';
 import { InventoryReturnListComponent } from './pages/inventory-transaction/inventory-return/inventory-return-list/inventory-return-list.component';
 import { InventoryReturnDialogComponent } from './pages/inventory-transaction/inventory-return/inventory-return-dialog/inventory-return-dialog.component';
+import { ItemBrowserTransferComponent } from './pages/inventory-transaction/inventory-transfer-request/item-browser-transfer/item-browser-transfer.component';
+import { CustomerBalanceComponent } from './pages/customers/customers/customer-balance/customer-balance.component';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
+import { CustomerBalanceSaleComponent } from './pages/sale/customer-balance-sale/customer-balance-sale.component';
+import { BluetoothDeviceSelectorComponent } from './pages/bluetooth-device-selector/bluetooth-device-selector.component';
+import { ItemsBrowserPurchaseComponent } from './pages/browser/items-browser-purchase/items-browser-purchase.component';
+import { DATE_PIPE_DEFAULT_TIMEZONE } from '@angular/common';
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEsHN from '@angular/common/locales/es-HN';
 
-
+registerLocaleData(localeEsHN);
 
 @NgModule({
     imports: [
@@ -137,22 +152,22 @@ import { InventoryReturnDialogComponent } from './pages/inventory-transaction/in
         HammerModule,
         WebcamModule,
         ReportsModule,
+        ConfirmDialogModule,
         ConnectionServiceModule,
         ServiceWorkerModule.register('ngsw-worker.js', {
-          enabled: environment.production,
-          // Register the ServiceWorker as soon as the app is stable
-          // or after 30 seconds (whichever comes first).
-          registrationStrategy: 'registerWhenStable:30000'
+            enabled: environment.production,
+            // Register the ServiceWorker as soon as the app is stable
+            // or after 30 seconds (whichever comes first).
+            registrationStrategy: 'registerWhenStable:30000',
         }),
-
     ],
     declarations: [
         AppComponent,
-        AppConfigComponent,
-        AppFooterComponent,
         AppMainComponent,
         AppMenuComponent,
         AppMenuitemComponent,
+        AppConfigComponent,
+        AppFooterComponent,
         AppTopBarComponent,
         CameraPickerComponent,
         CompanyInfoDialogComponent,
@@ -207,7 +222,6 @@ import { InventoryReturnDialogComponent } from './pages/inventory-transaction/in
         InventoryTransferDialogComponent,
         SupplierBrowserComponent,
         OrdersPurchaseListComponent,
-        OrdersPurchaseListComponent,
         OrdersPurchaseDialogComponent,
         InvoicePurchaseListComponent,
         InvoicePurchaseDialogComponent,
@@ -253,23 +267,26 @@ import { InventoryReturnDialogComponent } from './pages/inventory-transaction/in
         WizardConfigurationComponent,
         LiquidationDialogComponent,
         LiquidationListComponent,
-        InventoryEntryListComponent,
         InventoryReturnListComponent,
-        InventoryReturnDialogComponent
-               // ReportInventoryComponent,
-        // ReportInventoryWarehouseComponent
+        InventoryReturnDialogComponent,
+        ItemBrowserTransferComponent,
+        CustomerBalanceComponent,
+        CustomerBalanceSaleComponent,
+        BluetoothDeviceSelectorComponent,
+        ItemsBrowserPurchaseComponent,
     ],
     providers: [
-        {provide: LocationStrategy, useClass: HashLocationStrategy},
-         MenuService, ConfigService,UserService,CommonService,
-         SellerService,
+        { provide: LocationStrategy, useClass: HashLocationStrategy },
+        MenuService,
+        ConfigService,
+        UserService,
+        CommonService,
+        SellerService,
+        ConfirmationService,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-       // { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-       // { provide: HTTP_INTERCEPTORS, useClass: MonitorInterceptor, multi: true },
-        //{ provide: HTTP_INTERCEPTORS, useClass: CachingInterceptor, multi: true },
+        { provide: LOCALE_ID, useValue: 'es-HN' },
         DatePipe
-        // {provide: LOCALE_ID, useValue: 'es-HN'},
     ],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

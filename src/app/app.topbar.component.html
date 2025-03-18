@@ -1,41 +1,45 @@
-<div class="layout-topbar">
-    <a class="layout-topbar-logo" routerLink="">
-        <!-- <img src="assets/layout/images/{{appMain.config.dark ? 'logo-white' : 'logo-dark'}}.svg" alt="logo"> -->
-        <img src="assets/img/pos-terminal.png" alt="logo">
-        <span>POS</span>
-    </a>
+<div class="layout-topbar shadow-md bg-white dark:bg-gray-800">
+    <!-- Logo Section -->
+    <div class="flex items-center gap-2">
+        <a class="layout-topbar-logo flex items-center gap-2" routerLink="">
+            <img src="assets/img/pos-terminal.png" alt="logo" class="h-8">
+            <span class="font-bold text-xl text-gray-800 dark:text-white">POS</span>
+        </a>
 
-    <a class="p-link layout-menu-button layout-topbar-button" href="#" (click)="appMain.toggleMenu($event)">
-        <i class="pi pi-bars"></i>
-    </a>
-
-    <a class="p-link layout-topbar-menu-button layout-topbar-button" href="#" (click)="appMain.toggleTopMenu($event)">
-        <i class="pi pi-ellipsis-v"></i>
-    </a>
-    <div class="layout-topbar-status">
-        <i [ngClass]="getStyle()"></i>
-        <button pButton type="button" (click)="sync()" label="{{ status ? 'Online' : 'Offline' }}" class="p-button font-bold"></button>
+        <button class="p-link layout-menu-button layout-topbar-button md:hidden" (click)="appMain.toggleMenu($event)">
+            <i class="pi pi-bars"></i>
+        </button>
     </div>
 
+    <!-- Connection Controls -->
+    <div class="flex items-center gap-4">
+        <!-- Online/Offline Toggle -->
+        <button pButton type="button" [icon]="forceOffline ? 'pi pi-wifi' : 'pi pi-wifi'" (click)="toggleOfflineMode()"
+            [class]="forceOffline ? 'p-button-outlined p-button-danger' : 'p-button-outlined p-button-success'">
+        </button>
 
-    <div class="app-bar">
-        <p-chip styleClass="seller-chip" label="{{ this.auth.UserValue.sellerName }}"></p-chip>
-      </div>
+        <!-- Sync Button -->
+        <button pButton [disabled]="syncInProgress || forceOffline"
+            [icon]="syncInProgress ? 'pi pi-spin pi-spinner' : 'pi pi-sync'" [label]="syncInProgress ? '' : ''"
+            (click)="sync()" class="p-button-outlined">
+        </button>
+    </div>
 
-    <div class="layout-topbar-menu" [ngClass]="{'layout-topbar-menu-mobile-active': appMain.topMenuActive}">
-        <div class="p-hidden-md-up">
+    <!-- Progress Bar -->
+    <div class="absolute bottom-0 left-0 right-0" *ngIf="syncInProgress">
+        <p-progressBar [value]="syncProgress" [showValue]="false" [style]="{'height': '2px'}" styleClass="bg-primary">
+        </p-progressBar>
+    </div>
 
+    <!-- User Section -->
+    <div class="flex items-center gap-4">
+        <p-chip [label]="auth.UserValue.sellerName" styleClass="bg-primary text-white">
+        </p-chip>
 
-            <p-slideMenu #menuProfile [model]="items" [popup]="true"></p-slideMenu>
-            <button *ngIf="!isMobile" #btn type="button" pButton class="p-button-outlined" (click)="menuProfile.toggle($event)">
-                <i class="pi pi-user"></i>
-                <span class="ml-2"> Bienvenido, {{ this.auth.UserValue.name }}</span>
-            </button>
-            <button *ngIf="isMobile" type="button" pButton class="p-button-outlined" (click)="logout()">
-                <i class="pi pi-sign-out"></i>
-                <span class="ml-2"> Cerrar Sesión</span>
-            </button>
-        </div>
+        <p-menu #menu [popup]="true" [model]="items"></p-menu>
+        <button pButton type="button" icon="pi pi-user" [label]="isMobile ? '' : auth.UserValue.name"
+            (click)="menu.toggle($event)" class="p-button-text">
+        </button>
     </div>
 </div>
 <app-inactivity-modal></app-inactivity-modal>

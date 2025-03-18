@@ -110,7 +110,7 @@ blockScroll="true" [breakpoints]="{'960px': '75vw', '640px': '100vw'}" [style]="
                                     <td style="width: 25%; min-width: 5rem;">
                                         <input #sumApplied id="sumApplied"  [disabled]="disabled"  pInputText type="number"
                                         (ngModelChange)="calculateTotal()" [(ngModel)]="order.sumApplied" mode="decimal"
-                                        [minFractionDigits]="2" [min]="0" [max]="1000000"
+                                        [minFractionDigits]="2" [min]="0" [max]="order.balance"
                                         [ngModelOptions]="{standalone: true}" />
                                     </td>
                                     <td style="width: 10%;"><span class="p-column-title">Acción</span>

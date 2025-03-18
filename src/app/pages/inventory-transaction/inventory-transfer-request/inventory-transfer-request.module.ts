@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { InventoryTransferRequestRoutingModule } from './inventory-transfer-request-routing.module';
 
 
-
 @NgModule({
   declarations: [
+
   ],
   imports: [
     CommonModule,

@@ -5,8 +5,10 @@ export class InventoryRequestTransferDetail {
     transferRequestId: number;
     itemId: number;
     quantity: number;
+    quantityUnit: string;
     price: number;
     dueDate: Date;
+    stock: number;
     lineTotal: number;
     fromWhsCode: number;
     fromWhsName: string;

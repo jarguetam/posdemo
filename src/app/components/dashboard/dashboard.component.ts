@@ -332,7 +332,7 @@ export class DashboardComponent implements OnInit {
 
     async _getData() {
         try {
-            await this.syncService.syncData();
+
             this.loading = true;
            // Messages.loading('Cargando datos', 'Espere un momento....');
             var backgroundColor = [
@@ -524,6 +524,7 @@ export class DashboardComponent implements OnInit {
 
             Messages.closeLoading();
             this.loading = false;
+            await this.syncService.syncData();
         } catch (ex) {
             this.loading = false;
             Messages.warning('Advertencia', ex.error.message);

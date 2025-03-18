@@ -1,0 +1,37 @@
+:host ::ng-deep .p-dialog .p-dialog-content {
+    padding: initial;
+    padding-top: 30px;
+ }
+
+.button-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    padding: 10px;
+    z-index: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.top-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.bottom-row {
+    display: flex;
+    width: 100%;
+}
+
+.bottom-row input {
+    width: 100%;
+}
+
+.p-dropdown {
+    min-width: 200px;
+}

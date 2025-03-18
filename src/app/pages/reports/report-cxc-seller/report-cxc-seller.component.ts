@@ -20,6 +20,8 @@ export class ReportCxcSellerComponent implements OnInit {
     title: string = 'Reporte de cuentas por cobrar por vendedor';
     formFilter: FormGroup;
     sellerList: SellerModel[];
+    pdfSrc: any;
+    pdfBlob: Blob;
 
     constructor(
         private reportServices: ReportsService,
@@ -59,31 +61,52 @@ export class ReportCxcSellerComponent implements OnInit {
             sellerId: [
                0
             ],
+            onlyOverDue: [false]
         });
     }
 
     async getReport() {
         Messages.loading('Espere', 'Cargando reporte...');
+        await this.loadPdf();
         try {
             //this.loading = true;
-            await this.reportServices
-                .getReportCxCPdf(
-                    this.formFilter.value.sellerId,
-                )
-                .subscribe(async (blob) => {
-                    let base64data = await blobToBase64(blob);
-                    printJS({
-                        printable: base64data,
-                        type: 'pdf',
-                        base64: true,
-                    });
-                    Messages.closeLoading();
-                });
+            // await this.reportServices
+            //     .getReportCxCPdf(
+            //         this.formFilter.value.sellerId,
+            //     )
+            //     .subscribe(async (blob) => {
+            //         let base64data = await blobToBase64(blob);
+            //         printJS({
+            //             printable: base64data,
+            //             type: 'pdf',
+            //             base64: true,
+            //         });
+            //         Messages.closeLoading();
+            //     });
             this.loading = false;
         } catch (ex) {
             this.loading = false;
             Messages.warning('Advertencia', ex.message);
         }
+    }
+
+    async loadPdf() {
+        await this.reportServices
+        .getReportCxCPdf(
+            this.formFilter.value.sellerId,
+            this.formFilter.value.onlyOverDue,
+        ).subscribe(
+            (pdfBlob: Blob) => {
+                this.pdfBlob = pdfBlob;
+                // Opción 1: Usar URL.createObjectURL
+                this.pdfSrc = { url: URL.createObjectURL(pdfBlob) };
+
+                this.loading = false;
+            },
+            (error) => {
+                console.error('Error al cargar el PDF', error);
+            }
+        );
     }
 
     public base64ToBlob(b64Data, sliceSize = 512) {

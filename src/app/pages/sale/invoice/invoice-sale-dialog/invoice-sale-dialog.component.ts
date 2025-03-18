@@ -33,12 +33,15 @@ import { PaymentMetodDialogComponent } from 'src/app/pages/common/payment-metod-
 import { PayCondition } from 'src/app/models/paycondition';
 import { DbLocalService } from 'src/app/service/db-local.service';
 import { ConnectionService, ConnectionState } from 'ng-connection-service';
-import { tap } from 'rxjs';
+import { combineLatest, tap } from 'rxjs';
 import { Table } from 'primeng/table';
 import { PrintEscPosService } from '../../services/print-esc-pos.service';
 import { ListModel } from '../../models/list-model';
 import { Router } from '@angular/router';
 import { v4 as uuidv4 } from 'uuid';
+import { ItemService } from 'src/app/pages/items/service/items.service';
+import { ConfirmationService } from 'primeng/api';
+import { ConnectionStateService } from 'src/app/service/connection-state.service';
 
 @Component({
     selector: 'app-invoice-sale-dialog',
@@ -91,6 +94,9 @@ export class InvoiceSaleDialogComponent implements OnInit {
     isOffline: boolean = false;
     offlineId: number = 0;
     title: string = 'Agregar factura';
+    limitInvoiceCredit: number = 0;
+    balance: number = 0;
+    creditLine: number = 0;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -102,31 +108,60 @@ export class InvoiceSaleDialogComponent implements OnInit {
         private commonService: CommonService,
         private db_local: DbLocalService,
         private connectionService: ConnectionService,
-        private router: Router
+        private router: Router,
+        private itemService: ItemService,
+        private confirmationService: ConfirmationService,
+        private connectionStateService: ConnectionStateService
     ) {
         this.usuario = this.auth.UserValue;
         this.company = this.auth.CompanyValue;
-    }
-
-    ngOnInit(): void {
-        this.connectionService
-            .monitor()
+        // Combinar el monitor de red con el estado de offline forzado
+        combineLatest([
+            this.connectionService.monitor(),
+            this.connectionStateService.forceOffline$,
+        ])
             .pipe(
-                tap((newState: ConnectionState) => {
-                    this.currentState = newState;
-                    if (this.currentState.hasNetworkConnection) {
-                        this.status = true;
-                        //  this.getInvoice();
-                    } else {
-                        this.status = false;
-                    }
+                tap(([networkState, forceOffline]) => {
+                    this.currentState = networkState;
+                    // El status es true solo si hay conexión de red Y no está forzado el modo offline
+                    this.status =
+                        networkState.hasNetworkConnection && !forceOffline;
+
+                    // Log para debugging
+                    console.log(
+                        `Network: ${networkState.hasNetworkConnection}, Force Offline: ${forceOffline}, Final Status: ${this.status}`
+                    );
                 })
             )
             .subscribe();
+    }
+
+    get chipStyle() {
+        const baseColor = this.status ? '#00b300' : '#ff0000';
+        return {
+            'background-color': baseColor,
+            color: 'white',
+            'border-radius': '20px',
+            padding: '8px',
+            display: 'flex',
+            'align-items': 'center',
+            'font-weight': 'bold',
+            'box-shadow': `0 0 10px ${baseColor}`,
+        };
+    }
+
+    ngOnInit(): void {
         if (history.state.invoice) {
             this.isAdd = false;
             this.title = 'Editar factura';
-            this.showDialog(history.state.invoice, false);
+            if (
+                history.state.invoice.docReference != undefined &&
+                history.state.invoice.docReference != 0
+            ) {
+                this.isAdd = true;
+                this.title = 'Agregar factura';
+            }
+            this.showDialog(history.state.invoice, this.isAdd);
         } else {
             this.showDialog(new DocumentSaleModel(), true);
         }
@@ -229,7 +264,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
         }
         this.disabled = isAdd ? false : true;
         this.invoice = invoiceNew;
-        if (isAdd) {
+        if (isAdd || this.isOffline) {
             this.detail = invoiceNew.detail;
         } else {
             this.invoice.detail = invoiceNew.detailDto;
@@ -252,7 +287,6 @@ export class InvoiceSaleDialogComponent implements OnInit {
         await this._getNumeration();
         this.disabledwsh = this.usuario.role == 'Vendedor' ? true : false;
         this._createFormBuild();
-        console.log(this.isAdd);
     }
 
     _createFormBuild() {
@@ -361,7 +395,8 @@ export class InvoiceSaleDialogComponent implements OnInit {
         this.ItemsBrowser.showDialog(
             this.formInvoice.get('whsCode').value,
             this.formInvoice.get('customerId').value,
-            this.invoice.priceListId
+            this.invoice.priceListId,
+            this.invoice.detail
         );
     }
 
@@ -429,38 +464,22 @@ export class InvoiceSaleDialogComponent implements OnInit {
     }
 
     browserItems(item: ItemWareHouse) {
-        if (this.ItemsBrowser.index != -1) {
-            let currentIndex = this.ItemsBrowser.index;
-            let itemFind = this.invoice.detail.find(
-                (x) => x.itemId == item.itemId
-            );
-            if (itemFind) {
-                this.invoice.detail.find((x) => x.itemId == item.itemId)
-                    .quantity++;
-                this.calculate();
-            } else {
-                this.list.push(
-                    new ListModel(
-                        item.itemName,
-                        this.invoice.detail[currentIndex].quantity.toString(),
-                        item.priceSales.toString()
-                    )
-                );
-                this.invoice.detail[currentIndex].itemId = item.itemId;
-                this.invoice.detail[currentIndex].itemCode = item.itemCode;
-                this.invoice.detail[currentIndex].itemName = item.itemName;
-                this.invoice.detail[currentIndex].unitOfMeasureId =
-                    item.unitOfMeasureId;
-                this.invoice.detail[currentIndex].unitOfMeasureName =
-                    item.unitOfMeasureName;
-                this.invoice.detail[currentIndex].price = item.priceSales;
-                this.invoice.detail[currentIndex].cost = item.avgPrice;
-                this.invoice.detail[currentIndex].dueDate = item.dueDate;
-                this.invoice.detail[currentIndex].stock = item.stock;
-                this.invoice.detail[currentIndex].isTax = item.tax;
-                this.isTax = item.tax;
-            }
-        }
+        this.invoice.detail = this.itemService.itemsListService.map((item) => {
+            const detail = new DocumentSaleDetailModel();
+            detail.itemCode = item.itemCode;
+            detail.itemName = item.itemName;
+            detail.itemId = item.itemId;
+            detail.quantity = item.quantity;
+            detail.price = item.priceSales;
+            detail.cost = item.avgPrice;
+            detail.dueDate = item.dueDate;
+            detail.stock = item.stock;
+            detail.isTax = item.tax;
+            detail.lineTotal = item.quantity * item.priceSales;
+            detail.unitOfMeasureId = item.unitOfMeasureId;
+            detail.unitOfMeasureName = item.unitOfMeasureName;
+            return detail;
+        });
         this.ItemsBrowser.index = -1;
         let deleteIndex = this.invoice.detail.filter((x) => x.itemId == 0);
         this.index = this.index - deleteIndex.length;
@@ -497,6 +516,9 @@ export class InvoiceSaleDialogComponent implements OnInit {
         this.invoice.payConditionName = customer.payConditionName;
         this.invoice.payConditionDays = customer.payConditionDays;
         this.invoice.priceListId = customer.listPriceId;
+        this.limitInvoiceCredit = customer.limitInvoiceCredit;
+        this.balance = customer.balance;
+        this.creditLine = customer.creditLine;
         const currentDate = new Date();
 
         let date = new Date(); // fecha actual
@@ -547,16 +569,50 @@ export class InvoiceSaleDialogComponent implements OnInit {
         this.addTypeInvoice();
     }
 
+    // Método para confirmar el tipo de pago
+    async confirmPaymentType(): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            this.confirmationService.confirm({
+                message: '¿Es esta una factura al crédito o al contado?',
+                header: 'Confirmación de tipo de pago',
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                    // El usuario confirmó que es al contado
+                    this.formInvoice.patchValue({
+                        payConditionId: 1,
+                    });
+                    resolve(true);
+                },
+                reject: () => {
+                    // El usuario confirmó que es al credito
+                    this.formInvoice.patchValue({
+                        payConditionId: this.invoice.payConditionId,
+                    });
+                    resolve(true);
+                },
+            });
+        });
+    }
+
+    hasNullQuantities(details: any[]): boolean {
+        return details.some((item) => item.quantity == null);
+    }
+
     async add(newEntry: DocumentSaleModel) {
         if (!this.formInvoice.valid) return;
         try {
-            Messages.loading('Agregando', 'Agregando factura de venta');
             if (this.disabledwsh) {
                 newEntry.whsCode = this.usuario.whsCode;
                 newEntry.docId = 0;
             }
             newEntry.detail = this.invoice.detail;
             newEntry.detail.forEach((x) => (x.whsCode = newEntry.whsCode));
+            if (this.hasNullQuantities(newEntry.detail)) {
+                Messages.closeLoading();
+                Messages.warning('Advertencia', 'Ingrese la cantidad');
+                return;
+            }
+            Messages.loading('Agregando', 'Agregando factura de venta');
             newEntry.disccounts = this.descuento;
             newEntry.discountsTotal = this.descuentoTotal;
             newEntry.subTotal = this.subdoctotal;
@@ -574,12 +630,13 @@ export class InvoiceSaleDialogComponent implements OnInit {
             const MIN_DATE = new Date('0001-01-01T00:00:00Z'); // 01/01/0001
             newEntry.docDate = MIN_DATE;
             newEntry.uuid = uuidv4();
-
             if (this.status) {
+                newEntry.offline = true;
                 let invoice = await this.invoiceService.addInvoice(newEntry);
-                await this.printService.printInvoice(invoice[0]);
+                await this.printService.printInvoice(invoice[0], 'Factura');
                 let correlative = await this.db_local.correlative.toArray();
                 this.updateCorrelative(correlative[0].correlativeId);
+                this.itemService.itemsListService = [];
                 await this.db_local.customers
                     .where('customerId')
                     .equals(newEntry.customerId)
@@ -600,9 +657,12 @@ export class InvoiceSaleDialogComponent implements OnInit {
                 await this.addOffline(newEntry);
             }
         } catch (ex) {
-            debugger;
-            let message: string;
+            Messages.closeLoading();
+
+            let message: string = '';
             if (ex.error && ex.error.message) {
+                message = ex.error.message.toString();
+            } else if (ex.message == 'Error: Printer not connected') {
                 message = ex.error.message.toString();
             } else if (ex.message) {
                 message =
@@ -610,11 +670,67 @@ export class InvoiceSaleDialogComponent implements OnInit {
             } else {
                 message = 'Error desconocido';
             }
-            Messages.closeLoading();
             await Messages.warning('Advertencia', message);
             if (!message.includes('Error')) {
                 await this.addOffline(newEntry);
             }
+
+            const savedAsOrder = await this.handleSaveAsOrder(newEntry, message);
+        }
+    }
+
+    private async handleSaveAsOrder(newEntry: DocumentSaleModel, errorMessage: string): Promise<boolean> {
+        try {
+            // Preguntar al usuario si desea guardar como pedido
+            const result = await Messages.question(
+                'Error al crear factura',
+                `${errorMessage} ¿Desea guardar como pedido?`,
+                'Sí, guardar como pedido',
+                'No, cancelar'
+            );
+
+            if (result) {
+                if (this.status) {
+                    // Si hay conexión, guardar en el servidor
+                    newEntry.docId = 0;
+                    await this.invoiceService.addOrder(newEntry);
+                } else {
+                    // Si no hay conexión, guardar localmente
+                    await this.db_local
+                        .table('orderSales')
+                        .add(newEntry)
+                        .then(async (data) => {
+                            newEntry.detail.map(
+                                async (x) =>
+                                    await this.loadInventoryOffline(
+                                        x.itemId,
+                                        x.quantity
+                                    )
+                            );
+                        })
+                        .catch((err) =>
+                            console.error(
+                                'Error storing data locally:',
+                                err.message
+                            )
+                        );
+                }
+
+                Messages.Toas('Pedido guardado correctamente');
+                this.display = false;
+                this.index = 0;
+                await this.router.navigate(['/listado-pedidos'], {
+                    state: {},
+                });
+                return true;
+            }
+            return false;
+        } catch (orderError) {
+            Messages.warning(
+                'Error',
+                'No se pudo guardar el pedido: ' + orderError.message
+            );
+            return false;
         }
     }
 
@@ -653,6 +769,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
             newEntry.docDate = localDate;
 
             if (newEntry.payConditionId != 1) {
+                //Validaciones de credito Offline
                 const data = await this.db_local.customers
                     .where('customerId')
                     .equals(newEntry.customerId)
@@ -679,6 +796,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
                         'No puede agregar esta factura, se supera el limite disponible de: L.' +
                             disponible
                     );
+                    await this.handleSaveAsOrder(newEntry, 'No se puede agregar artículos con precio 0');
                     return;
                 } else if (faturasDisponibles <= 0) {
                     await Messages.warning(
@@ -686,8 +804,14 @@ export class InvoiceSaleDialogComponent implements OnInit {
                         'No puede agregar esta factura, no tiene facturas de credito disponibles: ' +
                             faturasDisponibles
                     );
+                    await this.handleSaveAsOrder(newEntry, 'No puede agregar esta factura, no tiene facturas de credito disponibles: ' +
+                            faturasDisponibles);
                 } else {
                     await this.addInvoiceToLocal(correlative, newEntry);
+                    newEntry.paidToDate = newEntry.docTotal;
+                    newEntry.balance = newEntry.docTotal;
+                    newEntry.docId = number;
+                    await this.db_local.table('invoiceSeller').add(newEntry);
                 }
             } else {
                 await this.addInvoiceToLocal(correlative, newEntry);
@@ -702,6 +826,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
         correlative: Correlative[],
         newEntry: DocumentSaleModel
     ) {
+        newEntry.offline = true;
         await this.db_local
             .table('invoice')
             .add(newEntry)
@@ -722,10 +847,9 @@ export class InvoiceSaleDialogComponent implements OnInit {
             .catch((err) =>
                 console.error('Error storing data locally:', err.message)
             );
-        let invoiceOffline = await this.db_local.invoice.toArray();
 
         newEntry.detailDto = newEntry.detail;
-        await this.printService.printInvoice(newEntry);
+        await this.printService.printInvoice(newEntry, 'Factura');
         await this.router.navigate(['/listado-facturas-venta'], {
             state: {},
         });
@@ -760,7 +884,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
                 newEntry.docTotal = this.doctotal;
                 newEntry.createBy = this.usuario.userId;
                 let invoice = await this.invoiceService.updateInvoice(newEntry);
-                this.printService.printInvoice(invoice[0]);
+                this.printService.printInvoice(invoice[0], 'Factura');
                 Messages.closeLoading();
                 Messages.Toas('Editado Correctamente');
                 await this.router.navigate(['/listado-facturas-venta'], {
@@ -784,7 +908,6 @@ export class InvoiceSaleDialogComponent implements OnInit {
                         this.invoice.id,
                         newEntry
                     );
-                    let invoiceOffline = await this.db_local.invoice.toArray();
                     await this.router.navigate(['/listado-facturas-venta'], {
                         state: {},
                     });
@@ -835,7 +958,7 @@ export class InvoiceSaleDialogComponent implements OnInit {
     }
 
     print() {
-        this.printService.printInvoice(this.invoice);
+        this.printService.printInvoice(this.invoice, 'Factura');
     }
 
     async invoiceModify(invoice: DocumentSaleModel[]) {
@@ -847,20 +970,14 @@ export class InvoiceSaleDialogComponent implements OnInit {
         this.display = false;
     }
 
-    addInvoice() {
-        if (!this.auth.hasPermission('btn_add')) {
-            Messages.warning(
-                'No tiene acceso',
-                'No puede agregar, por favor solicite el acceso.'
-            );
-            return;
+    async addTypeInvoice() {
+        if (this.invoice.payConditionId !== 1) {
+            // Preguntar al usuario si la factura es al crédito o al contado
+            const userChoice = await this.confirmPaymentType();
+            if (!userChoice) {
+                return;
+            }
         }
-        this.invoice.docReference = this.invoice.docId;
-        this.invoice.detail.forEach((doc) => (doc.docDetailId = 0));
-        // this.InvoiceSaleDialog.showDialog(this.invoice, true);
-    }
-
-    addTypeInvoice() {
         let newEntry = this.formInvoice.value as DocumentSaleModel;
         if (newEntry.payConditionId === 1) {
             let newEntryPayment = this.formInvoice.value as DocumentSaleModel;
@@ -913,5 +1030,11 @@ export class InvoiceSaleDialogComponent implements OnInit {
         await this.router.navigate(['/listado-facturas-venta'], {
             state: {},
         });
+    }
+
+    onCantidadFocus(item: DocumentSaleDetailModel) {
+        if (item.quantity == 0) {
+            item.quantity = null;
+        }
     }
 }

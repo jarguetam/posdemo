@@ -1,23 +1,93 @@
-.highlighted-text {
-    font-weight: bold; /* Cambia el peso de la fuente para resaltar */
-    color: red; /* Cambia el color del texto para resaltar */
-    /* Puedes agregar otros estilos de resaltado según tus preferencias */
-  }
+// customer-list.component.scss
+:host ::ng-deep {
+    .modern-customer-dialog {
+        .p-dialog-content {
+            padding: 0;
+            height: 100%;
+        }
 
-  .header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
+        // Ajustes de la tabla
+        .p-datatable {
+            .p-datatable-tbody > tr > td {
+                width: 100%;
+                padding: 0 0.5rem; // Añade un pequeño padding horizontal
+            }
+        }
+
+        // Header Section
+        .header-section {
+            background-color: var(--surface-card);
+            border-bottom: 1px solid var(--surface-border);
+            padding: 1rem;
+
+            .text-xl {
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+        }
+
+        // Search Section
+        .search-section {
+            margin-top: 0.5rem;
+
+            input {
+                padding: 0.4rem 0.4rem 0.4rem 2rem;
+            }
+
+            .pi-search {
+                left: 0.5rem;
+            }
+        }
+
+        // Customer Card
+        .customer-card {
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            transition: box-shadow 0.3s;
+            background-color: var(--surface-card);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 100%; // Asegura que tome todo el ancho disponible
+            max-width: 100%; // Evita que se desborde
+            box-sizing: border-box; // Incluye padding en el cálculo del ancho
+
+            .customer-info {
+                width: 100%;
+
+                span {
+                    display: inline-block;
+                    width: 100%; // Hace que cada span tome el ancho completo
+                    white-space: normal; // Permite que el texto se ajuste
+                    word-wrap: break-word; // Permite que las palabras largas se rompan
+                }
+            }
+        }
+
+        .p-chip {
+            background-color: var(--primary-color);
+            color: var(--primary-color-text);
+        }
+        // Scrollbar styles
+        .table-section {
+            .p-datatable-wrapper {
+                &::-webkit-scrollbar {
+                    width: 8px;
+                }
+
+                &::-webkit-scrollbar-track {
+                    background: var(--surface-ground);
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: var(--surface-400);
+                    border-radius: 4px;
+                }
+            }
+        }
+
+        .p-datatable .p-datatable-tbody > tr {
+            border-bottom: none;
+        }
+    }
 }
-
-.button-container {
-    display: flex;
-    gap: 8px;
-}
-
-.search-container {
-    margin-top: 8px;
-    width: 100%;
-}
-

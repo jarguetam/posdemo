@@ -1,0 +1,26 @@
+.grid {
+    animation: slideInLeft 500ms ease-in-out;
+  }
+
+  @keyframes slideInLeft {
+    0% {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .button-container {
+    display: flex;
+    align-items: right; /* Alinea los botones verticalmente en el centro */
+
+    /* Agrega una media query para pantallas más pequeñas */
+    @media only screen and (max-width: 600px) {
+        flex-direction: column; /* Cambia la dirección de flexión a columna */
+        align-items: stretch; /* Asegura que los botones se estiren para ocupar todo el ancho */
+    }
+}
+

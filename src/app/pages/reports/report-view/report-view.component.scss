@@ -1,0 +1,14 @@
+.p-fluid .col-12.md\:col-8 {
+    display: flex;
+    align-items: center;
+}
+
+.p-fluid .col-12.md\:col-8 .p-float-label {
+    width: 100%;
+}
+
+.p-fluid .col-12.md\:col-4 {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}

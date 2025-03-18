@@ -6,6 +6,7 @@ import { CostRevaluationService } from '../services/cost-revaluation.service';
 import { AuthService } from 'src/app/service/users/auth.service';
 import { Messages } from 'src/app/helpers/messages';
 import { PrintCostRevaluationService } from '../services/print-cost-revaluation.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-cost-revaluation-list',
@@ -23,7 +24,8 @@ export class CostRevaluationListComponent implements OnInit {
         private costRevaluationServices: CostRevaluationService,
         private auth: AuthService,
         private formBuilder: FormBuilder,
-        private printService: PrintCostRevaluationService
+        private printService: PrintCostRevaluationService,
+        private datePipe: DatePipe,
     ) {}
 
     ngOnInit() {
@@ -33,11 +35,11 @@ export class CostRevaluationListComponent implements OnInit {
     _createFormBuild() {
         this.formFilter = this.formBuilder.group({
             from: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
             to: [
-                new Date().toISOString().substring(0, 10),
+                new Date(),
                 Validators.required,
             ],
         });
@@ -47,8 +49,8 @@ export class CostRevaluationListComponent implements OnInit {
         try {
             this.loading = true;
             this.costRevaluationList = await this.costRevaluationServices.getByDate(
-                this.formFilter.value.from,
-                this.formFilter.value.to
+                this.datePipe.transform(this.formFilter.value.from, 'yyyy-MM-dd'),
+                this.datePipe.transform(this.formFilter.value.to, 'yyyy-MM-dd')
             );
             Messages.closeLoading();
             this.loading = false;
